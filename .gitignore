@@ -1,0 +1,7 @@
+# vscode
+*.vscode/
+# c
+*.o
+# binaries folders
+*/bin/
+*/exe/

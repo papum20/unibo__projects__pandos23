@@ -1,0 +1,46 @@
+{
+    "files.associations": {
+		"*.h": "c",
+	},
+
+
+/*
+// start bash, not the mintty, or you'll get a new window
+  "terminal.integrated.shell.windows": "C:\\CygWin64\\cygwin64\\bin\\bash.exe",
+  // Use this to keep bash from doing a 'cd ${HOME}'
+  "terminal.integrated.env.windows": {
+    "CHERE_INVOKING": "1"
+  },
+  // Make it a login shell
+  "terminal.integrated.shellArgs.windows": [
+    "-l"
+  ],
+  */
+  	//THEME
+	"workbench.preferredDarkColorTheme": "Monokai Dimmed",
+	"workbench.colorTheme": "Monokai",
+	
+	//EDITOR
+	"editor.selectionClipboard": false,		//vertical selection middle mouse
+
+	//INDENT
+	"editor.detectIndentation": false,
+	"editor.insertSpaces": false,	
+  
+	//ERRORS
+	"C_Cpp.errorSquiggles": "enabled",				//sottolineatura rossa attivata
+	"C_Cpp.codeAnalysis.runAutomatically": true,	//
+	"problems.decorations.enabled": true,
+	"explorer.decorations.colors": true,
+	"C_Cpp.default.enableConfigurationSquiggles": true,
+	"explorer.decorations.badges": true,
+
+	// AUTOCOMPLETE
+	"C_Cpp.autocomplete": "default",
+	"C_Cpp.autocompleteAddParentheses": true,
+	"workbench.activityBar.visible": true,
+
+	//C Cpp
+  	"C_Cpp.default.compilerPath": "/usr/bin/gcc"
+
+}

@@ -1,24 +1,26 @@
-#include "include/pcb.h"
+#include "pcb.h"
 
-/* namespace descriptor type */
-typedef struct nsd_t {
-	struct nsd_t	*n_next;	/* next element on the free list */
-	int				n_type;		/* pointer to the semaphore */
-} nsd_t;
 
-nsd_t *getNamespace(pcb_t *p, int type);
+
+
+//// NAMESPACES MANAGEMENT
+
+static void initNamespaces();
+	/* Initialize the type nsFree list to contain all the elements of the
+	arrays static ns t type nsTable[MAXPROC]
+	This method will be only called once during data structure initialization. */
+	/* Inizializza tutte le liste dei namespace
+	liberi. Questo metodo viene invocato
+	una volta sola durante l’inizializzazione
+	della struttura dati. */
+	
+static nsd_t *getNamespace(pcb_t *p, int type);
 	/* Return the pointer to the namespace descriptor of type type
 	associated with the pcb p. */
+	/* Ritorna il namespace di tipo type
+	associato al processo p (o NULL).*/
 
-nsd_t *allocNamespace(int type);
-	/* Allocate a namespace from the type nsFree list and return
-	to the user, this value can be used for the next calls to refer to
-	this namespace. */
-
-void freeNamespace(nsd_t *descriptor);
-	/* Free a namespace, adding its list pointer (n link) to the correct type nsFree list. */
-
-int addNamespace( *ns, pcb_t *p);
+static int addNamespace(pcb_t *p, nsd_t *ns);
 	/* Insert the namespace ns as the namespace for the correct type
 	of p to ns. If the namespace is currently the base (i.e. there are
 	no descriptor for the namespace), allocate a new descriptor from
@@ -26,9 +28,18 @@ int addNamespace( *ns, pcb_t *p);
 	the fields, and proceed as above. If a new namespace descriptor
 	needs to be allocated and the type nsFree list is empty, return
 	TRUE. In all other cases return FALSE. */
+	/* AAssocia al processo p e a tutti I suoi
+	figli il namespace ns. Ritorna FALSE in
+	caso di errore, TRUE altrimenti. */
 
-void initNamespaces();
-	/* Initialize the type nsFree list to contain all the elements of the
-	arrays
-	static ns t type nsTable[MAXPROC]
-	This method will be only called once during data structure initialization. */
+static nsd_t *allocNamespace(int type);
+	/* Allocate a namespace from the type nsFree list and return
+	to the user, this value can be used for the next calls to refer to
+	this namespace. */
+	/* Alloca un namespace di tipo type
+	dalla lista corretta.*/
+
+static void freeNamespace(nsd_t *ns);
+	/* Free a namespace, adding its list pointer (n link) to the correct type nsFree list. */
+	/* Libera il namespace ns ri-inserendolo
+	nella lista di namespace corretta.*/

@@ -1,9 +1,10 @@
-#include "phase1_files/types.h"
-#include "phase1_files/pandos_types.h"
 #include "phase1_files/pandos_const.h"
-
-
-
+#include "phase1_files/pandos_types.h"
+#include "phase1_files/types.h"
+/*	pandos_const.h is included before list.h,
+	as the former defines NULL while the latter requires it
+	(this is just for the editor, as in execution it doesn't matter) */
+#include "phase1_files/list.h"
 
 
 

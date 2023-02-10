@@ -1,6 +1,6 @@
 {
     "files.associations": {
-		"*.h": "c",
+		"*.h": "c"
 	},
 
 
@@ -28,11 +28,14 @@
 	"editor.insertSpaces": false,	
   
 	//ERRORS
-	"C_Cpp.errorSquiggles": "enabled",				//sottolineatura rossa attivata
+	"C_Cpp.default.enableConfigurationSquiggles": true,
+	"C_Cpp.codeAnalysis.clangTidy.enabled": true,		//auto-runs task/build, to check errors
+	"C_Cpp.codeAnalysis.exclude": {},
 	"C_Cpp.codeAnalysis.runAutomatically": true,	//
+	"C_Cpp.errorSquiggles": "enabled",				//sottolineatura rossa attivata
+	"C_Cpp.intelliSenseEngine": "default",
 	"problems.decorations.enabled": true,
 	"explorer.decorations.colors": true,
-	"C_Cpp.default.enableConfigurationSquiggles": true,
 	"explorer.decorations.badges": true,
 
 	// AUTOCOMPLETE

@@ -20,3 +20,10 @@ pcb_t *outChild(pcb_t *p)
 static int emptyChild(pcb_t *p){
 	return (list_empty(&(p->p_child)));
 }
+
+
+static void insertChild(pcb_t *prnt, pcb_t *p){
+	return;
+}
+	/* Inserisce il PCB puntato da p come figlio
+	del PCB puntato da prnt.*/

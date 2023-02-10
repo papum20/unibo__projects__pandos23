@@ -20,7 +20,7 @@
 /**
  * container_of_safe - cast a member of a structure out to the containing structure
  * @ptr:	the pointer to the member.
- * @type:	the type of the container struct this is embedded in.
+ * @type:	th9e type of the container struct this is embedded in.
  * @member:	the name of the member within the struct.
  *
  * If IS_ERR_OR_NULL(ptr), ptr is returned unchanged.

@@ -42,7 +42,10 @@ int emptyChild(pcb_t *p){
 	return (list_empty(&(p->p_child)));
 }
 
-void insertChild(pcb_t *prnt, pcb_t *p);
+void insertChild(pcb_t *prnt, pcb_t *p){
+	p->p_parent=prnt;  //p ha come padre prnt
+	list_add(&p->p_sib,&prnt->p_child); //p ha come fratello il figlio di prnt in testa e prnt ha come figlio p
+}
 
 
 pcb_t *removeChild(pcb_t *p);

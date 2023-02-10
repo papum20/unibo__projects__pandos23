@@ -4,4 +4,4 @@
 *.o
 # binaries folders
 */bin/
-*/exe/
+*/obj/

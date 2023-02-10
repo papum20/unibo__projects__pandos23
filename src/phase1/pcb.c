@@ -1,6 +1,12 @@
-
-#include "../../include/pcb.h"
-
+#include "pcb.h"
+ 
+/*
+       LOCAL (STATIC) VARIABLES:
+       pcbFree_table[MAX_PROC];
+       /* array of free or unused PCBs
+       pcbFree_h;
+       /*list of free or unused PCBs
+*/
 
 pcbFree_h;						//list of free or unused PCBs
 pcbFree_table[MAXPROC]; // PCB array, with max size=MAX_PROC
@@ -8,22 +14,44 @@ pcbFree_table[MAXPROC]; // PCB array, with max size=MAX_PROC
 
 //// ALLOCATION
 
+void freePcb(pcb_t *p);
+
+pcb_t *allocPcb();
+
+
+
 
 //// LIST
 
-pcb_t *outChild(pcb_t *p)
-{
-	return NULL;
-}
+void *mkEmptyProcQ(struct list_head *head);
+	
+
+int emptyProcQ(struct list_head *head);
+
+
+void insertProcQ(struct list_head *head, pcb_t *p);
+
+
+pcb_t *headProcQ(struct list_head *head);
+
+	
+pcb_t *removeProcQ(struct list_head* head);
+
+	
+pcb_t *outProcQ(struct list_head *head, pcb_t *p);
+
+
+
 
 //// TREES
-static int emptyChild(pcb_t *p){
+int emptyChild(pcb_t *p){
 	return (list_empty(&(p->p_child)));
 }
 
+void insertChild(pcb_t *prnt, pcb_t *p);
 
-static void insertChild(pcb_t *prnt, pcb_t *p){
-	return;
-}
-	/* Inserisce il PCB puntato da p come figlio
-	del PCB puntato da prnt.*/
+
+pcb_t *removeChild(pcb_t *p);
+
+	
+pcb_t *outChild(pcb_t *p);

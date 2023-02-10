@@ -1,24 +1,25 @@
 {
-	"configurations": [
-		{
-		"name": "Linux",
-		"includePath": [
-			"${workspaceFolder}/**",
-			"${workspaceFolder}/include/**",
-			"/usr/include/",
-			"/usr/src/linux-headers-5.10.0-19-common/**"
-		],
-		"defines": [
-			"_DEBUG",
-			"UNICODE",
-			"_UNICODE"
-		],
-		"compilerPath": "/usr/bin/gcc",
-		"cStandard": "c11",
-		"cppStandard": "c++17",
-		"intelliSenseMode": "${default}"
-		}
-	],
-	"enableConfigurationSquiggles": true,
-	"version": 4
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/include/**"
+                //"/usr/include/",
+                //"/usr/src/linux-headers-5.10.0-19-common/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "${default}",
+            "configurationProvider": "ms-vscode.makefile-tools"
+        }
+    ],
+    "enableConfigurationSquiggles": true,
+    "version": 4
 }

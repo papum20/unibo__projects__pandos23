@@ -40,8 +40,7 @@ DEPS = $(patsubst %, $(IDIR)/%, $(_DEPS))
 # command line object files .o
 O = 
 # object (.o) files
-_OBJ = $(O)
-OBJ = $(patsubst %, $(ODIR)/%, $(_OBJ))
+OBJ = $(patsubst %, %.o, $(O))
 
 
 
@@ -49,28 +48,29 @@ OBJ = $(patsubst %, $(ODIR)/%, $(_OBJ))
 # RULES #
 #########
 
+.PRECIOUS: $(ODIR)/%.o
+
 # MAKE COMMAND LINE ARGUMENT
-FOO:=$(DIOCANE)
-NOWANTS = $(wildcard *.o)
-$(filter-out $(NOWANTS), %): %.o
-	echo "arg"
-	echo $(OBJ)
-	echo $(DEPS)
-	echo $<
-#	$(CC) -c -o $@ $< $(CFLAGS)
+
+misc/%: misc/%.o $(OBJ)
+	$(warning ARG: $@)
+	$(CC) -o $(BDIR)/$(notdir $@) $(patsubst %.o, $(ODIR)/%.o, $(notdir $^)) $(CFLAGS)
 
 # MAKE .o
 
-%.o: $(SDIR)/%.c $(DEPS)
-	echo "o"
-#	$(CC) -c -o $(ODIR)/$@ $< $(CFLAGS)
+%.o: %.c $(DEPS)
+	$(warning OBJ: $@)
+	$(CC) -c -o $(ODIR)/$(notdir $@) $< $(CFLAGS)
 
 # MAKE all
 
 .PHONY: all
-all: $(OBJ)
-	echo "all"
-#	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+_OBJALL != find . | grep -v .git | grep -F .c
+OBJALL = $(patsubst %.c, %.o, $(_OBJALL))
+all: $(OBJALL)
+	$(warning (ONLY BUILD) ALL: $@)
+	$(OBJALL)
+	$(warning (ONLY BUILD) ALL: $@)
 
 #panda1: $(OBJ)
 #	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)

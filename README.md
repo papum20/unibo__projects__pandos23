@@ -23,6 +23,18 @@ source files (.c).
 source files for phase * of the project.
 ## tests
 testers for umps3.
+## Makefile
+.o files go in obj/  
+executables go in bin/
+### make
+only compiles all .c files
+### make TARGET [O="DEPENDENCIES"]
+with TARGET written as full path from this folder, without extension, compiles it (and creates executable).  
+if specified, DEPENDENCIES are needed source files (you write like O="DEP1 DEP2 ...")
+### make TARGET.o
+with TARGET.o written as full path from this folder to source file, but with .o extension instead of .c, compiles it.
+### make clean
+clean.
 ## README
 - README(.md): git readme.
 - README.txt: plaint text readme file.

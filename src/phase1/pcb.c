@@ -1,9 +1,25 @@
+ #include "pcb.h"
+ 
+/*
+       LOCAL (STATIC) VARIABLES:
+       pcbFree_table[MAX_PROC];
+       * array of free or unused PCBs
+       pcbFree_h;
+       *list of free or unused PCBs
+*/
 
-#include "../../include/pcb.h"
 
 
-pcbFree_h;						//list of free or unused PCBs
-pcbFree_table[MAX_PROC]; // PCB array, with max size=MAX_PROC
+void initPcbs()
+{
+	static pcb_t pcbFree_table[MAXPROC];
+	static pcb_t *pcbFree_h;
+
+	INIT_LIST_HEAD(&(pcbFree_h->p_list));
+	pcb_t *p_pcb;
+	for(p_pcb = pcbFree_table; p_pcb < pcbFree_table + MAXPROC; p_pcb++)
+		list_add_tail(&(p_pcb->p_list), &(pcbFree_h->p_list));
+}
 
 
 //// ALLOCATION

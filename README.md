@@ -1,6 +1,8 @@
 # unibo__projects__pandos23
 PandOS+ project for operating systems course at University of Bologna, for the year 2022-2023.
 
+## bin
+compiled files/executables
 ## documentation
 project specifications.
 ## include
@@ -11,6 +13,10 @@ headers, given for the project.
 misc files for support while developing.
 ### misc/vscode
 suggested vscode settings (for linux/debian-like).
+### misc/ex
+examples, exercises, stuff to make practice while developing.
+## obj
+object files (.o)
 ## src
 source files (.c).
 ### src/phase*

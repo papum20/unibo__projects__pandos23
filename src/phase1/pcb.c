@@ -3,9 +3,9 @@
 /*
        LOCAL (STATIC) VARIABLES:
        pcbFree_table[MAX_PROC];
-       /* array of free or unused PCBs
+       * array of free or unused PCBs
        pcbFree_h;
-       /*list of free or unused PCBs
+       *list of free or unused PCBs
 */
 
 

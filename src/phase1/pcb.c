@@ -8,8 +8,18 @@
        /*list of free or unused PCBs
 */
 
-pcbFree_h;						//list of free or unused PCBs
-pcbFree_table[MAXPROC]; // PCB array, with max size=MAX_PROC
+
+
+void initPcbs()
+{
+	static pcb_t pcbFree_table[MAXPROC];
+	static pcb_t *pcbFree_h;
+
+	INIT_LIST_HEAD(&(pcbFree_h->p_list));
+	pcb_t *p_pcb;
+	for(p_pcb = pcbFree_table; p_pcb < pcbFree_table + MAXPROC; p_pcb++)
+		list_add_tail(&(p_pcb->p_list), &(pcbFree_h->p_list));
+}
 
 
 //// ALLOCATION

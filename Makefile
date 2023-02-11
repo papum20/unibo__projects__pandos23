@@ -52,7 +52,11 @@ OBJ = $(patsubst %, %.o, $(O))
 
 # MAKE COMMAND LINE ARGUMENT
 
-misc/%: misc/%.o $(OBJ)
+misc/%: $(OBJ) misc/%.o
+	$(warning ARG: $@)
+	$(CC) -o $(BDIR)/$(notdir $@) $(patsubst %.o, $(ODIR)/%.o, $(notdir $^)) $(CFLAGS)
+
+src/%: src/%.o $(OBJ)
 	$(warning ARG: $@)
 	$(CC) -o $(BDIR)/$(notdir $@) $(patsubst %.o, $(ODIR)/%.o, $(notdir $^)) $(CFLAGS)
 

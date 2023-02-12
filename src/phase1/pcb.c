@@ -31,8 +31,8 @@ pcb_t *allocPcb();
 
 //// LIST
 
-void *mkEmptyProcQ(struct list_head *head){
-
+void mkEmptyProcQ(struct list_head *head){
+	INIT_LIST_HEAD(head);
 }
 	
 
@@ -41,10 +41,14 @@ int emptyProcQ(struct list_head *head){
 }
 
 
-void insertProcQ(struct list_head *head, pcb_t *p);
+void insertProcQ(struct list_head *head, pcb_t *p){
+	list_add(&p->p_list,head);
+}
 
 
-pcb_t *headProcQ(struct list_head *head);
+pcb_t *headProcQ(struct list_head *head){
+	
+}
 
 	
 pcb_t *removeProcQ(struct list_head* head);

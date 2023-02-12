@@ -56,7 +56,9 @@ pcb_t *headProcQ(struct list_head *head){
 pcb_t *removeProcQ(struct list_head* head){ //rimozione in testa
 	if(emptyProcQ(head))
 		return NULL;
+	pcb_t tmp = container_of(head->next, struct pcb_t, p_list);
 	list_del(head->next);
+	return tmp;
 }
 
 	

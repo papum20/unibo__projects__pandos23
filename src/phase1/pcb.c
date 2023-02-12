@@ -56,19 +56,19 @@ pcb_t *headProcQ(struct list_head *head){
 pcb_t *removeProcQ(struct list_head* head){ //rimozione in testa
 	if(emptyProcQ(head))
 		return NULL;
-	pcb_t tmp = container_of(head->next, struct pcb_t, p_list);
+	pcb_t *tmp = container_of(head->next, struct pcb_t, p_list);
 	list_del(head->next);
 	return tmp;
 }
 
-	
+
 pcb_t *outProcQ(struct list_head *head, pcb_t *p){
 	struct list_head *pos;
 	struct pcb_t *tmp;
 	list_for_each(pos, head){ //scorre tutta la lista
 		tmp = container_of(pos, struct pcb_t, p_list); 
 		if(tmp==p){
-			list_del(p->p_list);
+			list_del(&p->p_list);
 			return p;
 		}	
 	}

@@ -41,17 +41,24 @@ int emptyProcQ(struct list_head *head){
 }
 
 
-void insertProcQ(struct list_head *head, pcb_t *p){
-	list_add(&p->p_list,head);
+void insertProcQ(struct list_head *head, pcb_t *p){  //inserimento in coda
+	list_add_tail(&p->p_list,head);
 }
 
-
+/* Restituisce l’elemento di testa della coda dei processi da head, SENZA
+	RIMUOVERLO. Ritorna NULL se la coda non ha elementi. */
 pcb_t *headProcQ(struct list_head *head){
-	
+	if(emptyProcQ(head))
+		return NULL;
+	return container_of(head->next, struct pcb_t, p_list); 
 }
 
 	
-pcb_t *removeProcQ(struct list_head* head);
+pcb_t *removeProcQ(struct list_head* head){ //rimozione in testa
+	if(emptyProcQ(head))
+		return NULL;
+	list_del(head->next);
+}
 
 	
 pcb_t *outProcQ(struct list_head *head, pcb_t *p);
@@ -66,8 +73,7 @@ int emptyChild(pcb_t *p){
 
 void insertChild(pcb_t *prnt, pcb_t *p){
 	p->p_parent=prnt;  //p ha come padre prnt
-	list_del(&p->p_sib);
-	list_add(&p->p_sib,&prnt->p_child); //p ha come fratello il figlio di prnt in testa e prnt ha come figlio p
+	list_add_tail(&p->p_sib,&prnt->p_child); //p ha come fratello il figlio di prnt in testa e prnt ha come figlio p
 }
 
 
@@ -86,7 +92,7 @@ pcb_t *outChild(pcb_t *p){
 		return NULL;
 	if(p->p_parent->p_child.next == p){  //p è il primo figlio del suo padre
 		return removeChild(p);
-	}
+	}/*
 	struct list_head *pos;
 	struct pcb_t *tmp;
 	list_for_each(pos, &p->p_parent->p_child){ //scorre tutta la lista
@@ -98,4 +104,8 @@ pcb_t *outChild(pcb_t *p){
 			return p;
 		}
 	}
+	*/
+	list_del(&p->p_sib);
+	p->p_parent = NULL;
+	return p; 
 }

@@ -45,8 +45,7 @@ void insertProcQ(struct list_head *head, pcb_t *p){  //inserimento in coda
 	list_add_tail(&p->p_list,head);
 }
 
-/* Restituisce l’elemento di testa della coda dei processi da head, SENZA
-	RIMUOVERLO. Ritorna NULL se la coda non ha elementi. */
+
 pcb_t *headProcQ(struct list_head *head){
 	if(emptyProcQ(head))
 		return NULL;
@@ -61,9 +60,18 @@ pcb_t *removeProcQ(struct list_head* head){ //rimozione in testa
 }
 
 	
-pcb_t *outProcQ(struct list_head *head, pcb_t *p);
-
-
+pcb_t *outProcQ(struct list_head *head, pcb_t *p){
+	struct list_head *pos;
+	struct pcb_t *tmp;
+	list_for_each(pos, head){ //scorre tutta la lista
+		tmp = container_of(pos, struct pcb_t, p_list); 
+		if(tmp==p){
+			list_del(p->p_list);
+			return p;
+		}	
+	}
+	return NULL;
+}
 
 
 //// TREES

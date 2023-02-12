@@ -94,24 +94,4 @@ pcb_t *outChild(pcb_t *p){
 			return p;
 		}
 	}
-
-
-
-	/*
-	struct pcb_t *pos;
-	list_for_each_entry(pos, &p->p_parent->p_child, p_child){ 
-		if(pos==p){                //p in mezzo alla lista dei figli del suo padre
-			list_del(&p->p_sib);
-			list_del(p->p_parent);   
-			return p;
-		}
-	}
-
-	*/
 }
-
-/* Rimuove il PCB puntato da p dalla lista dei figli del padre.
-	Se il PCB puntato da p non ha un padre, restituisce NULL,
-	altrimenti restituisce l’elemento rimosso (cioè p). A differenza della
-	removeChild, p può trovarsi in una posizione arbitraria (ossia non è
-	necessariamente il primo figlio del padre).*/

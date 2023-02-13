@@ -100,9 +100,10 @@ pcb_t *removeChild(pcb_t *p){
 pcb_t *outChild(pcb_t *p){
 	if(p->p_parent==NULL)  //p non ha padre
 		return NULL;
-	if(p->p_parent->p_child.next == p){  //p è il primo figlio del suo padre
-		return removeChild(p);
-	}/*
+	//if(p->p_parent->p_child.next == p){  //p è il primo figlio del suo padre
+	//	return removeChild(p);
+	//}
+	/*
 	struct list_head *pos;
 	struct pcb_t *tmp;
 	list_for_each(pos, &p->p_parent->p_child){ //scorre tutta la lista

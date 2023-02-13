@@ -75,13 +75,11 @@ pcb_t *removeProcQ(struct list_head* head){ //rimozione in testa
 
 pcb_t *outProcQ(struct list_head *head, pcb_t *p){
 	struct list_head *pos;
-	struct pcb_t *tmp;
 	list_for_each(pos, head){ //scorre tutta la lista
-		tmp = container_of(pos, struct pcb_t, p_list); 
-		if(tmp==p){
+		if(pos==&p->p_list){
 			list_del(&p->p_list);
 			return p;
-		}	
+		}
 	}
 	return NULL;
 }

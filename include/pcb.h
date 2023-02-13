@@ -44,7 +44,7 @@ pcb_t *allocPcb();
 
 
 
-//// LIST
+//// LISTS
 
 void *mkEmptyProcQ(struct list_head *head);
 	/* This method is used to initialize a variable to be tail pointer

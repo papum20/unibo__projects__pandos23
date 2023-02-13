@@ -59,7 +59,7 @@ typedef struct semd_t {
     /* Queue of PCBs blocked on the semaphore */
     struct list_head s_procq;
 
-    /* Semaphore hash table */
+	/* Semaphore hash table */
     struct hlist_node s_link;
     /* Free Semaphores list */
     struct list_head s_freelink;

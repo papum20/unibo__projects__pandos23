@@ -1,10 +1,10 @@
-#ifndef ASH.H
-#define ASH.H
+#ifndef ASH_H
+#define ASH_H
 
 #include "phase1_files/pandos_const.h"
 #include "phase1_files/pandos_types.h"
-#include "types.h"
-#include "phase1_files/hashtable_api.h"
+#include "phase1_files/types.h"
+#include "phase1_files/hashtable.h"
 #include "pcb.h"
 
 

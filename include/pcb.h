@@ -46,7 +46,7 @@ pcb_t *allocPcb();
 
 //// LISTS
 
-void *mkEmptyProcQ(struct list_head *head);
+void mkEmptyProcQ(struct list_head *head);
 	/* This method is used to initialize a variable to be tail pointer
 	to a process queue.
 	Return a pointer to the tail of an empty process queue; i.e. NULL.

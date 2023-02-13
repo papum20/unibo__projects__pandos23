@@ -4,24 +4,20 @@ static struct list_head semdFree_h;
 static struct hlist_node semd_h;
 
 
-typedef struct semd_t {
-    int *s_key;
-    struct list_head s_procq;         //lista dei processi in attesa sul semaforo
-    struct hlist_node s_link;         //parametro hashtable
-    struct list_head s_freelink;      //lista dei semd liberi
-} semd_t, *semd_PTR;
-
 void initAsh(){
 
     static semd_t semdTable[MAXPROC];
 
-    INIT_LIST_HEAD(semdFree_h);
-    DEFINE_HASHTABLE(semd_h, MAXPROC);
-
     //crea la lista di semdFree
+    INIT_LIST_HEAD(semdFree_h);
     for (int i = 0; i < MAXPROC; i++){
         list_add_tail(&semdTable[i].s_freelink, &semdFree_h);
     }
+
+    //crea la hashtable
+    DEFINE_HASHTABLE(semd_h, MAXPROC);
+    hash_init(semd_h);
+
 }
 
 int insertBlocked(int *semAdd, pcb_t *p){

@@ -1,5 +1,5 @@
-#ifndef ASH.H
-#define ASH.H
+#ifndef ASH_H
+#define ASH_H
 
 #include "phase1_files/pandos_const.h"
 #include "phase1_files/pandos_types.h"

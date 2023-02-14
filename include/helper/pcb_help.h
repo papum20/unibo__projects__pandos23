@@ -1,13 +1,21 @@
 /*
 HELPER FUNCTIONS FOR pcb
 */
-#include "phase1_files/pandos_const.h"
-#include "phase1_files/pandos_types.h"
-#include "phase1_files/types.h"
+
+
+#ifndef PCB_HELP_H
+#define PCB_HELP_H
+
+
+#include "const.h"
+#include "pandos_const.h"
+#include "pandos_types.h"
+#include "types.h"
 /*	pandos_const.h is included before list.h,
 	as the former defines NULL while the latter requires it
 	(this is just for the editor, as in execution it doesn't matter) */
-#include "phase1_files/list.h"
+#include "list.h"
+
 
 
 
@@ -22,7 +30,7 @@ HELPER FUNCTIONS FOR pcb
 /*	helper function for allcPcb,
 	initiates Pcb's values to default.
 */
-static inline void __initPcb(pcb_t *p)
+HIDDEN inline void __initPcb(pcb_t *p)
 {
     //process queue
     p->p_list	= __DFLT_LIST_HEAD;
@@ -46,7 +54,7 @@ static inline void __initPcb(pcb_t *p)
 
 /* doesn't check if list is empty
 */
-static inline pcb_t *__removeProcQ(struct list_head* head)
+HIDDEN inline pcb_t *__removeProcQ(struct list_head* head)
 {
 	pcb_t *p = container_of(head->next, struct pcb_t, p_list);
 	list_del(head->next);
@@ -56,3 +64,6 @@ static inline pcb_t *__removeProcQ(struct list_head* head)
 
 //// TREES
 
+
+
+#endif

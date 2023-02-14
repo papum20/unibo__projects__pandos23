@@ -81,7 +81,7 @@ pcb_t* headBlocked(int *semAdd){
     return list_first_entry_or_null(&sem->s_procq, pcb_t, p_list);  //ritorna automaticamente null (errore) se la lista è vuota, oppure il pcb in testa
 }
 
-pcb_t* outBlocked(pbc_t *p){
+pcb_t* outBlocked(pcb_t *p){
   semd_t *sem;
 
   hash_for_each_possible(semd_h, sem, s_link, p->p_semAdd){

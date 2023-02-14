@@ -1,90 +1,71 @@
+## UMPS LIBRARIES AND REQUIREMENTS
 
-########
-# DIRS #
-########
+# This makefile creates a kernel file from three source files:
+ifneq ($(wildcard /usr/bin/umps3),)
+	UMPS3_DIR_PREFIX = /usr
+	LIBDIR = $(UMPS3_DIR_PREFIX)/lib/x86_64-linux-gnu/umps3
+else
+	UMPS3_DIR_PREFIX = /usr/local
+	LIBDIR = $(UMPS3_DIR_PREFIX)/lib/umps3
+endif
 
-# headers (.h) dir
-IDIR = include
-# source (.c) dir
-SDIR = src
-# object files (.o) dir
-ODIR = obj
-# binaries/executables dir
+INCDIR = $(UMPS3_DIR_PREFIX)/include/umps3/umps
+SUPDIR = $(UMPS3_DIR_PREFIX)/share/umps3
+
+
+## PROJECT'S REQUIREMENTS
+
 BDIR = bin
-# libraries dir
-#LDIR = lib
+IDIRS = include include/helper include/phase1_files
+IDIR = include
+ODIR = obj
+SDIR = src
 
-# CLEAN EXCEPTIONS
-NOCLEAN = .placeholder
+DEPS = $(IDIR)/*.h
 
-
-############
-# COMMANDS #
-############
-
-CC = gcc
-CFLAGS = -iquote$(IDIR)
-# gcc parameters for including libraries
-#LIBS = lib
+_OBJS = phase1/pcb phase1/ash phase1/ns
+OBJS = $(patsubst %, $(ODIR)/%.o, $(_OBJS))
 
 
 
-################
-# DEPENDENCIES #
-################
 
-# dependencies
-_DEPS = *
-DEPS = $(patsubst %, $(IDIR)/%, $(_DEPS))
+## COMMANDS
 
-# command line object files .o
-O = 
-# object (.o) files
-OBJ = $(patsubst %, %.o, $(O))
+DEFS = $(DEPS) $(INCDIR)/libumps.h Makefile
 
+CFLAGS = -ffreestanding -ansi -Wall -c -mips1 -mabi=32 -mfp32 \
+	-mno-gpopt -G 0 -fno-pic -mno-abicalls -o
+CFLAGSINC = $(patsubst %, -iquote%, $(IDIRS))
+LDAOUTFLAGS = -G 0 -nostdlib -T $(SUPDIR)/umpsaout.ldscript
+LDCOREFLAGS = -G 0 -nostdlib -T $(SUPDIR)/umpscore.ldscript
 
-
-#########
-# RULES #
-#########
-
-.PRECIOUS: $(ODIR)/%.o
-
-# MAKE COMMAND LINE ARGUMENT
-
-misc/%: $(OBJ) misc/%.o
-	$(warning ARG: $@)
-	$(CC) -o $(BDIR)/$(notdir $@) $(patsubst %.o, $(ODIR)/%.o, $(notdir $^)) $(CFLAGS)
-
-src/%: src/%.o $(OBJ)
-	$(warning ARG: $@)
-	$(CC) -o $(BDIR)/$(notdir $@) $(patsubst %.o, $(ODIR)/%.o, $(notdir $^)) $(CFLAGS)
-
-# MAKE .o
-
-%.o: %.c $(DEPS)
-	$(warning OBJ: $@)
-	$(CC) -c -o $(ODIR)/$(notdir $@) $< $(CFLAGS)
-
-# MAKE all
-
-.PHONY: all
-_OBJALL != find . | grep -v .git | grep -F .c
-OBJALL = $(patsubst %.c, %.o, $(_OBJALL))
-all: $(OBJALL)
-	$(warning (ONLY BUILD) ALL: $@)
-	$(OBJALL)
-	$(warning (ONLY BUILD) ALL: $@)
-
-#panda1: $(OBJ)
-#	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+CC = mipsel-linux-gnu-gcc
+LD = mipsel-linux-gnu-ld
+AS = mipsel-linux-gnu-as -KPIC
+EF = umps3-elf2umps
+UDEV = umps3-mkdev
 
 
+# keep the .o
+.PRECIOUS: $(ODIR)/*
 
-#########
-# CLEAN #
-#########
 
-.PHONY: clean
-clean:
-	rm $(ODIR)/$(filter-out $(NOCLEAN), *.o) $(BDIR)/$(filter-out $(NOCLEAN), *)
+## MAKE
+
+#main target
+all: $(BDIR)/kernel.core.umps $(BDIR)/disk0.umps
+
+# use umps3-mkdev to create the disk0 device
+$(BDIR)/disk0.umps:
+	$(UDEV) -d $(BDIR)/disk0.umps
+
+# create the kernel.core.umps kernel executable file
+$(BDIR)/kernel.core.umps: $(BDIR)/kernel
+	$(EF) -k $(BDIR)/kernel
+
+$(BDIR)/kernel: $(OBJS)
+	$(LD) $(LDCOREFLAGS) $(LIBDIR)/crtso.o $(OBJS) \
+		$(LIBDIR)/libumps.o -o $(BDIR)/kernel
+
+%.o: src/phase1/pcb.c $(DEFS)
+	$(CC) $(CFLAGS) $@ $< $(CFLAGSINC)

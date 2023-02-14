@@ -1,10 +1,10 @@
 #ifndef ASH_H
 #define ASH_H
 
-#include "phase1_files/pandos_const.h"
-#include "phase1_files/pandos_types.h"
-#include "phase1_files/types.h"
-#include "phase1_files/hashtable.h"
+#include "pandos_const.h"
+#include "pandos_types.h"
+#include "types.h"
+#include "hashtable.h"
 #include "pcb.h"
 
 
@@ -28,7 +28,7 @@ and s_procq to an empty list), and proceed as above. If a new
 semaphore descriptor needs to be allocated and the semdFree list
 is empty, return TRUE. In all other cases return FALSE.
 */
-int insertBlocked(int *semAdd, pcb_t *p);
+extern int insertBlocked(int *semAdd, pcb_t *p);
 
 
 
@@ -39,7 +39,7 @@ return a pointer to it. If the process queue for this semaphore
 becomes empty (lista_vuota is TRUE), remove the
 semaphore descriptor from the ASH and return it to the semdFree
 list. */
-pcb_t* removeBlocked(int *semAdd);
+extern pcb_t* removeBlocked(int *semAdd);
 
 
 
@@ -47,7 +47,7 @@ pcb_t* removeBlocked(int *semAdd);
 queue associated with the semaphore semAdd. Return NULL if
 semAdd is not found on the ASH or if the process queue associated
 with semAdd is empty. */
-pcb_t* headBlocked(int *semAdd);
+extern pcb_t* headBlocked(int *semAdd);
 
 
 /* Remove the pcb pointed to by p from the process queue associated with p’s semaphore (p→ p semAdd) on the ASH. If pcb
@@ -55,7 +55,7 @@ pointed to by p does not appear in the process queue associated
 with p’s semaphore, which is an error condition, return NULL;
 otherwise, return p. 
 */
-pcb_t* outBlocked(pcb_t *p);
+extern pcb_t* outBlocked(pcb_t *p);
 
 
 #endif

@@ -33,8 +33,12 @@ OBJS = $(patsubst %, $(ODIR)/%.o, $(_OBJS))
 
 DEFS = $(DEPS) $(INCDIR)/libumps.h Makefile
 
-CFLAGS = -ffreestanding -ansi -Wall -c -mips1 -mabi=32 -mfp32 \
-	-mno-gpopt -G 0 -fno-pic -mno-abicalls -o
+# ansi
+# CFLAGS = -ffreestanding -ansi -Wall -c -mips1 -mabi=32 -mfp32 \
+# 	-mno-gpopt -G 0 -fno-pic -mno-abicalls -o
+#c90
+ CFLAGS = -ffreestanding -std=c99 -Wall -c -mips1 -mabi=32 -mfp32 \
+ 	-mno-gpopt -G 0 -fno-pic -mno-abicalls -o
 CFLAGSINC = $(patsubst %, -iquote%, $(IDIRS))
 LDAOUTFLAGS = -G 0 -nostdlib -T $(SUPDIR)/umpsaout.ldscript
 LDCOREFLAGS = -G 0 -nostdlib -T $(SUPDIR)/umpscore.ldscript
@@ -67,5 +71,11 @@ $(BDIR)/kernel: $(OBJS)
 	$(LD) $(LDCOREFLAGS) $(LIBDIR)/crtso.o $(OBJS) \
 		$(LIBDIR)/libumps.o -o $(BDIR)/kernel
 
-%.o: src/phase1/pcb.c $(DEFS)
+$(ODIR)/%.o: $(SDIR)/%.c $(DEFS)
 	$(CC) $(CFLAGS) $@ $< $(CFLAGSINC)
+
+
+# CLEAN
+.PHONY: clean
+clean:
+	rm $(ODIR)/*/*.o $(BDIR)/$(filter-out .placeholder, *)

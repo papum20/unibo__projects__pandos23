@@ -56,7 +56,7 @@ HIDDEN inline void __initPcb(pcb_t *p)
 */
 HIDDEN inline pcb_t *__removeProcQ(struct list_head* head)
 {
-	pcb_t *p = container_of(head->next, struct pcb_t, p_list);
+	pcb_t *p = container_of(head->next, pcb_t, p_list);
 	list_del(head->next);
 	return p;
 }

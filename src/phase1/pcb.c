@@ -98,9 +98,10 @@ void insertChild(pcb_t *prnt, pcb_t *p){
 
 
 pcb_t *removeChild(pcb_t *p){
-	if(emptyChild((p))==1)
+	if(emptyChild(p) == 1)
 		return NULL;
-	pcb_t *tmp = p->p_child.next;
+		
+	pcb_t *tmp = container_of(p->p_child.next, pcb_t, p_sib);
 	//list_del(p->p_child.next);  
 	list_del(&tmp->p_sib);
 	tmp->p_parent = NULL;

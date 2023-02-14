@@ -8,13 +8,16 @@ void initAsh(){
 
     static semd_t semdTable[MAXPROC];
 
-    INIT_LIST_HEAD(&semdFree_h);
-    DEFINE_HASHTABLE(semd_h, MAXPROC);
-
     //crea la lista di semdFree
+    INIT_LIST_HEAD(semdFree_h);
     for (int i = 0; i < MAXPROC; i++){
         list_add_tail(&semdTable[i].s_freelink, &semdFree_h);
     }
+
+    //crea la hashtable
+    DEFINE_HASHTABLE(semd_h, MAXPROC);
+    hash_init(semd_h);
+
 }
 
 int insertBlocked(int *semAdd, pcb_t *p){

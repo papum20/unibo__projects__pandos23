@@ -3,10 +3,8 @@
 #define _LINUX_LIST_H
 
 
-//#include <container_of.h>
-#include "phase1_files/container_of.h"
-//#include <types.h>
-#include "phase1_files/types.h"
+#include "container_of.h"
+#include "types.h"
 
 /*
  * Circular doubly linked list implementation.

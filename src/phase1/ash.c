@@ -1,7 +1,12 @@
 #include "ash.h"
 
+
+/* enough to contain MAXPROC entries */
+#define HASH_TABLE_SIZE (const_ilog2(MAXPROC) + 1)
+
 static struct list_head semdFree_h;
-static struct hlist_node semd_h;
+static DECLARE_HASHTABLE(semd_h, HASH_TABLE_SIZE);
+
 
 
 void initAsh(){
@@ -9,13 +14,12 @@ void initAsh(){
     static semd_t semdTable[MAXPROC];
 
     //crea la lista di semdFree
-    INIT_LIST_HEAD(semdFree_h);
+    INIT_LIST_HEAD(&semdFree_h);
     for (int i = 0; i < MAXPROC; i++){
         list_add_tail(&semdTable[i].s_freelink, &semdFree_h);
     }
 
     //crea la hashtable
-    DEFINE_HASHTABLE(semd_h, MAXPROC);
     hash_init(semd_h);
 
 }
@@ -28,10 +32,10 @@ int insertBlocked(int *semAdd, pcb_t *p){
     if (sem == NULL)        //se non c'è ritorno true
       return true;
     else{                        
-      sem->s_key = semAdd;          //inizializzo la chiave
+      sem.s_key = semAdd;          //inizializzo la chiave
       INIT_LIST_HEAD(&sem->s_procq);     //inizializzo la lista dei processi bloccati su quel semaforo
       list_add_tail(&p->p_list, &sem->s_procq);       //ci aggiungo il pcb 
-      hash_add(semd_h, &sem->s_link, *sem->s_key);     //metto il semaforo nella hashtable
+      hash_add(&semd_h, &sem.s_link, *sem.s_key);     //metto il semaforo nella hashtable
       list_del(&sem->s_freelink);       //rimuovo il sem dalla lista di quelli liberi               
       return false;
     }

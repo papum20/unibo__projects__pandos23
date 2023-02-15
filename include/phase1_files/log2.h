@@ -8,7 +8,7 @@
 #ifndef _LINUX_LOG2_H
 #define _LINUX_LOG2_H
 
-#include "phase1_files/types.h"
+#include "types.h"
 
 #define const_ilog2(n)				\
 (						\

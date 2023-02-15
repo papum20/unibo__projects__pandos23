@@ -36,8 +36,8 @@ DEFS = $(DEPS) $(INCDIR)/libumps.h Makefile
 # ansi
 # CFLAGS = -ffreestanding -ansi -Wall -c -mips1 -mabi=32 -mfp32 \
 # 	-mno-gpopt -G 0 -fno-pic -mno-abicalls -o
-#c90
- CFLAGS = -ffreestanding -std=c99 -Wall -c -mips1 -mabi=32 -mfp32 \
+# gnu99 supports: inline, typeof
+ CFLAGS = -ffreestanding -std=gnu99 -Wall -c -mips1 -mabi=32 -mfp32 \
  	-mno-gpopt -G 0 -fno-pic -mno-abicalls -o
 CFLAGSINC = $(patsubst %, -iquote%, $(IDIRS))
 LDAOUTFLAGS = -G 0 -nostdlib -T $(SUPDIR)/umpsaout.ldscript

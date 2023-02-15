@@ -9,6 +9,26 @@ static DECLARE_HASHTABLE(semd_h, HASH_TABLE_SIZE);
 
 
 
+
+static inline semd_t* hash_semaphore(int* key){
+  semd_t *sem;
+  int found = false;
+
+  hash_for_each_possible(semd_h, sem, s_link, *key){
+    if (sem->s_key == key){
+      found = true;
+      break;
+    }
+  }
+
+  if (found == true)
+    return sem;
+  else
+    return NULL;
+}
+
+
+
 void initAsh(){
 
     static semd_t semdTable[MAXPROC];
@@ -93,22 +113,7 @@ pcb_t* outBlocked(pcb_t *p){
   return pcb;
 }
 
-static inline semd_t* hash_semaphore(int* key){
-  semd_t *sem;
-  int found = false;
 
-  hash_for_each_possible(semd_h, sem, s_link, *key){
-    if (sem->s_key == key){
-      found = true;
-      break;
-    }
-  }
-
-  if (found == true)
-    return sem;
-  else
-    return NULL;
-}
 /*
 
 list functions:

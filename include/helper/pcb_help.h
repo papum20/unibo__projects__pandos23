@@ -23,9 +23,10 @@ HELPER FUNCTIONS FOR pcb
 //// ALLOCATION
 
 
-#define __DFLT_LIST_HEAD ((struct list_head){NULL, NULL})
+#define __DFLT_LIST_HEAD ((struct list_head){.next=NULL, .prev=NULL})
 
-#define __DFLT_STATE_T 	((state_t){0, 0, 0, 0, 0, 0, 0})
+#define __DFLT_STATE_T 	((state_t){.entry_hi=0, .cause=0, .status=0, .pc_epc=0, .gpr=NULL, .hi=0, .lo=0})
+
 
 /*	helper function for allcPcb,
 	initiates Pcb's values to default.

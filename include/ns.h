@@ -33,7 +33,7 @@ extern int addNamespace(pcb_t *p, nsd_t *ns);
 	the fields, and proceed as above. If a new namespace descriptor
 	needs to be allocated and the type nsFree list is empty, return
 	TRUE. In all other cases return FALSE. */
-	/* AAssocia al processo p e a tutti I suoi
+	/* Associa al processo p e a tutti I suoi
 	figli il namespace ns. Ritorna FALSE in
 	caso di errore, TRUE altrimenti. */
 

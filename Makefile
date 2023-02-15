@@ -20,11 +20,17 @@ IDIRS = include include/helper include/phase1_files
 IDIR = include
 ODIR = obj
 SDIR = src
+SDIR1 = phase1
+SDIR2 = phase2
+TDIR = tests
 
 DEPS = $(IDIR)/*.h
 
-_OBJS = phase1/pcb phase1/ash phase1/ns
-OBJS = $(patsubst %, $(ODIR)/%.o, $(_OBJS))
+__OBJS1 = pcb ash ns
+_OBJS1 = $(patsubst %, $(SDIR)/$(SDIR1)/%, $(__OBJS1))
+__TESTS = p1test1
+_TESTS = $(patsubst %, $(TDIR)/%, $(__TESTS))
+OBJS = $(patsubst %, $(ODIR)/%.o, $(_OBJS1) $(_TESTS))
 
 
 
@@ -71,11 +77,12 @@ $(BDIR)/kernel: $(OBJS)
 	$(LD) $(LDCOREFLAGS) $(LIBDIR)/crtso.o $(OBJS) \
 		$(LIBDIR)/libumps.o -o $(BDIR)/kernel
 
-$(ODIR)/%.o: $(SDIR)/%.c $(DEFS)
+$(ODIR)/%.o: %.c $(DEFS)
 	$(CC) $(CFLAGS) $@ $< $(CFLAGSINC)
 
 
 # CLEAN
 .PHONY: clean
 clean:
-	rm $(ODIR)/*/*.o $(BDIR)/$(filter-out .placeholder, *)
+	rm $(ODIR)/$(SDIR)/$(SDIR1)/*.o $(ODIR)/$(SDIR)/$(SDIR2)/*.o \
+		$(ODIR)/$(TDIR)/*.o $(BDIR)/$(filter-out .placeholder, *)

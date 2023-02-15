@@ -25,17 +25,17 @@ void initAsh(){
 }
 
 int insertBlocked(int *semAdd, pcb_t *p){
-  semd_t *sem = hash_semaphore(&semAdd);
+  semd_t *sem = hash_semaphore(semAdd);
 
   if (sem == NULL){               // non ho trovato un semaforo con quella chiave
     sem = list_first_entry_or_null(&semdFree_h, semd_t, s_freelink);    //vedo se ce n'è uno disponibile
     if (sem == NULL)        //se non c'è ritorno true
       return true;
     else{                        
-      sem.s_key = semAdd;          //inizializzo la chiave
+      sem->s_key = semAdd;          //inizializzo la chiave
       INIT_LIST_HEAD(&sem->s_procq);     //inizializzo la lista dei processi bloccati su quel semaforo
       list_add_tail(&p->p_list, &sem->s_procq);       //ci aggiungo il pcb 
-      hash_add(&semd_h, &sem.s_link, *sem.s_key);     //metto il semaforo nella hashtable
+      hash_add(semd_h, &sem->s_link, *sem->s_key);     //metto il semaforo nella hashtable
       list_del(&sem->s_freelink);       //rimuovo il sem dalla lista di quelli liberi               
       return false;
     }
@@ -47,7 +47,7 @@ int insertBlocked(int *semAdd, pcb_t *p){
 }
 
 pcb_t* removeBlocked(int *semAdd){
-  semd_t *sem = hash_semaphore(&semAdd);
+  semd_t *sem = hash_semaphore(semAdd);
 
   if (sem == NULL){
     return NULL;
@@ -64,7 +64,7 @@ pcb_t* removeBlocked(int *semAdd){
 }
 
 pcb_t* headBlocked(int *semAdd){
-  semd_t *sem = hash_semaphore(&semAdd);
+  semd_t *sem = hash_semaphore(semAdd);
 
   if (sem == NULL)
     return NULL;
@@ -72,9 +72,9 @@ pcb_t* headBlocked(int *semAdd){
     return list_first_entry_or_null(&sem->s_procq, pcb_t, p_list);  //ritorna automaticamente null (errore) se la lista è vuota, oppure il pcb in testa
 }
 
-pcb_t* outBlocked(pbc_t *p){
+pcb_t* outBlocked(pcb_t *p){
 
-  semd_t *sem = hash_semaphore(&(p->p_semAdd));
+  semd_t *sem = hash_semaphore((p->p_semAdd));
 
   pcb_t *pcb;
   list_for_each_entry(pcb, &sem->s_procq, p_list){
@@ -94,7 +94,7 @@ pcb_t* outBlocked(pbc_t *p){
 }
 
 static inline semd_t* hash_semaphore(int* key){
-  semd_t *sem = kmalloc(sizeof(semd_t), GFP_KERNEL);
+  semd_t *sem;
   int found = false;
 
   hash_for_each_possible(semd_h, sem, s_link, *key){

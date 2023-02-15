@@ -58,4 +58,10 @@ otherwise, return p.
 pcb_t* outBlocked(pcb_t *p);
 
 
+//useful function that iterates through a hashtable and returns
+//the semaphore associated with the hash of the key
+//if not present, it returns a pointer pointing to NULL
+static inline semd_t* hash_semaphore(int* key);
+
+
 #endif

@@ -104,6 +104,7 @@ pcb_t* outBlocked(pcb_t *p){
   semd_t *sem = hash_semaphore((p->p_semAdd));
 
   pcb_t *pcb;
+
   list_for_each_entry(pcb, &sem->s_procq, p_list){
     if (p == pcb)
       break;

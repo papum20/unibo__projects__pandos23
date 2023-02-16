@@ -13,6 +13,8 @@
  *      Modified by Davide Berardi on November 23, 2022
  */
 
+/* uncomment for vscode debugging
+*/
 #include "linux_rwonce.h"
 
 #include "pandos_const.h"

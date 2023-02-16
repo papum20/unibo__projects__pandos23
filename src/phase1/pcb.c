@@ -18,8 +18,8 @@ void initPcbs()
 	INIT_LIST_HEAD(&pcbFree_h);
 	pcb_t *p_pcb;
 	//reverse for to only evaluate the plus once
-	for(p_pcb = pcbFree_table + MAXPROC - 1; p_pcb >= pcbFree_table; p_pcb--)
-		list_add(&p_pcb->p_list, &pcbFree_h);
+	for(p_pcb = pcbFree_table + MAXPROC - 1; p_pcb >= pcbFree_table; p_pcb--) //create a list of free or unused PCBs with number of elements MAXPROC
+		list_add(&p_pcb->p_list, &pcbFree_h); 
 }
 
 
@@ -56,7 +56,7 @@ int emptyProcQ(struct list_head *head){
 }
 
 
-void insertProcQ(struct list_head *head, pcb_t *p){  //inserimento in coda
+void insertProcQ(struct list_head *head, pcb_t *p){ //inserimento in coda
 	list_add_tail(&p->p_list, head);
 }
 
@@ -72,20 +72,20 @@ pcb_t *headProcQ(struct list_head *head){
 pcb_t *removeProcQ(struct list_head* head){ //rimozione in testa
 	if(emptyProcQ(head))
 		return NULL;
-
 	return __removeProcQ(head);
 }
 
 
 pcb_t *outProcQ(struct list_head *head, pcb_t *p){
 	struct list_head *pos;
-	list_for_each(pos, head){ //scorre tutta la lista
+	//scorre la lista che ha come sentinella head fino a trovare il processo p e lo rimuove dalla lista
+	list_for_each(pos, head){ 
 		if(pos == &p->p_list){
 			list_del(&p->p_list);
 			return p;
 		}
 	}
-	return NULL;
+	return NULL; //se p non è presente nella lista di head, la funzione ritorna NULL
 }
 
 
@@ -96,18 +96,17 @@ int emptyChild(pcb_t *p){
 }
 
 void insertChild(pcb_t *prnt, pcb_t *p){
-	p->p_parent = prnt;  //p ha come padre prnt
-	list_add_tail(&p->p_sib, &prnt->p_child); //p ha come fratello il figlio di prnt in testa e prnt ha come figlio p
+	p->p_parent = prnt;  //prnt diventa il padre di p
+	list_add_tail(&p->p_sib, &prnt->p_child); //aggiungi p in coda nella lista dei figli di prnt
 }
 
 
 pcb_t *removeChild(pcb_t *p){
-	if(emptyChild(p) == 1)
+	if(emptyChild(p) == 1) //p non ha figli
 		return NULL;
 		
-	pcb_t *tmp = container_of(p->p_child.next, pcb_t, p_sib);
-	//list_del(p->p_child.next);  
-	list_del(&tmp->p_sib);
+	pcb_t *tmp = container_of(p->p_child.next, pcb_t, p_sib); 
+	list_del(&tmp->p_sib);   //rimuove il primo figlio di p
 	tmp->p_parent = NULL;
 	return tmp;	
 }
@@ -115,23 +114,7 @@ pcb_t *removeChild(pcb_t *p){
 pcb_t *outChild(pcb_t *p){
 	if(p->p_parent==NULL)  //p non ha padre
 		return NULL;
-	//if(p->p_parent->p_child.next == p){  //p è il primo figlio del suo padre
-	//	return removeChild(p);
-	//}
-	/*
-	struct list_head *pos;
-	struct pcb_t *tmp;
-	list_for_each(pos, &p->p_parent->p_child){ //scorre tutta la lista
-		tmp = container_of(pos, struct pcb_t, p_child); 
-		if(tmp==p){
-			list_del(&p->p_sib);
-			p->p_parent = NULL;  
-			list_del(pos);
-			return p;
-		}
-	}
-	*/
-	list_del(&p->p_sib);
+	list_del(&p->p_sib);  
 	p->p_parent = NULL;
 	return p; 
 }

@@ -1,4 +1,4 @@
-#include "include/ns.h"
+#include "ns.h"
 
 static struct list_head pid_nsFree_h;
 static struct list_head pid_nsList_h;
@@ -51,7 +51,10 @@ nsd_t *allocNamespace(int type){
 
 
 void freeNamespace(nsd_t *ns){
-	
+
+	struct list_head *tmp_List=type_nsList(ns->n_type);
+
+	list_add(&ns->n_link, &tmp_List);
 }
 
 

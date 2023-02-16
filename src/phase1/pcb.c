@@ -1,5 +1,7 @@
 #include "pcb.h"
-#include "pcb_help.h"
+#include "helper/pcb_help.h"
+/* include for debug */
+#include "debug.h"
  
 
 
@@ -23,11 +25,21 @@ void initPcbs()
 
 //// ALLOCATION
 
-void freePcb(pcb_t *p) {
-	
+void freePcb(pcb_t *p)
+{
+	list_add_tail(&p->p_list, &pcbFree_h);
 }
 
-pcb_t *allocPcb();
+
+pcb_t *allocPcb()
+{
+	if(list_empty(&pcbFree_h))
+		return NULL;
+
+	pcb_t *p = __removeProcQ(&pcbFree_h);
+	__initPcb(p);
+	return p;
+}
 
 
 
@@ -44,7 +56,7 @@ int emptyProcQ(struct list_head *head){
 
 
 void insertProcQ(struct list_head *head, pcb_t *p){  //inserimento in coda
-	list_add_tail(&p->p_list,head);
+	list_add_tail(&p->p_list, head);
 }
 
 
@@ -58,9 +70,8 @@ pcb_t *headProcQ(struct list_head *head){
 pcb_t *removeProcQ(struct list_head* head){ //rimozione in testa
 	if(emptyProcQ(head))
 		return NULL;
-	pcb_t *tmp = container_of(head->next, struct pcb_t, p_list);
-	list_del(head->next);
-	return tmp;
+
+	return __removeProcQ(head);
 }
 
 
@@ -77,20 +88,22 @@ pcb_t *outProcQ(struct list_head *head, pcb_t *p){
 
 
 //// TREES
+
 int emptyChild(pcb_t *p){
 	return (list_empty(&(p->p_child)));
 }
 
 void insertChild(pcb_t *prnt, pcb_t *p){
-	p->p_parent=prnt;  //p ha come padre prnt
-	list_add_tail(&p->p_sib,&prnt->p_child); //p ha come fratello il figlio di prnt in testa e prnt ha come figlio p
+	p->p_parent = prnt;  //p ha come padre prnt
+	list_add_tail(&p->p_sib, &prnt->p_child); //p ha come fratello il figlio di prnt in testa e prnt ha come figlio p
 }
 
 
 pcb_t *removeChild(pcb_t *p){
-	if(emptyChild((p))==1)
+	if(emptyChild(p) == 1)
 		return NULL;
-	pcb_t *tmp = p->p_child.next;
+		
+	pcb_t *tmp = container_of(p->p_child.next, pcb_t, p_sib);
 	//list_del(p->p_child.next);  
 	list_del(&tmp->p_sib);
 	tmp->p_parent = NULL;

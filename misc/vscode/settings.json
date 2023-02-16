@@ -1,6 +1,19 @@
 {
     "files.associations": {
-		"*.h": "c"
+		"*.h": "c",
+		"*.c": "c",
+		"typeinfo": "c",
+		"random": "c",
+		"*.tcc": "c",
+		"streambuf": "c",
+		"type_traits": "c",
+		"array": "c",
+		"compare": "c",
+		"functional": "c",
+		"ostream": "c",
+		"ranges": "c",
+		"tuple": "c",
+		"utility": "c"
 	},
 
 

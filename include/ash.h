@@ -1,11 +1,27 @@
+#ifndef ASH_H
+#define ASH_H
+
+#include "pandos_const.h"
+#include "pandos_types.h"
+#include "types.h"
+#include "linux_hashtable.h"
 #include "pcb.h"
 
 
 
+extern void initASH();
+	/* Initialize the semdFree list to contain all the elements of the array
+	extern semd t semdTable[MAXPROC]
+	This method will be only called once during data structure initialization. */
+	/* Inizializza la lista dei semdFree in
+	modo da contenere tutti gli elementi
+	della semdTable. Questo metodo
+	viene invocato una volta sola durante
+	l’inizializzazione della struttura dati. */
 
 //// ASH MANAGEMENT
 
-static int insertBlocked(int *semAdd, pcb_t *p);
+extern int insertBlocked(int *semAdd, pcb_t *p);
 	/* Insert the pcb pointed to by p at the tail of the process queue
 	associated with the semaphore whose physical address is semAdd
 	and set the semaphore address of p to semAdd. If the semaphore
@@ -26,7 +42,7 @@ static int insertBlocked(int *semAdd, pcb_t *p);
 	restituisce TRUE. In tutti gli altri casi, restituisce
 	FALSE. */
 
-static pcb_t *removeBlocked(int *semAdd);
+extern pcb_t *removeBlocked(int *semAdd);
 	/* Search the ASH for a descriptor of this semaphore. If none is
 	found, return NULL; otherwise, remove the first (i.e. head) pcb
 	from the process queue of the found semaphore descriptor and
@@ -44,7 +60,7 @@ static pcb_t *removeBlocked(int *semAdd);
 	corrispondente dalla ASH e lo inserisce nella
 	coda dei descrittori liberi (semdFree_h). */
 
-static pcb_t *outBlocked(pcb_t *p);
+extern pcb_t *outBlocked(pcb_t *p);
 	/* Remove the pcb pointed to by p from the process queue associated with p’s semaphore (p→ p semAdd) on the ASH. If pcb
 	pointed to by p does not appear in the process queue associated
 	with p’s semaphore, which is an error condition, return NULL;
@@ -57,7 +73,7 @@ static pcb_t *outBlocked(pcb_t *p);
 	vuota, rimuove il descrittore corrispondente dalla ASH
 	e lo inserisce nella coda dei descrittori liberi */
 
-static pcb_t *headBlocked(int *semAdd);
+extern pcb_t *headBlocked(int *semAdd);
 	/* Return a pointer to the pcb that is at the head of the process
 	queue associated with the semaphore semAdd. Return NULL if
 	semAdd is not found on the ASH or if the process queue associated
@@ -68,12 +84,10 @@ static pcb_t *headBlocked(int *semAdd);
 	compare nella ASH oppure se compare ma la sua coda
 	dei processi è vuota.*/
 
-initASH();
-	/* Initialize the semdFree list to contain all the elements of the array
-	static semd t semdTable[MAXPROC]
-	This method will be only called once during data structure initialization. */
-	/* Inizializza la lista dei semdFree in
-	modo da contenere tutti gli elementi
-	della semdTable. Questo metodo
-	viene invocato una volta sola durante
-	l’inizializzazione della struttura dati. */
+
+//useful function that iterates through a hashtable and returns
+//the semaphore associated with the hash of the key
+//if not present, it returns a pointer pointing to NULL
+
+
+#endif

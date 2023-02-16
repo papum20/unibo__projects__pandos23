@@ -6,8 +6,8 @@
 
 
  
-static struct list_head pcbFree_h;
 /* list of free or unused PCBs */
+static struct list_head pcbFree_h;
 
 
 
@@ -37,7 +37,8 @@ pcb_t *allocPcb()
 		return NULL;
 
 	pcb_t *p = __removeProcQ(&pcbFree_h);
-	__initPcb(p);
+	//__removeProcQ already initializes p_list
+	__initPcb_no_plist(p);
 	return p;
 }
 
@@ -63,6 +64,7 @@ void insertProcQ(struct list_head *head, pcb_t *p){  //inserimento in coda
 pcb_t *headProcQ(struct list_head *head){
 	if(emptyProcQ(head))
 		return NULL;
+
 	return container_of(head->next, struct pcb_t, p_list); 
 }
 
@@ -78,7 +80,7 @@ pcb_t *removeProcQ(struct list_head* head){ //rimozione in testa
 pcb_t *outProcQ(struct list_head *head, pcb_t *p){
 	struct list_head *pos;
 	list_for_each(pos, head){ //scorre tutta la lista
-		if(pos==&p->p_list){
+		if(pos == &p->p_list){
 			list_del(&p->p_list);
 			return p;
 		}

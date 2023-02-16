@@ -1,3 +1,7 @@
+/* this header's functions count on the test to define them
+*/
+
+
 #ifndef DEBUG_H
 #define DEBUG_H
 

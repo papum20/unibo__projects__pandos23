@@ -15,7 +15,8 @@ HELPER FUNCTIONS FOR pcb
 	as the former defines NULL while the latter requires it
 	(this is just for the editor, as in execution it doesn't matter) */
 #include "linux_list.h"
-
+/* include for debug */
+#include "debug.h"
 
 
 
@@ -33,13 +34,13 @@ HELPER FUNCTIONS FOR pcb
  *	not working with stdlib.
 */
 #define __DFLT_STATE_T(state) \
-	state.entry_hi	= 0;														\
-	state.cause		= 0;														\
-	state.status	= 0;														\
-	state.pc_epc	= 0;														\
-	for(unsigned int *_p = state.gpr + STATE_GPR_LEN; _p >= state.gpr; _p--)	\
-		_p = 0;																	\
-	state.hi		= 0;														\
+	state.entry_hi	= 0;															\
+	state.cause		= 0;															\
+	state.status	= 0;															\
+	state.pc_epc	= 0;															\
+	for(unsigned int *_p = state.gpr + STATE_GPR_LEN - 1; _p >= state.gpr; _p--)	\
+		*_p = 0;																	\
+	state.hi		= 0;															\
 	state.lo		= 0;
 
 
@@ -61,7 +62,7 @@ HIDDEN inline void __initPcb(pcb_t *p)
     p->p_semAdd = NULL;
     //Namespace list
     for(nsd_t **p_nsd = p->namespaces + NS_TYPE_MAX - 1; p_nsd >= p->namespaces; p_nsd--)
-		p_nsd = NULL;
+		*p_nsd = NULL;
 }
 
 

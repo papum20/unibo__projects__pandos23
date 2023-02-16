@@ -54,7 +54,7 @@ void freeNamespace(nsd_t *ns){
 
 	struct list_head *tmp_List=type_nsList(ns->n_type);
 
-	list_add(&ns->n_link, &tmp_List);
+	list_add(&ns->n_link, tmp_List);
 }
 
 

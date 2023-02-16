@@ -13,18 +13,10 @@
 
 
 
+/*	Initialize the pcbFree list to contain MAXPROC elements.
+	This function should be called once during data structure initialization.
+*/
 extern void initPcbs();
-	/* Initialize the pcbFree list to contain all the elements of
-	the static array of MAXPROC pcbs. This method will be
-	called only once during data structure initialization. */
-	/*A static array of MAXPROC pcbs will be declared in initPcbs().
-	Furthermore, this method will insert each of the
-	MAXPROC pcbs onto the pcbFree list.	*/
-	/* Inizializza la lista pcbFree in modo da
-	contenere tutti gli elementi della
-	pcbFree_table. Questo metodo deve
-	essere chiamato una volta sola in fase di
-	inizializzazione della struttura dati. */
 
 
 

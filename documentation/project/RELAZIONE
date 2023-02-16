@@ -14,6 +14,7 @@ Giuseppe e Daniele si sono occupati della gestione della lista di PCB e degli al
 e Tommaso dei namespace
 
 
+
 LISTA DI PCB
 
 
@@ -24,3 +25,13 @@ HASH TABLE
 
 
 NAMESPACE
+
+
+notes:
+-	liste: aggiunta testa/coda
+-	hidden/static
+-	pcb_help
+-	include structure
+-	rwonce.h
+-	makefile (in readme?)
+-	implementazione namespace

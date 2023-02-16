@@ -11,14 +11,18 @@ static struct list_head pcbFree_h;
 
 
 
+/*	allocates MAXPROC pcb's declaring a static array
+	pcbFree_table[].	
+	Then adds these pcb's to the pcbFree_h list.
+*/
 void initPcbs()
 {
 	static pcb_t pcbFree_table[MAXPROC];
 
 	INIT_LIST_HEAD(&pcbFree_h);
 	pcb_t *p_pcb;
-	//reverse for to only evaluate the plus once
-	for(p_pcb = pcbFree_table + MAXPROC - 1; p_pcb >= pcbFree_table; p_pcb--) //create a list of free or unused PCBs with number of elements MAXPROC
+	/* reverse for used to only evaluate the plus once */
+	for(p_pcb = pcbFree_table + MAXPROC - 1; p_pcb >= pcbFree_table; p_pcb--)
 		list_add(&p_pcb->p_list, &pcbFree_h); 
 }
 

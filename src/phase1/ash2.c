@@ -54,16 +54,17 @@ int insertBlocked(int *semAdd, pcb_t *p){
 			return true;
 		else{                        
 			sem->s_key = semAdd;          //inizializzo la chiave
-			p->p_semAdd = semAdd;
 			INIT_LIST_HEAD(&sem->s_procq);     //inizializzo la lista dei processi bloccati su quel semaforo
-			list_add_tail(&p->p_list, &sem->s_procq);       //ci aggiungo il pcb 
 			hash_add(semd_h, &sem->s_link, *sem->s_key);     //metto il semaforo nella hashtable
 			list_del(&sem->s_freelink);       //rimuovo il sem dalla lista di quelli liberi               
+			p->p_semAdd = semAdd;
+			insertProcQ(&sem->s_procq, p);		//ci aggiungo il pcb 
 			return false;
 		}
 	}
 	else{
-		list_add_tail(&p->p_list, &sem->s_procq);
+		p->p_semAdd = semAdd;
+		insertProcQ(&sem->s_procq, p);		//ci aggiungo il pcb 
 		return false;
 	}
 }

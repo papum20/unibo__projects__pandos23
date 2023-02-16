@@ -41,24 +41,20 @@ void initASH(){
 int insertBlocked(int *semAdd, pcb_t *p){
 	semd_t *sem = hash_semaphore(semAdd);
 
-	if (sem == NULL){               // non ho trovato un semaforo con quella chiave
-		sem = list_first_entry_or_null(&semdFree_h, semd_t, s_freelink);    //vedo se ce n'è uno disponibile
-		if (sem == NULL)        //se non c'è ritorno true
+	if(sem == NULL) {
+		if(list_empty(&semdFree_h))// non ho trovato un semaforo con quella chiave
 			return true;
-		else{                        
-			sem->s_key = semAdd;          //inizializzo la chiave
-			p->p_semAdd = semAdd;
-			INIT_LIST_HEAD(&sem->s_procq);     //inizializzo la lista dei processi bloccati su quel semaforo
-			hash_add(semd_h, &sem->s_link, *sem->s_key);     //metto il semaforo nella hashtable
-			list_del(&sem->s_freelink);       //rimuovo il sem dalla lista di quelli liberi               
-			insertProcQ(&sem->s_procq, p);		//ci aggiungo il pcb 
-			return false;
-		}
+
+		sem = list_first_entry(&semdFree_h, semd_t, s_freelink);
+		sem->s_key = semAdd;          //inizializzo la chiave
+		INIT_LIST_HEAD(&sem->s_procq);     //inizializzo la lista dei processi bloccati su quel semaforo
+		hash_add(semd_h, &sem->s_link, *sem->s_key);     //metto il semaforo nella hashtable
+		list_del(&sem->s_freelink);       //rimuovo il sem dalla lista di quelli liberi               
 	}
-	else{
-			insertProcQ(&sem->s_procq, p);		//ci aggiungo il pcb 
-		return false;
-	}
+
+	p->p_semAdd = semAdd;
+	insertProcQ(&sem->s_procq, p);		//ci aggiungo il pcb 
+	return false;
 }
 
 pcb_t* removeBlocked(int *semAdd){

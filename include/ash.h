@@ -4,7 +4,7 @@
 #include "pandos_const.h"
 #include "pandos_types.h"
 #include "types.h"
-#include "hashtable.h"
+#include "linux_hashtable.h"
 #include "pcb.h"
 
 

@@ -293,31 +293,41 @@ int main(void) {
             adderrbuf("insertBlocked(3): unexpected TRUE   ");
     }
     if (removeBlocked(&sem[11]) != NULL)
-        adderrbuf("removeBlocked: removed nonexistent blocked proc   ");
-    addokbuf("insertBlocked and removeBlocked ok   \n");
+    	adderrbuf("removeBlocked: removed nonexistent blocked proc   ");
+	addokbuf("insertBlocked and removeBlocked ok   \n");
 
     if (headBlocked(&sem[11]) != NULL)
         adderrbuf("headBlocked: nonNULL for a nonexistent queue   ");
+	addokbuf("pippo1");
     if ((q = headBlocked(&sem[9])) == NULL)
         adderrbuf("headBlocked(1): NULL for an existent queue   ");
+	addokbuf("pippo2");
     if (q != procp[9])
         adderrbuf("headBlocked(1): wrong process returned   ");
+	addokbuf("pippo3");
     p = outBlocked(q);
+	addokbuf("pippo3.1");
     if (p != q)
         adderrbuf("outBlocked(1): couldn't remove from valid queue   ");
+	addokbuf("pippo4");
     q = headBlocked(&sem[9]);
     if (q == NULL)
         adderrbuf("headBlocked(2): NULL for an existent queue   ");
+	addokbuf("pippo5");
     if (q != procp[19])
         adderrbuf("headBlocked(2): wrong process returned   ");
+	addokbuf("pippo6");
     p = outBlocked(q);
     if (p != q)
         adderrbuf("outBlocked(2): couldn't remove from valid queue   ");
+	addokbuf("pippo7");
     p = outBlocked(q);
     if (p != NULL)
         adderrbuf("outBlocked: removed same process twice.");
+	addokbuf("pippo8");
     if (headBlocked(&sem[9]) != NULL)
         adderrbuf("out/headBlocked: unexpected nonempty queue   ");
+	addokbuf("pippo9");
 
     for (i = 0; i < MAXPROC; i++)
         freePcb(procp[i]);

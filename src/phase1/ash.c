@@ -98,13 +98,7 @@ pcb_t* headBlocked(int *semAdd){
     
 }
 
-/**
- * list_first_entry - get the first element from a list
- * @ptr:	the list head to take the element from.
- * @type:	the type of the struct this is embedded in.
- * @member:	the name of the list_head within the struct.
- *
- * Not
+
 pcb_t* outBlocked(pcb_t *p){
 
   semd_t *sem = hash_semaphore((p->p_semAdd));

@@ -13,6 +13,8 @@
  *      Modified by Davide Berardi on November 23, 2022
  */
 
+#include "linux_rwonce.h"
+
 #include "pandos_const.h"
 #include "pandos_types.h"
 

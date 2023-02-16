@@ -4,8 +4,13 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/include"
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/include/helper",
+                "${workspaceFolder}/include/kernel",
+                "${workspaceFolder}/include/phase1_files"
                 //"/usr/include/",
+                //"/usr/include/linux"
+				//"/usr/src/linux-headers-5.10.0-19-common/include/"
                 //"/usr/src/linux-headers-5.10.0-19-common/**"
             ],
             "defines": [
@@ -14,10 +19,9 @@
                 "_UNICODE"
             ],
             "compilerPath": "/usr/bin/gcc",
-            "cStandard": "c11",
+            "cStandard": "gnu99",
             "cppStandard": "c++17",
-            "intelliSenseMode": "${default}",
-            "configurationProvider": "ms-vscode.makefile-tools"
+            "intelliSenseMode": "${default}"
         }
     ],
     "enableConfigurationSquiggles": true,

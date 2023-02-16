@@ -14,7 +14,7 @@ HELPER FUNCTIONS FOR pcb
 /*	pandos_const.h is included before list.h,
 	as the former defines NULL while the latter requires it
 	(this is just for the editor, as in execution it doesn't matter) */
-#include "list.h"
+#include "linux_list.h"
 
 
 
@@ -22,10 +22,25 @@ HELPER FUNCTIONS FOR pcb
 
 //// ALLOCATION
 
-
+/* "returns" the default value for a struct list_ehad (i.e. NULL fields)
+*/
 #define __DFLT_LIST_HEAD ((struct list_head){.next=NULL, .prev=NULL})
 
-#define __DFLT_STATE_T 	((state_t){.entry_hi=0, .cause=0, .status=0, .pc_epc=0, .gpr=NULL, .hi=0, .lo=0})
+/** inits a state_t object to default values (0)
+ *	@state: state_t object
+ *	note: doing like this was necessary, as by doing instead like __DFLT_LIST_HEAD,
+ *	i.e. assigning {0,0,...,0}, gcc tried to invoke memset, not defined
+ *	not working with stdlib.
+*/
+#define __DFLT_STATE_T(state) \
+	state.entry_hi	= 0;														\
+	state.cause		= 0;														\
+	state.status	= 0;														\
+	state.pc_epc	= 0;														\
+	for(unsigned int *_p = state.gpr + STATE_GPR_LEN; _p >= state.gpr; _p--)	\
+		_p = 0;																	\
+	state.hi		= 0;														\
+	state.lo		= 0;
 
 
 /*	helper function for allcPcb,
@@ -40,7 +55,7 @@ HIDDEN inline void __initPcb(pcb_t *p)
 	p->p_child	= __DFLT_LIST_HEAD;
     p->p_sib	= __DFLT_LIST_HEAD;
     //process status information
-    p->p_s = __DFLT_STATE_T;
+    __DFLT_STATE_T(p->p_s);
 	p->p_time = 0;
 	//semaphore
     p->p_semAdd = NULL;

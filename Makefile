@@ -16,7 +16,7 @@ SUPDIR = $(UMPS3_DIR_PREFIX)/share/umps3
 ## PROJECT'S REQUIREMENTS
 
 BDIR = bin
-IDIRS = include include/helper include/phase1_files
+IDIRS = include include/helper include/kernel include/phase1_files
 IDIR = include
 ODIR = obj
 SDIR = src
@@ -39,10 +39,11 @@ OBJS = $(patsubst %, $(ODIR)/%.o, $(_OBJS1) $(_TESTS))
 
 DEFS = $(DEPS) $(INCDIR)/libumps.h Makefile
 
-# ansi
+# CFLAGS suggested by project pdf
 # CFLAGS = -ffreestanding -ansi -Wall -c -mips1 -mabi=32 -mfp32 \
 # 	-mno-gpopt -G 0 -fno-pic -mno-abicalls -o
-# gnu99 supports: inline, typeof
+# this CFLAGS' options:
+# std=gnu99 supports: inline, typeof
  CFLAGS = -ffreestanding -std=gnu99 -Wall -c -mips1 -mabi=32 -mfp32 \
  	-mno-gpopt -G 0 -fno-pic -mno-abicalls -o
 CFLAGSINC = $(patsubst %, -iquote%, $(IDIRS))

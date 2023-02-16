@@ -9,7 +9,7 @@
 /*	pandos_const.h is included before list.h,
 	as the former defines NULL while the latter requires it
 	(this is just for the editor, as in execution it doesn't matter) */
-#include "list.h"
+#include "linux_list.h"
 
 
 

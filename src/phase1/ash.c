@@ -29,7 +29,7 @@ static inline semd_t* hash_semaphore(int* key){
 
 
 
-void initAsh(){
+void initASH(){
 
     static semd_t semdTable[MAXPROC];
 

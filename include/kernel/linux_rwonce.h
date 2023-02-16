@@ -22,35 +22,7 @@
 
 #ifndef __ASSEMBLY__
 
-
-
-/* __no_sanitize_or_inline from linux/compiler_types.h
-*/
-
-#ifdef __SANITIZE_ADDRESS__
-/*
- * We can't declare function 'inline' because __no_sanitize_address conflicts
- * with inlining. Attempt to inline it may cause a build failure.
- *     https://gcc.gnu.org/bugzilla/show_bug.cgi?id=67368
- * '__maybe_unused' allows us to avoid defined-but-not-used warnings.
- */
-# define __no_kasan_or_inline __no_sanitize_address notrace __maybe_unused
-# define __no_sanitize_or_inline __no_kasan_or_inline
-#else
-# define __no_kasan_or_inline __always_inline
-#endif
-
-#define __no_kcsan __no_sanitize_thread
-#ifdef __SANITIZE_THREAD__
-# define __no_sanitize_or_inline __no_kcsan notrace __maybe_unused
-#endif
-
-#ifndef __no_sanitize_or_inline
-#define __no_sanitize_or_inline __always_inline
-#endif
-
-
-
+#include "linux_compiler_types.h"
 
 /*
  * Yes, this permits 64-bit accesses on 32-bit architectures. These will
@@ -87,7 +59,7 @@ do {									\
 	__WRITE_ONCE(x, val);						\
 } while (0)
 
-static __no_sanitize_or_inline
+static inline
 unsigned long __read_once_word_nocheck(const void *addr)
 {
 	return __READ_ONCE(*(unsigned long *)addr);
@@ -105,12 +77,14 @@ unsigned long __read_once_word_nocheck(const void *addr)
 	(typeof(x))__read_once_word_nocheck(&(x));			\
 })
 
-static __no_kasan_or_inline
+/*
+static inline
 unsigned long read_word_at_a_time(const void *addr)
 {
 	kasan_check_read(addr, 1);
 	return *(unsigned long *)addr;
 }
+*/
 
 #endif /* __ASSEMBLY__ */
 #endif	/* __ASM_GENERIC_RWONCE_H */

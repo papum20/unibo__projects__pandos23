@@ -318,6 +318,7 @@ int main(void) {
         adderrbuf("headBlocked(2): wrong process returned   ");
 	addokbuf("pippo6");
     p = outBlocked(q);
+	addokbuf("pippo6.1");
     if (p != q)
         adderrbuf("outBlocked(2): couldn't remove from valid queue   ");
 	addokbuf("pippo7");

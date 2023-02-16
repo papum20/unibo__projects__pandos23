@@ -3,5 +3,11 @@
 # c
 *.o
 # binaries folders
-*/bin/
-*/obj/
+bin/*
+!bin/.placeholder
+obj/*
+!obj/phase1/.placeholder
+!obj/phase2/.placeholder
+# umps config
+misc/umps-config/*
+!misc/umps-config/.placeholder

@@ -23,14 +23,10 @@ HELPER FUNCTIONS FOR pcb
 
 //// ALLOCATION
 
-/* "returns" the default value for a struct list_ehad (i.e. NULL fields)
-*/
-#define __DFLT_LIST_HEAD ((struct list_head){.next=NULL, .prev=NULL})
-
 /** inits a state_t object to default values (0)
  *	@state: state_t object
- *	note: doing like this was necessary, as by doing instead like __DFLT_LIST_HEAD,
- *	i.e. assigning {0,0,...,0}, gcc tried to invoke memset, not defined
+ *	note: doing like this was necessary, as by assigning {0,0,...,0},
+ *	gcc tried to invoke memset, not defined
  *	not working with stdlib.
 */
 #define __DFLT_STATE_T(state) \
@@ -50,11 +46,11 @@ HELPER FUNCTIONS FOR pcb
 HIDDEN inline void __initPcb(pcb_t *p)
 {
     //process queue
-    p->p_list	= __DFLT_LIST_HEAD;
+    INIT_LIST_HEAD(&p->p_list);
     //process tree fields
     p->p_parent	= NULL;
-	p->p_child	= __DFLT_LIST_HEAD;
-    p->p_sib	= __DFLT_LIST_HEAD;
+    INIT_LIST_HEAD(&p->p_child);
+    INIT_LIST_HEAD(&p->p_sib);
     //process status information
     __DFLT_STATE_T(p->p_s);
 	p->p_time = 0;

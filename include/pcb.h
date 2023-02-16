@@ -71,6 +71,8 @@ extern void insertProcQ(struct list_head *head, pcb_t *p);
 	*/
 	/* Inserisce l’elemento puntato da p nella
 	coda dei processi puntata da head. */
+	/* Precondition: p isn't in any list
+	*/
 
 extern pcb_t *headProcQ(struct list_head *head);
 	/* Return a pointer to the first pcb from the process queue whose

@@ -1,4 +1,5 @@
 #include "ash.h"
+#include "debug.h"
 
 
 /* enough to contain MAXPROC entries */
@@ -20,7 +21,7 @@ static inline semd_t* hash_semaphore(int* key){
       break;
     }
   }
-
+	
   if (found == true)
     return sem;
   else
@@ -45,25 +46,26 @@ void initASH(){
 }
 
 int insertBlocked(int *semAdd, pcb_t *p){
-  semd_t *sem = hash_semaphore(semAdd);
+	semd_t *sem = hash_semaphore(semAdd);
 
-  if (sem == NULL){               // non ho trovato un semaforo con quella chiave
-    sem = list_first_entry_or_null(&semdFree_h, semd_t, s_freelink);    //vedo se ce n'è uno disponibile
-    if (sem == NULL)        //se non c'è ritorno true
-      return true;
-    else{                        
-      sem->s_key = semAdd;          //inizializzo la chiave
-      INIT_LIST_HEAD(&sem->s_procq);     //inizializzo la lista dei processi bloccati su quel semaforo
-      list_add_tail(&p->p_list, &sem->s_procq);       //ci aggiungo il pcb 
-      hash_add(semd_h, &sem->s_link, *sem->s_key);     //metto il semaforo nella hashtable
-      list_del(&sem->s_freelink);       //rimuovo il sem dalla lista di quelli liberi               
-      return false;
-    }
-  }
-  else{
-    list_add_tail(&p->p_list, &sem->s_procq);
-    return false;
-  }
+	if (sem == NULL){               // non ho trovato un semaforo con quella chiave
+		sem = list_first_entry_or_null(&semdFree_h, semd_t, s_freelink);    //vedo se ce n'è uno disponibile
+		if (sem == NULL)        //se non c'è ritorno true
+			return true;
+		else{                        
+			sem->s_key = semAdd;          //inizializzo la chiave
+			p->p_semAdd = semAdd;
+			INIT_LIST_HEAD(&sem->s_procq);     //inizializzo la lista dei processi bloccati su quel semaforo
+			list_add_tail(&p->p_list, &sem->s_procq);       //ci aggiungo il pcb 
+			hash_add(semd_h, &sem->s_link, *sem->s_key);     //metto il semaforo nella hashtable
+			list_del(&sem->s_freelink);       //rimuovo il sem dalla lista di quelli liberi               
+			return false;
+		}
+	}
+	else{
+		list_add_tail(&p->p_list, &sem->s_procq);
+		return false;
+	}
 }
 
 pcb_t* removeBlocked(int *semAdd){
@@ -74,6 +76,7 @@ pcb_t* removeBlocked(int *semAdd){
   }
   else{
     pcb_t *pcb = list_first_entry(&sem->s_procq, pcb_t, p_list);
+	pcb->p_semAdd = NULL;
     list_del(&pcb->p_list);
     if (list_empty(&sem->s_procq) == true){
       list_add_tail(&sem->s_freelink, &semdFree_h);
@@ -101,14 +104,26 @@ pcb_t* headBlocked(int *semAdd){
 
 pcb_t* outBlocked(pcb_t *p){
 
-  semd_t *sem = hash_semaphore((p->p_semAdd));
+	semd_t *sem = hash_semaphore((p->p_semAdd));
 
+	if(sem == NULL)
+		return NULL;
+	else {
+		list_del(&p->p_list);
+		if (list_empty(&sem->s_procq) == true){
+			list_add_tail(&sem->s_freelink, &semdFree_h);
+			hash_del(&sem->s_link);
+		}
+		return p;
+	}
+
+
+	/*
   pcb_t *pcb;
   list_for_each_entry(pcb, &sem->s_procq, p_list){
     if (p == pcb)
       break;
   }
-
   if (pcb != NULL){
     list_del(&pcb->p_list);
     if (list_empty(&sem->s_procq) == true){
@@ -118,6 +133,7 @@ pcb_t* outBlocked(pcb_t *p){
   }
 
   return pcb;
+	*/
 }
 
 

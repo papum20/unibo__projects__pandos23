@@ -88,10 +88,23 @@ pcb_t* headBlocked(int *semAdd){
 
   if (sem == NULL)
     return NULL;
-  else
-    return list_first_entry_or_null(&sem->s_procq, pcb_t, p_list);  //ritorna automaticamente null (errore) se la lista è vuota, oppure il pcb in testa
+  else{
+	if (list_empty(&sem->s_procq) == true)
+		return NULL;
+	else
+		return list_first_entry(&sem->s_procq, pcb_t, p_list);
+		//return list_first_entry(&sem->s_procq, semd_t, p_list);
+  }
+    
 }
 
+/**
+ * list_first_entry - get the first element from a list
+ * @ptr:	the list head to take the element from.
+ * @type:	the type of the struct this is embedded in.
+ * @member:	the name of the list_head within the struct.
+ *
+ * Not
 pcb_t* outBlocked(pcb_t *p){
 
   semd_t *sem = hash_semaphore((p->p_semAdd));

@@ -13,11 +13,18 @@ static DECLARE_HASHTABLE(semd_h, HASH_TABLE_SIZE);
 
 static inline semd_t* hash_semaphore(int* key){
   semd_t *sem;
+  int found = false;
 
   hash_for_each_possible(semd_h, sem, s_link, *key){
-    if (sem->s_key == key)
-      return sem;
+    if (sem->s_key == key){
+      found = true;
+      break;
+    }
   }
+	
+  if (found == true)
+    return sem;
+  else
     return NULL;
 }
 
@@ -49,14 +56,14 @@ int insertBlocked(int *semAdd, pcb_t *p){
 			sem->s_key = semAdd;          //inizializzo la chiave
 			p->p_semAdd = semAdd;
 			INIT_LIST_HEAD(&sem->s_procq);     //inizializzo la lista dei processi bloccati su quel semaforo
+			list_add_tail(&p->p_list, &sem->s_procq);       //ci aggiungo il pcb 
 			hash_add(semd_h, &sem->s_link, *sem->s_key);     //metto il semaforo nella hashtable
 			list_del(&sem->s_freelink);       //rimuovo il sem dalla lista di quelli liberi               
-			insertProcQ(&sem->s_procq, p);		//ci aggiungo il pcb 
 			return false;
 		}
 	}
 	else{
-			insertProcQ(&sem->s_procq, p);		//ci aggiungo il pcb 
+		list_add_tail(&p->p_list, &sem->s_procq);
 		return false;
 	}
 }
@@ -99,12 +106,9 @@ pcb_t* outBlocked(pcb_t *p){
 
 	semd_t *sem = hash_semaphore((p->p_semAdd));
 
-	if(sem == NULL){
-		addokbuf("\nnon trovato sem\n");
+	if(sem == NULL)
 		return NULL;
-	}
 	else {
-		addokbuf("\ntrovato sem\n");
 		list_del(&p->p_list);
 		if (list_empty(&sem->s_procq) == true){
 			list_add_tail(&sem->s_freelink, &semdFree_h);

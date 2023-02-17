@@ -1,0 +1,77 @@
+RELAZIONE PROGETTO SISTEMI OPERATIVI
+PandOS 2022/2023	-	Università di Bologna
+
+
+
+PARTECIPANTI/AUTORI:
+
+	Daniele		D'Ugo		0001027741
+	Osama		Elatfi		000
+	Tommaso		Michetti 	000
+	Giuseppe	Spathis		000	
+
+
+
+DIVISIONE DEL LAVORO:
+
+	Giuseppe, Daniele:
+		PCB
+	Osama:
+		ASH 
+	Tommaso:
+		namespace
+
+
+
+
+STRUTTURA E CONVENZIONI GENERALI:
+
+	Nel corso dello sviluppo, per quanto possibile e in linea con le nostre conoscenze, "imparando facendo",
+	abbiamo cercato di mantenere il codice e i file ordinati, e di rimanere coerenti con delle scelte precise
+	riguardo ad alcuni aspetti, una volta stabilite.
+
+	STRUTTURA:
+		La fase 1 del progetto è stata suddivisa in tre moduli principali (pcb per i pcb, ash per i semafori,
+		ns per i namespace), più ulteriori file ausiliari.
+		I file sono divisi nel modo seguente:
+		
+		src/
+			file sorgente (.c), suddivisi nel modo seguente:
+			src/phase1/
+				per i file della fase 1;
+			src/tests/
+				per i test da eseguire su umps3.
+		include/
+			header (.h), suddivisi nel modo seguente:
+			include/*
+				gli header principali del progetto - uno per ogni modulo (pcb, ash, ns)
+
+
+COMPILAZIONE:
+
+
+
+
+PCB -	LISTE
+
+
+PCB	-	ALBERI
+
+
+ASH	(HASH TABLE DEI SEMAFORI)
+
+
+NS	(NAMESPACE)
+
+
+
+
+notes:
+-	liste: aggiunta testa/coda
+-	hidden/static
+-	pcb_help
+-	include structure
+-	rwonce.h
+-	makefile (in readme?)
+-	implementazione namespace
+

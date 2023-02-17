@@ -29,7 +29,7 @@ DEPS = $(IDIR)/*.h
 __OBJS1 = pcb ash ns
 _OBJS1 = $(patsubst %, $(SDIR)/$(SDIR1)/%, $(__OBJS1))
 __TESTS = p1test1
-_TESTS = $(patsubst %, $(TDIR)/%, $(__TESTS))
+_TESTS = $(patsubst %, $(SDIR)/$(TDIR)/%, $(__TESTS))
 OBJS = $(patsubst %, $(ODIR)/%.o, $(_OBJS1) $(_TESTS))
 
 

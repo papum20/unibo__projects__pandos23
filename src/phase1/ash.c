@@ -9,6 +9,26 @@ static struct list_head semdFree_h;
 static DECLARE_HASHTABLE(semd_h, HASH_TABLE_SIZE);
 
 
+	/* AUXILIARY FUNCTIONS*/
+
+
+/*
+	useful function that iterates through a hashtable and returns
+	the semaphore associated with the hash of the key
+	if not present, it returns a pointer pointing to NULL
+*/
+
+HIDDEN inline semd_t* __hash_semaphore(int* key){
+  semd_t *sem;
+
+  hash_for_each_possible(semd_h, sem, s_link, *key){
+    if (sem->s_key == key)
+      return sem;
+  }
+    return NULL;
+}
+
+
 	/* ASH INITIALIZATION*/
 
 void initASH(){
@@ -98,22 +118,3 @@ pcb_t* outBlocked(pcb_t *p){
 	}
 }
 
-
-	/* AUXILIARY FUNCTIONS*/
-
-
-/*
-	useful function that iterates through a hashtable and returns
-	the semaphore associated with the hash of the key
-	if not present, it returns a pointer pointing to NULL
-*/
-
-HIDDEN inline semd_t* __hash_semaphore(int* key){
-  semd_t *sem;
-
-  hash_for_each_possible(semd_h, sem, s_link, *key){
-    if (sem->s_key == key)
-      return sem;
-  }
-    return NULL;
-}

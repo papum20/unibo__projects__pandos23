@@ -40,13 +40,11 @@ HELPER FUNCTIONS FOR pcb
 	state.lo		= 0;
 
 
-/*	helper function for allcPcb,
-	initiates Pcb's values to default.
+
+/* __initPcb, but doesn't init p_list
 */
-HIDDEN inline void __initPcb(pcb_t *p)
+HIDDEN inline void __initPcb_no_plist(pcb_t *p)
 {
-    //process queue
-    INIT_LIST_HEAD(&p->p_list);
     //process tree fields
     p->p_parent	= NULL;
     INIT_LIST_HEAD(&p->p_child);
@@ -59,6 +57,17 @@ HIDDEN inline void __initPcb(pcb_t *p)
     //Namespace list
     for(nsd_t **p_nsd = p->namespaces + NS_TYPE_MAX - 1; p_nsd >= p->namespaces; p_nsd--)
 		*p_nsd = NULL;
+}
+
+/*	helper function for allcPcb,
+	initiates Pcb's values to default.
+*/
+HIDDEN inline void __initPcb(pcb_t *p)
+{
+    //process queue
+    INIT_LIST_HEAD(&p->p_list);
+    //other fields
+    __initPcb_no_plist(p);
 }
 
 

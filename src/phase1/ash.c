@@ -11,6 +11,10 @@ static DECLARE_HASHTABLE(semd_h, HASH_TABLE_SIZE);
 
 
 
+//useful function that iterates through a hashtable and returns
+//the semaphore associated with the hash of the key
+//if not present, it returns a pointer pointing to NULL
+
 static inline semd_t* hash_semaphore(int* key){
   semd_t *sem;
 
@@ -81,11 +85,13 @@ pcb_t* headBlocked(int *semAdd){
   if (sem == NULL)
     return NULL;
   else{
+		return list_first_entry_or_null(&sem->s_procq, pcb_t, p_list);
+		/*
 	if (list_empty(&sem->s_procq) == true)
 		return NULL;
 	else
 		return list_first_entry(&sem->s_procq, pcb_t, p_list);
-		//return list_first_entry(&sem->s_procq, semd_t, p_list);
+		//return list_first_entry(&sem->s_procq, semd_t, p_list);*/
   }
     
 }

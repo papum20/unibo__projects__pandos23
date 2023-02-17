@@ -6,19 +6,25 @@
 
 
  
-static struct list_head pcbFree_h;
 /* list of free or unused PCBs */
+static struct list_head pcbFree_h;
 
 
 
+/*	allocates MAXPROC pcb's declaring a static array
+	pcbFree_table[].	
+	Then adds these pcb's to the pcbFree_h list.
+*/
 void initPcbs()
 {
 	static pcb_t pcbFree_table[MAXPROC];
 
 	INIT_LIST_HEAD(&pcbFree_h);
 	pcb_t *p_pcb;
-	//reverse for to only evaluate the plus once
-	for(p_pcb = pcbFree_table + MAXPROC - 1; p_pcb >= pcbFree_table; p_pcb--) //create a list of free or unused PCBs with number of elements MAXPROC
+	/*	reverse for used to only evaluate the sum (pcbFree_table + MAXPROC - 1) once;
+		consequently, it adds on head, which corresponds to adding in tail in order.
+	*/
+	for(p_pcb = pcbFree_table + MAXPROC - 1; p_pcb >= pcbFree_table; p_pcb--)
 		list_add(&p_pcb->p_list, &pcbFree_h); 
 }
 
@@ -37,7 +43,8 @@ pcb_t *allocPcb()
 		return NULL;
 
 	pcb_t *p = __removeProcQ(&pcbFree_h);
-	__initPcb(p);
+	//__removeProcQ already initializes p_list
+	__initPcb_no_plist(p);
 	return p;
 }
 
@@ -63,6 +70,7 @@ void insertProcQ(struct list_head *head, pcb_t *p){ //inserimento in coda
 pcb_t *headProcQ(struct list_head *head){
 	if(emptyProcQ(head))
 		return NULL;
+
 	return container_of(head->next, struct pcb_t, p_list); 
 }
 
@@ -70,15 +78,17 @@ pcb_t *headProcQ(struct list_head *head){
 pcb_t *removeProcQ(struct list_head* head){ //rimozione in testa
 	if(emptyProcQ(head))
 		return NULL;
+
 	return __removeProcQ(head);
 }
 
 
 pcb_t *outProcQ(struct list_head *head, pcb_t *p){
 	struct list_head *pos;
-	//scorre la lista che ha come sentinella head fino a trovare il processo p e lo rimuove dalla lista
+	//scorre la lista che ha come sentinella head fino a trovare il processo p e lo rimuove dalla lista.
+	//è necessario scorrere la lista di head per sapere se p è in essa
 	list_for_each(pos, head){ 
-		if(pos==&p->p_list){
+		if(pos == &p->p_list){
 			list_del(&p->p_list);
 			return p;
 		}
@@ -110,8 +120,9 @@ pcb_t *removeChild(pcb_t *p){
 }
 
 pcb_t *outChild(pcb_t *p){
-	if(p->p_parent==NULL)  //p non ha padre
+	if(p->p_parent == NULL)  //p non ha padre
 		return NULL;
+
 	list_del(&p->p_sib);  
 	p->p_parent = NULL;
 	return p; 

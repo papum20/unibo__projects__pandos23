@@ -43,7 +43,7 @@ nsd_t *allocNamespace(int type){
 	if(list_empty(tmp_Free))
 		return NULL;
 
-	nsd_t *n=container_of(tmp_Free->next, nsd_t, n_link);
+	nsd_t *n = container_of(tmp_Free->next, nsd_t, n_link);
 	list_del(tmp_Free->next);
 	n->n_type=type;
 	return(n);
@@ -52,9 +52,9 @@ nsd_t *allocNamespace(int type){
 
 void freeNamespace(nsd_t *ns){
 
-	struct list_head *tmp_Free=type_nsFree(ns->n_type);
+	struct list_head *tmp_Free = type_nsFree(ns->n_type);
 
-	list_add(&ns->n_link, &tmp_Free);
+	list_add(&ns->n_link, tmp_Free);
 }
 
 

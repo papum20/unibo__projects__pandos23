@@ -34,44 +34,107 @@ STRUTTURA E CONVENZIONI GENERALI:
 		La fase 1 del progetto è stata suddivisa in tre moduli principali (pcb per i pcb, ash per i semafori,
 		ns per i namespace), più ulteriori file ausiliari.
 		I file sono divisi nel modo seguente:
-		
+
 		src/
-			file sorgente (.c), suddivisi nel modo seguente:
+			file sorgente (.c):
 			src/phase1/
 				per i file della fase 1;
 			src/tests/
 				per i test da eseguire su umps3.
 		include/
-			header (.h), suddivisi nel modo seguente:
+			header (.h):
 			include/*
-				gli header principali del progetto - uno per ogni modulo (pcb, ash, ns)
+				gli header principali del progetto - uno per ogni modulo (pcb, ash, ns), più const.h (con
+				costanti da noi definite);
+			include/phase*_files/
+				gli header forniti per il progetto, con, come unica	modifica, gli include con virgolette ""
+				invece di <>;
+			include/kernel/
+				ulteriori file riadattati da quelli del kernel (modificando gli include e prendendo solo
+				le parti utili e necessarie) - in particolare rwonce.h, necessario per utilizzare READ_ONCE
+				in list.h, e compiler.h, richiesto da rwonce.h;
+			include/helper/
+				funzioni e variabili ausiliari per i moduli da sviluppare, tenuti separati per differenziare
+				l'interfaccia pubblica dagli oggetti "privati", di implementazione;
+		documentation/
+			documentation/project/
+				documentazione dello sviluppo.
+		bin/
+			output prodotto.
+		obj/src/path-to-source-file
+			file oggetto di src/path-to-source-file.c .
+
+		nota: sono presenti alcuni file chiamati .placeholder per assicurarsi che rimangano le cartelle in cui si
+		trovano, anche se vuote.
+
+	CONVENZIONI:
+		static/hidden - public/private:
+			Per risolvere l'ambiguità della keyword static, utilizzata per rendere oggetti persistenti in memoria,
+			sia per creare il concetto di membro "privato" di un modulo, locale e accessibile solo a chi lo
+			dichiara, abbiamo definito il suo alias HIDDEN, utilizzato con il significato di privato.
+
+			Dunque, mentre le funzioni dell'interfaccia pubblica (negli header principali) sono dichiarate extern
+			(e definite nei sorgenti), quelle private, utili all'implementazione, collocate nei sorgenti e in
+			include/helper/ , sono HIDDEN; infine, le variabili che devono rimanere costanti per il tempo di vita
+			del sistema operativo, sono dichiarate static.
+
+			Per leggibilità, le funzioni HIDDEN iniziano con un doppio underscore (__).
+
+		fifo:
+			Tutte le liste vengono gestite in modo fifo, in particolare con inserimento in coda e rimozione in testa,
+			per garantire la "fifoness" dove necessaria e per coerenza in generale.
+
 
 
 COMPILAZIONE:
+	E' presente un Makefile, nella cartella di base, che compila tutti i sorgenti da implementare e il test p1test.c 
+	(con make) e rimuove gli output (con make clean).
+	Il tutto è da eseguire nella cartella di base del progetto.
+
+	make produce in obj/ i file oggetto, e in bin/ gli altri file di output per umps3 (in particolare kernel.core.umps3
+	e kernel.stab.umps per eseguire il codice su umps3).
+
+	I parametri di compilazione sono simili a quelli suggeriti dalla documentazione fornita per il progetto, ma si
+	compila con standard di c gnu99 (perché con -ansi non era definita, ad esempio, la keyword inline), e vengono incluse
+	tutte le cartelle degli header.
+	
 
 
+IMPLEMENTAZIONE:
+
+	strutture:
+		Le strutture necessarie per sostenere MAXPROC processi sono definite come suggerito nella documentazione fornita.
+
+		Ogni modulo ha delle strutture static, persistenti in memoria:
+		-	pcb:
+				pcbFree_h	:	lista dei pcb liberi/non usati;
+		-	ash:
+				semdFree_h	:	lista dei semd liberi/non usati;
+				semd_h		:	hash table dei semafori, di dimensione 2**log2(MAXPROC) arrotondato per eccesso, ovvero
+								la minima potenza di 2 sufficiente a contenere tutti i processi;
+		-	ns:
+				per ogni tipo type sono definiti:
+				type_nsFree	:	lista dei ns liberi;
+				type_nsList	:	lista dei ns utilizzati;
+				in particolare, per la prima fase sono definiti solo pid_nsFree, pid_nsList.
+
+		Inoltre, le strutture dei namespace, nelle funzioni, vengono gestite attraverso delle macro, che permettono di
+		accedere alla struttura del tipo giusto o ne ritornano un puntatore.
+
+	Init*():
+		Tutte le funzioni di inizializzazione dei moduli allocano lo spazio necessario per sostenere MAXPROC processi
+		dichiarando degli array static al loro interno: gli array non saranno poi più utilizzati, perché tutti i
+		puntatori ai loro elementi vengono inseriti e conservati nelle opportune liste.
+	
+	in generale:
+		Tutte le funzioni risultano abbastanza semplici, perché sfruttano i metodi di list.h e hashtable.h per gestire le
+		proprie strutture private e i campi degli struct.
+
+		Il modulo PCB, in particolare, ha solo a che fare con liste, che sia p_list o p_sib, la lista dei fratelli (o dei figli
+		dal punto di vista del padre p_parent).
+
+		ASH e NS hanno qualche riga in più perché lavorano con più strutture (la hashtable di ASH, le liste per ogni tipo di
+		namespace in NS) e devono settare più campi degli struct.
 
 
-PCB -	LISTE
-
-
-PCB	-	ALBERI
-
-
-ASH	(HASH TABLE DEI SEMAFORI)
-
-
-NS	(NAMESPACE)
-
-
-
-
-notes:
--	liste: aggiunta testa/coda
--	hidden/static
--	pcb_help
--	include structure
--	rwonce.h
--	makefile (in readme?)
--	implementazione namespace
-
+		

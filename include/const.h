@@ -3,8 +3,7 @@
 
 
 /*	alias of static, for disambiguating its use to declare
-	"private" functions, from its use as
-	persistent/global/local-to-translation-unit
+	"private" functions, from its use as constant.
 */
 #define HIDDEN static
 

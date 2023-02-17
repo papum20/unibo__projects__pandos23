@@ -11,7 +11,7 @@
 
 
 /**
- * Initialize the pcbFree list to contain MAXPROC elements.
+ * Initialize the pcbFree_h list to contain MAXPROC elements.
  * This function should be called once during data structure initialization.
 */
 extern void initPcbs();

@@ -1,4 +1,5 @@
-/* this header's functions count on the test to define them
+/*	Functions for debugging in umps3.
+	This header's functions count on the test to define them.
 */
 
 

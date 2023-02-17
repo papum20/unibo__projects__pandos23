@@ -28,7 +28,7 @@ void initNamespace(){
 
 
 nsd_t *getNamespace(pcb_t *p, int type){
-
+	
 	for(int i = 0; i < NS_TYPE_MAX; i++){
 		if(p->namespaces[i]->n_type==type) return p->namespaces[i];
 	}
@@ -54,35 +54,52 @@ void freeNamespace(nsd_t *ns){
 
 	struct list_head *tmp_Free=type_nsFree(ns->n_type);
 
-	list_add(&ns->n_link, &tmp_Free);
+	list_add(&ns->n_link, tmp_Free);
 }
 
 
-// questo addNamespace è completamente sbagliato, l'avevo fatto essendo convinto di alcune cose ma sicuramente non è corretto  
-int addNamespace(pcb_t *p, nsd_t *ns){
-	//verifico se a p è gia associato una namespace di tipo type, se non è così scorro l'array dei namespace associati a p e lo inserisco
+void addNamespace_h(pcb_t *p, nsd_t *ns){
 	int ok=0;
+
+	//verifico se a p è gia associato una namespace di tipo type, se non è così scorro l'array dei namespace associati a p 
+	//e lo inserisco
 	if(getNamespace(p, ns->n_type)==NULL){
-		for(int i = 0; i < NS_TYPE_MAX && ok; i++){
+		for(int i = 0; i < NS_TYPE_MAX && !ok; i++){
 			if(p->namespaces[i]==NULL){
 				p->namespaces[i]=ns;
 				ok=1;
 			}
 		}
 	}
-	else return(0);
-
-	//faccio la stessa cosa per ogni figlio di p, usando list_for_each_entry
-	pcb_t *pos;
-	list_for_each_entry(pos, &(p->p_child), p_child){
-		ok=0;
-		if(getNamespace(pos, ns->n_type)==NULL){
-			for(int i = 0; i < NS_TYPE_MAX && ok; i++){
-				if(pos->namespaces[i]==NULL){
-					pos->namespaces[i]=ns;
-					ok=1;
-				}
+	else{
+		for(int i = 0; i < NS_TYPE_MAX && !ok; i++){
+			if(p->namespaces[i]->n_type==ns->n_type){
+				freeNamespace(p->namespaces[i]);
+				p->namespaces[i]=ns;
+				ok=1;
 			}
+		}
+	}
+
+}
+
+
+int addNamespace(pcb_t *p, nsd_t *ns){
+
+	struct list_head *tmp_List=type_nsList(ns->n_type);
+	list_add(&ns->n_link, tmp_List);
+
+	pcb_t *px;
+	struct list_head *queue;
+	mkEmptyProcQ(queue);
+
+	if(p!=NULL) insertProcQ(queue, p);
+	while(emptyProcQ(queue)!=1){
+		px=removeProcQ(queue);
+		addNamespace_h(px ,ns);
+		pcb_t *pos;
+		list_for_each_entry(pos, &(px->p_child), p_child){
+			insertProcQ(queue, pos);
 		}
 	}
 }

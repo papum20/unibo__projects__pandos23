@@ -1,4 +1,5 @@
 #include "ns.h"
+#include "pcb_help.h"
 
 static struct list_head pid_nsFree_h;
 static struct list_head pid_nsList_h;
@@ -12,7 +13,7 @@ static struct list_head pid_nsList_h;
 
 
 
-void initNamespace(){
+void initNamespaces(){
 
 	static nsd_t pid_nsd[MAXPROC];
 
@@ -30,7 +31,7 @@ void initNamespace(){
 nsd_t *getNamespace(pcb_t *p, int type){
 	
 	for(int i = 0; i < NS_TYPE_MAX; i++){
-		if(p->namespaces[i]->n_type==type) return p->namespaces[i];
+		if(p->namespaces[i] != NULL && p->namespaces[i]->n_type==type) return p->namespaces[i];
 	}
 	return NULL;
 }
@@ -90,16 +91,18 @@ int addNamespace(pcb_t *p, nsd_t *ns){
 	list_add(&ns->n_link, tmp_List);
 
 	pcb_t *px;
-	struct list_head *queue;
-	mkEmptyProcQ(queue);
+	struct list_head queue;
+	mkEmptyProcQ(&queue);
 
-	if(p!=NULL) insertProcQ(queue, p);
-	while(emptyProcQ(queue)!=1){
-		px=removeProcQ(queue);
+	if(p!=NULL) insertProcQ(&queue, p);
+	while(emptyProcQ(&queue)!=1){
+		px=removeProcQ(&queue);
 		addNamespace_h(px ,ns);
 		pcb_t *pos;
-		list_for_each_entry(pos, &(px->p_child), p_child){
-			insertProcQ(queue, pos);
+		pcb_for_each_child(pos, px){
+			insertProcQ(&queue, pos);
 		}
 	}
+
+	return TRUE;
 }

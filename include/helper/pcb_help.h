@@ -74,7 +74,8 @@ HIDDEN inline void __initPcb(pcb_t *p)
 
 //// LISTS
 
-/* doesn't check if list is empty
+/**
+ * doesn't check if list is empty
 */
 HIDDEN inline pcb_t *__removeProcQ(struct list_head* head)
 {
@@ -85,6 +86,16 @@ HIDDEN inline pcb_t *__removeProcQ(struct list_head* head)
 
 
 //// TREES
+
+/**
+ * iterate over the children of pcb_t *parent.
+ * @pos:	the pcb_t * to use as a loop cursor.
+ * @parent:	the pcb_t *parent.
+ */
+#define pcb_for_each_child(pos, parent) \
+	list_for_each_entry(pos, &(parent->p_child), p_sib)
+
+
 
 
 

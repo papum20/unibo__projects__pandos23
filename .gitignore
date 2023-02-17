@@ -6,8 +6,17 @@
 bin/*
 !bin/.placeholder
 obj/*
-!obj/phase1/.placeholder
-!obj/phase2/.placeholder
+!obj/src/
+obj/src/*
+!obj/src/phase1/
+!obj/src/phase2/
+!obj/src/tests/
+obj/src/phase1/*
+obj/src/phase2/*
+obj/src/tests/*
+!obj/src/phase1/.placeholder
+!obj/src/phase2/.placeholder
+!obj/src/tests/.placeholder
 # umps config
 misc/umps-config/*
 !misc/umps-config/.placeholder

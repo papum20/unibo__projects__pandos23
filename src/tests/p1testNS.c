@@ -23,6 +23,7 @@
 #include <umps3/umps/libumps.h>
 #include "pcb.h"
 #include "ash.h"
+#include "ns.h"
 
 
 #define MAXPROC 20
@@ -293,42 +294,31 @@ int main(void) {
             adderrbuf("insertBlocked(3): unexpected TRUE   ");
     }
     if (removeBlocked(&sem[11]) != NULL)
-    	adderrbuf("removeBlocked: removed nonexistent blocked proc   ");
-	addokbuf("insertBlocked and removeBlocked ok   \n");
+        adderrbuf("removeBlocked: removed nonexistent blocked proc   ");
+    addokbuf("insertBlocked and removeBlocked ok   \n");
 
     if (headBlocked(&sem[11]) != NULL)
         adderrbuf("headBlocked: nonNULL for a nonexistent queue   ");
-	addokbuf("pippo1");
     if ((q = headBlocked(&sem[9])) == NULL)
         adderrbuf("headBlocked(1): NULL for an existent queue   ");
-	addokbuf("pippo2");
     if (q != procp[9])
         adderrbuf("headBlocked(1): wrong process returned   ");
-	addokbuf("pippo3");
     p = outBlocked(q);
-	addokbuf("pippo3.1");
     if (p != q)
         adderrbuf("outBlocked(1): couldn't remove from valid queue   ");
-	addokbuf("pippo4");
     q = headBlocked(&sem[9]);
     if (q == NULL)
         adderrbuf("headBlocked(2): NULL for an existent queue   ");
-	addokbuf("pippo5");
     if (q != procp[19])
         adderrbuf("headBlocked(2): wrong process returned   ");
-	addokbuf("pippo6");
     p = outBlocked(q);
-	addokbuf("pippo6.1");
     if (p != q)
         adderrbuf("outBlocked(2): couldn't remove from valid queue   ");
-	addokbuf("pippo7");
     p = outBlocked(q);
     if (p != NULL)
         adderrbuf("outBlocked: removed same process twice.");
-	addokbuf("pippo8");
     if (headBlocked(&sem[9]) != NULL)
         adderrbuf("out/headBlocked: unexpected nonempty queue   ");
-	addokbuf("pippo9");
 
     for (i = 0; i < MAXPROC; i++)
         freePcb(procp[i]);
@@ -336,6 +326,61 @@ int main(void) {
     addokbuf("headBlocked and outBlocked ok   \n");
     addokbuf("ASH module ok   \n");
 
-   
+    /* check Namespaces */
+    initNamespaces();
+    addokbuf("Initialized Namespaces\n");
+
+    /* check normal namespace (getNamespace) */
+    addokbuf("getNamespace test #1 started  \n");
+    for (i = 0; i < MAXPROC; i++) {
+        procp[i] = allocPcb();
+        if (getNamespace(procp[i], NS_PID) != NULL)
+            adderrbuf("getNamespace(1): unexpected Namespace   ");
+    }
+
+    addokbuf("getNamespace test #1 ok\n");
+    addokbuf("addNamespace test #1 started\n");
+    pid_ns = allocNamespace(NS_PID);
+    if (pid_ns == NULL)
+            adderrbuf("Unexpected null on allocNS");
+    if (addNamespace(procp[3], pid_ns) != TRUE)
+            adderrbuf("addNamespace: Unexpected FALSE");
+    if (getNamespace(procp[3], NS_PID) == getNamespace(procp[0], NS_PID))
+            adderrbuf("getNamespace: Unexpected root namespace for process 3");
+    if (getNamespace(procp[3], NS_PID) != pid_ns)
+            adderrbuf("getNamespace: Unexpected namespace for process 3");
+    addokbuf("addNamespace: test ok\n");
+
+    addokbuf("addNamespace(2): test started\n");
+    /* Change namespace with child */
+    insertChild(procp[1], procp[2]);
+    addNamespace(procp[1], pid_ns);
+
+    if (getNamespace(procp[2], NS_PID) == NULL)
+	    adderrbuf("Child namespace is the root one");
+    if (getNamespace(procp[2], NS_PID) != pid_ns)
+            adderrbuf("Child namespace is not the one of the parent!");
+    addokbuf("addNamespace(2): test ok\n");
+
+    pid_ns2 = allocNamespace(NS_PID);
+
+    addNamespace(procp[1], pid_ns2);
+
+    if (getNamespace(procp[0], NS_PID) != NULL)
+            adderrbuf("Root namespace changed!");
+    if (getNamespace(procp[1], NS_PID) != pid_ns2)
+            adderrbuf("Parent namespace did not changed!");
+    if (getNamespace(procp[2], NS_PID) != pid_ns2)
+            adderrbuf("Child namespace did not changed!");
+    if (getNamespace(procp[3], NS_PID) != pid_ns)
+            adderrbuf("Other process namespace changed!");
+
+	/* MY ADD */
+
+	freeNamespace(pid_ns);
+	freeNamespace(pid_ns2);
+
+    addokbuf("Namespace module ok\n");
+    addokbuf("So Long and Thanks for All the Fish\n");
     return 0;
 }

@@ -40,13 +40,11 @@ HELPER FUNCTIONS FOR pcb
 	state.lo		= 0;
 
 
-/*	helper function for allcPcb,
-	initiates Pcb's values to default.
+
+/* __initPcb, but doesn't init p_list
 */
-HIDDEN inline void __initPcb(pcb_t *p)
+HIDDEN inline void __initPcb_no_plist(pcb_t *p)
 {
-    //process queue
-    INIT_LIST_HEAD(&p->p_list);
     //process tree fields
     p->p_parent	= NULL;
     INIT_LIST_HEAD(&p->p_child);
@@ -61,11 +59,23 @@ HIDDEN inline void __initPcb(pcb_t *p)
 		*p_nsd = NULL;
 }
 
+/*	helper function for allcPcb,
+	initiates Pcb's values to default.
+*/
+HIDDEN inline void __initPcb(pcb_t *p)
+{
+    //process queue
+    INIT_LIST_HEAD(&p->p_list);
+    //other fields
+    __initPcb_no_plist(p);
+}
+
 
 
 //// LISTS
 
-/* doesn't check if list is empty
+/**
+ * doesn't check if list is empty
 */
 HIDDEN inline pcb_t *__removeProcQ(struct list_head* head)
 {
@@ -76,6 +86,16 @@ HIDDEN inline pcb_t *__removeProcQ(struct list_head* head)
 
 
 //// TREES
+
+/**
+ * iterate over the children of pcb_t *parent.
+ * @pos:	the pcb_t * to use as a loop cursor.
+ * @parent:	the pcb_t *parent.
+ */
+#define pcb_for_each_child(pos, parent) \
+	list_for_each_entry(pos, &(parent->p_child), p_sib)
+
+
 
 
 

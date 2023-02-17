@@ -96,7 +96,6 @@ pcb_t* headBlocked(int *semAdd){
 		return NULL;
 	else
 		return list_first_entry(&sem->s_procq, pcb_t, p_list);
-		//return list_first_entry(&sem->s_procq, semd_t, p_list);
   }
     
 }

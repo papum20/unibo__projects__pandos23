@@ -99,4 +99,4 @@ HIDDEN inline pcb_t *__removeProcQ(struct list_head* head)
 
 
 
-#endif
+#endif /* PCB_HELP_H */

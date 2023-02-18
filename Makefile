@@ -28,9 +28,10 @@ DEPS = $(IDIR)/*.h
 
 __OBJS1 = pcb ash ns
 _OBJS1 = $(patsubst %, $(SDIR)/$(SDIR1)/%, $(__OBJS1))
-__TEST = p1test1
-_TESTS = $(patsubst %, $(SDIR)/$(TDIR)/%, $(__TEST))
-OBJS = $(patsubst %, $(ODIR)/%.o, $(_OBJS1) $(_TESTS))
+__TESTS = p1test
+_TESTS = $(patsubst %, $(TDIR)/%, $(__TESTS))
+TESTS = $(patsubst %, $(ODIR)/%.o, $(_TESTS))
+OBJS = $(patsubst %, $(ODIR)/%.o, $(_OBJS1))
 
 
 
@@ -44,9 +45,9 @@ DEFS = $(DEPS) $(INCDIR)/libumps.h Makefile
 # 	-mno-gpopt -G 0 -fno-pic -mno-abicalls -o
 # this CFLAGS' options:
 # std=gnu99 supports: inline, typeof
- CFLAGS = -ffreestanding -std=gnu99 -Wall -c -mips1 -mabi=32 -mfp32 \
+CFLAGS = -ffreestanding -std=gnu99 -Wall -c -mips1 -mabi=32 -mfp32 \
  	-mno-gpopt -G 0 -fno-pic -mno-abicalls -o
-CFLAGSINC = $(patsubst %, -iquote%, $(IDIRS))
+CFLAGSINC = $(patsubst %, -iquote%, $(IDIRS)) -Iinclude/phase1_files/
 LDAOUTFLAGS = -G 0 -nostdlib -T $(SUPDIR)/umpsaout.ldscript
 LDCOREFLAGS = -G 0 -nostdlib -T $(SUPDIR)/umpscore.ldscript
 
@@ -57,13 +58,27 @@ EF = umps3-elf2umps
 UDEV = umps3-mkdev
 
 
+## COMMAND-LINE ARGUMENTS
+
+# DELTEST = Y if the default tests should not be compiled
+DELTEST = 
+
+
 # keep the .o
 .PRECIOUS: $(ODIR)/*
 
 
 ## MAKE
 
-#main target
+ifeq($(strip ), Y)
+	TESTS =
+endif
+
+
+
+# main target
+
+.PHONY: all
 all: $(BDIR)/kernel.core.umps $(BDIR)/disk0.umps
 
 # use umps3-mkdev to create the disk0 device
@@ -74,12 +89,21 @@ $(BDIR)/disk0.umps:
 $(BDIR)/kernel.core.umps: $(BDIR)/kernel
 	$(EF) -k $(BDIR)/kernel
 
-$(BDIR)/kernel: $(OBJS)
-	$(LD) $(LDCOREFLAGS) $(LIBDIR)/crtso.o $(OBJS) \
+$(BDIR)/kernel: $(OBJS) $(TESTS)
+	$(LD) $(LDCOREFLAGS) $(LIBDIR)/crtso.o $(OBJS) $(TESTS) \
 		$(LIBDIR)/libumps.o -o $(BDIR)/kernel
 
+#objects
 $(ODIR)/%.o: %.c $(DEFS)
 	$(CC) $(CFLAGS) $@ $< $(CFLAGSINC)
+
+
+# argument target: 
+
+# the idea is the argument is a test for umps,
+# so it compiles that and all the project files
+$(TDIR)/%: $(ODIR)/$(TDIR)/%.o all
+
 
 
 # CLEAN

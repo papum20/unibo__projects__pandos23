@@ -40,4 +40,4 @@ extern void freeNamespace(nsd_t *ns);
 
 
 
-#endif
+#endif /* NS_H */

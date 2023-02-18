@@ -39,8 +39,8 @@ STRUTTURA E CONVENZIONI GENERALI:
 			file sorgente (.c):
 			src/phase1/
 				per i file della fase 1;
-			src/tests/
-				per i test da eseguire su umps3.
+		tests/
+			per i test da eseguire su umps3.
 		include/
 			header (.h):
 			include/*

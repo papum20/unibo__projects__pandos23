@@ -2,7 +2,8 @@
 #include "debug.h"
 
 
-/* enough to contain MAXPROC entries */
+	/* enough to contain MAXPROC entries */
+	
 #define HASH_TABLE_SIZE (const_ilog2(MAXPROC) + 1)
 
 static struct list_head semdFree_h;
@@ -13,7 +14,7 @@ static DECLARE_HASHTABLE(semd_h, HASH_TABLE_SIZE);
 
 
 /*
-	useful function that iterates through a hashtable and returns
+	function that iterates through a hashtable and returns
 	the semaphore associated with the hash of the key
 	if not present, it returns a pointer pointing to NULL
 */
@@ -28,8 +29,39 @@ HIDDEN inline semd_t* __hash_semaphore(int* key){
     return NULL;
 }
 
+/*
+	function that removes a pcb from the process queue
+	of a semaphore and checks if it became empty.
+	If so, removes the semaphore from the ash
+*/
+
+HIDDEN inline void __remove_proc_update_ash(pcb_t* p, semd_t* sem){
+	list_del(&p->p_list);															
+	if (emptyProcQ(&sem->s_procq) == true){											//elimino e controllo se la coda dei proc è diventata vuota
+		list_add_tail(&sem->s_freelink, &semdFree_h);								//se è così, tolgo il semaforo dalla ash e lo inserisco
+		hash_del(&sem->s_link);														//nella lista dei vuoti
+	}
+	p->p_semAdd = NULL;
+}
+
+/*
+	function that initializes a semaphore
+	from the list of free ones: adds it to the ash, 
+	removes it from the free list and sets the key
+*/
+
+HIDDEN inline semd_t* __init_free_sem(int* semAdd){
+	semd_t* sem = list_first_entry(&semdFree_h, semd_t, s_freelink);
+	sem->s_key = semAdd;          										//inizializzo la chiave
+	mkEmptyProcQ(&sem->s_procq);     									//inizializzo la lista dei processi bloccati su quel semaforo
+	hash_add(semd_h, &sem->s_link, *sem->s_key);     					//metto il semaforo nella hashtable
+	list_del(&sem->s_freelink);      	 								//rimuovo il sem dalla lista di quelli liberi
+	return sem;
+}
+
 
 	/* ASH INITIALIZATION*/
+
 
 void initASH(){
 
@@ -46,7 +78,9 @@ void initASH(){
 
 }
 
+
 	/* ASH MANAGEMENT */
+
 
 int insertBlocked(int *semAdd, pcb_t *p){
 	semd_t *sem = __hash_semaphore(semAdd);
@@ -54,12 +88,7 @@ int insertBlocked(int *semAdd, pcb_t *p){
 	if(sem == NULL) {
 		if(list_empty(&semdFree_h))
 			return true;
-
-		sem = list_first_entry(&semdFree_h, semd_t, s_freelink);
-		sem->s_key = semAdd;          								//inizializzo la chiave
-		mkEmptyProcQ(&sem->s_procq);     							//inizializzo la lista dei processi bloccati su quel semaforo
-		hash_add(semd_h, &sem->s_link, *sem->s_key);     			//metto il semaforo nella hashtable
-		list_del(&sem->s_freelink);      	 						//rimuovo il sem dalla lista di quelli liberi               
+		sem = __init_free_sem(semAdd);             
 	}
 
 	p->p_semAdd = semAdd;
@@ -69,52 +98,32 @@ int insertBlocked(int *semAdd, pcb_t *p){
 
 
 pcb_t* removeBlocked(int *semAdd){
-  semd_t *sem = __hash_semaphore(semAdd);
+	semd_t *sem = __hash_semaphore(semAdd);
 
-  if (sem == NULL){													//se non trovo il semaforo ritorno NULL
-    return NULL;
-  }
-  else{
-    pcb_t *pcb = list_first_entry(&sem->s_procq, pcb_t, p_list);	//altrimenti prendo il primo pcb dalla lista dei processi del sem
-	pcb->p_semAdd = NULL;											//tolgo il puntatore al semaforo
-    list_del(&pcb->p_list);											//elimino il pcb dalla lista
-    if (list_empty(&sem->s_procq) == true){							//se diventa vuota, tolgo il semaforo dalla ash e lo metto nella lista dei free
-   		list_add_tail(&sem->s_freelink, &semdFree_h);
-   		hash_del(&sem->s_link);
-    }
-    return pcb;
-  }
+	if (sem != NULL){													//se non trovo il semaforo ritorno NULL
+    	pcb_t *p = list_first_entry(&sem->s_procq, pcb_t, p_list);	//altrimenti prendo il primo pcb dalla lista dei processi del sem
+		__remove_proc_update_ash(p, sem);
+    	return p;
+  	}
+
+	return NULL;
 }
 
 
 pcb_t* headBlocked(int *semAdd){															
-  semd_t *sem = __hash_semaphore(semAdd);
+	semd_t *sem = __hash_semaphore(semAdd);
 
-  return sem == NULL ? NULL : list_first_entry(&sem->s_procq, pcb_t, p_list);	//se trovo un semaforo, ritorno il primo elemento della lista dei proc
-  /*
-  if (sem == NULL)
-    return NULL;
-  else{
-		return list_first_entry_or_null(&sem->s_procq, pcb_t, p_list);
-  }
-  */  
+	return sem == NULL ? NULL : list_first_entry(&sem->s_procq, pcb_t, p_list);	//se trovo un semaforo, ritorno il primo elemento della lista dei proc
 }
 
 
 pcb_t* outBlocked(pcb_t *p){
 	semd_t *sem = __hash_semaphore((p->p_semAdd));										
 
-	if(sem == NULL){
-		return NULL;
-	}
-	else {																				//se il semAdd del pcb era quello di un sem, allora quel pcb
-		list_del(&p->p_list);															//compare nella coda dei processi di quel semaforo,
-		if (list_empty(&sem->s_procq) == true){											//quindi lo elimino e controllo se la coda dei proc è diventata vuota
-			list_add_tail(&sem->s_freelink, &semdFree_h);								//se è così, tolgo il semaforo dalla ash e lo inserisco
-			hash_del(&sem->s_link);														//nella lista dei vuoti
-		}
-		p->p_semAdd = NULL;
+	if(sem != NULL){
+		__remove_proc_update_ash(p, sem);
 		return p;
 	}
-}
 
+	return NULL;
+}

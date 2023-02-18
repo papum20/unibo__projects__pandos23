@@ -6,7 +6,7 @@ PandOS 2022/2023	-	Università di Bologna
 PARTECIPANTI/AUTORI:
 
 	Daniele		D'Ugo		0001027741
-	Osama		Elatfi		000
+	Osama		Elatfi		0001042877
 	Tommaso		Michetti 	000
 	Giuseppe	Spathis		000	
 
@@ -109,7 +109,7 @@ IMPLEMENTAZIONE:
 		-	pcb:
 				pcbFree_h	:	lista dei pcb liberi/non usati;
 		-	ash:
-				semdFree_h	:	lista dei semd liberi/non usati;
+				semdFree_h	:	lista dei semd liberi;
 				semd_h		:	hash table dei semafori, di dimensione 2**log2(MAXPROC) arrotondato per eccesso, ovvero
 								la minima potenza di 2 sufficiente a contenere tutti i processi;
 		-	ns:
@@ -135,6 +135,15 @@ IMPLEMENTAZIONE:
 
 		ASH e NS hanno qualche riga in più perché lavorano con più strutture (la hashtable di ASH, le liste per ogni tipo di
 		namespace in NS) e devono settare più campi degli struct.
+
+		Scelte implementative modulo ASH:
+			- Anche se non specificato nelle descrizioni dei metodi da implementare, quando inseriamo/rimuoviamo un pcb 
+			  dalla coda dei processi di un semaforo, aggiorniamo anche il campo p_semAdd.
+			- Nel metodo headBlocked, non controlliamo esplicitamente se la coda del semaforo è vuota (e non lo eliminiamo)
+			  in quanto lo svolgiamo nei metodi di rimozione, e se la coda dei processi diventa vuota, provvediamo a 
+			  eliminarlo dalla ASH. 
+			- Nell'implementazione del metodo outBlocked, se troviamo un semaforo grazie alla chiave del pcb passato assumiamo 
+			  che compaia nella sua coda dei processi (guardare primo punto), per questo provvediamo direttamente ad eliminarlo.
 
 
 		

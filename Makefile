@@ -1,3 +1,12 @@
+
+## COMMAND-LINE ARGUMENTS
+
+# DELTEST = T if the default tests should not be compiled
+DELTEST = 
+# T = tests to compile, in tests/
+T = 
+
+
 ## UMPS LIBRARIES AND REQUIREMENTS
 
 # This makefile creates a kernel file from three source files:
@@ -30,7 +39,12 @@ __OBJS1 = pcb ash ns
 _OBJS1 = $(patsubst %, $(SDIR)/$(SDIR1)/%, $(__OBJS1))
 __TESTS = p1test
 _TESTS = $(patsubst %, $(TDIR)/%, $(__TESTS))
-TESTS = $(patsubst %, $(ODIR)/%.o, $(_TESTS))
+ifneq ($(strip $(DELTEST)), $(strip T))
+	TESTS = $(patsubst %, $(ODIR)/%.o, $(_TESTS))
+endif
+ifneq ($(strip $(T)),)
+	TESTS += $(patsubst %, $(ODIR)/%.o, $(T))
+endif
 OBJS = $(patsubst %, $(ODIR)/%.o, $(_OBJS1))
 
 
@@ -58,22 +72,11 @@ EF = umps3-elf2umps
 UDEV = umps3-mkdev
 
 
-## COMMAND-LINE ARGUMENTS
-
-# DELTEST = Y if the default tests should not be compiled
-DELTEST = 
-
-
 # keep the .o
 .PRECIOUS: $(ODIR)/*
 
 
 ## MAKE
-
-ifeq($(strip ), Y)
-	TESTS =
-endif
-
 
 
 # main target
@@ -94,16 +97,27 @@ $(BDIR)/kernel: $(OBJS) $(TESTS)
 		$(LIBDIR)/libumps.o -o $(BDIR)/kernel
 
 #objects
-$(ODIR)/%.o: %.c $(DEFS)
+$(ODIR)/%.o: %.c $(DEFS) 
 	$(CC) $(CFLAGS) $@ $< $(CFLAGSINC)
 
 
-# argument target: 
+# show help screen
 
-# the idea is the argument is a test for umps,
-# so it compiles that and all the project files
-$(TDIR)/%: $(ODIR)/$(TDIR)/%.o all
+.PHONY: help
+help: 
+	@echo "make [DELTEST={T}] [T=paths]"
+	@echo "make			: compile default tests"
+	@echo "DELTEST=T		: don't compile default tests"
+	@echo "DELTEST={anythig else}	: doesn't do anything"
+	@echo "T=paths-to-tests	: also compiles specified tests,"
+	@echo "			  to write with path, without extension"
+	@echo "make help		: show this help message"
+	@echo "make clean		: clean"
 
+
+# sets the tests to compile, if specified as make command-line arguments
+
+	
 
 
 # CLEAN

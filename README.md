@@ -3,20 +3,28 @@ PandOS+ project for operating systems course at University of Bologna, for the y
 
 ## bin
 compiled files/executables
-## documentation
+## documentation/project
+our documentation.
+## documentation/tasks
 project specifications.
 ## include
 headers (.h).
+### include/helper
+helper headers, intended to be "private", used in implementation.
+### include/kernel
+headers readapted from kernel.
 ### include/phase*_files
 headers, given for the project.
 ## misc
 misc files for support while developing.
-### misc/vscode
-suggested vscode settings (for linux/debian-like).
 ### misc/ex
 examples, exercises, stuff to make practice while developing.
-## obj
-object files (.o)
+### misc/umps-config
+config files for umps3
+### misc/vscode
+suggested vscode settings (for linux/debian-like).
+## obj/path-to-c
+object file (.o) of path-to-c
 ## src
 source files (.c).
 ### src/phase*
@@ -27,12 +35,13 @@ testers for umps3.
 .o files go in obj/  
 executables go in bin/
 ### make
-only compiles all .c files
-### make TARGET [O="DEPENDENCIES"]
-with TARGET written as full path from this folder, without extension, compiles it (and creates executable).  
-if specified, DEPENDENCIES are needed source files (you write like O="DEP1 DEP2 ...")
-### make TARGET.o
-with TARGET.o written as full path from this folder to source file, but with .o extension instead of .c, compiles it.
+compile all .c files and default tests.
+### make help
+show help screen.
+### make DELTEST=T
+don't compile default tests
+### make T=paths-to-tests
+also compile specified tests, written with path and without extension
 ### make clean
 clean.
 ## README

@@ -74,5 +74,6 @@ int addNamespace(pcb_t *p, nsd_t *ns){
 		}
 	}
 
-	return TRUE;
+	// ritorna sempre true, non essendo definiti casi di errore al momento
+	return true;
 }

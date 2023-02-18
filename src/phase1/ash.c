@@ -79,8 +79,8 @@ pcb_t* removeBlocked(int *semAdd){
 	pcb->p_semAdd = NULL;											//tolgo il puntatore al semaforo
     list_del(&pcb->p_list);											//elimino il pcb dalla lista
     if (list_empty(&sem->s_procq) == true){							//se diventa vuota, tolgo il semaforo dalla ash e lo metto nella lista dei free
-      list_add_tail(&sem->s_freelink, &semdFree_h);
-      hash_del(&sem->s_link);
+   		list_add_tail(&sem->s_freelink, &semdFree_h);
+   		hash_del(&sem->s_link);
     }
     return pcb;
   }

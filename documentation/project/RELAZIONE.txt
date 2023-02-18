@@ -14,6 +14,8 @@ PARTECIPANTI/AUTORI:
 
 DIVISIONE DEL LAVORO:
 
+	Daniele:
+		compilazione/makefile
 	Giuseppe, Daniele:
 		PCB
 	Osama:
@@ -84,10 +86,22 @@ STRUTTURA E CONVENZIONI GENERALI:
 			Tutte le liste vengono gestite in modo fifo, in particolare con inserimento in coda e rimozione in testa,
 			per garantire la "fifoness" dove necessaria e per coerenza in generale.
 
+		valori booleani:
+			Per coerenza, utilizziamo sempre le costanti true/false definite in phase1_files/types.h.
+
 
 
 COMPILAZIONE:
-	E' presente un Makefile, nella cartella di base, che compila tutti i sorgenti da implementare e il test p1test.c 
+	E' presente un Makefile, nella cartella di base, pensato per essere eseguito da li. 
+	Comandi:
+		make [DELTEST={T}] [T=paths]	: compila tutti i sorgenti da implementare ed eventuali test
+		make							: compila il test di default (tests/p1test.c)
+		DELTEST=T						: non compila i test di default
+		DELTEST={anythig else}			: (non cambia niente)
+		T=paths-to-tests				: compila anche i test specificati, scritti con il percorso e senza estensione
+		make help						: messaggio di help
+		make clean						: clean
+	che compila tutti i sorgenti da implementare e il test p1test.c 
 	(con make) e rimuove gli output (con make clean).
 	Il tutto è da eseguire nella cartella di base del progetto.
 
@@ -136,14 +150,14 @@ IMPLEMENTAZIONE:
 		ASH e NS hanno qualche riga in più perché lavorano con più strutture (la hashtable di ASH, le liste per ogni tipo di
 		namespace in NS) e devono settare più campi degli struct.
 
-		Scelte implementative modulo ASH:
-			- Anche se non specificato nelle descrizioni dei metodi da implementare, quando inseriamo/rimuoviamo un pcb 
-			  dalla coda dei processi di un semaforo, aggiorniamo anche il campo p_semAdd.
-			- Nel metodo headBlocked, non controlliamo esplicitamente se la coda del semaforo è vuota (e non lo eliminiamo)
-			  in quanto lo svolgiamo nei metodi di rimozione, e se la coda dei processi diventa vuota, provvediamo a 
-			  eliminarlo dalla ASH. 
-			- Nell'implementazione del metodo outBlocked, se troviamo un semaforo grazie alla chiave del pcb passato assumiamo 
-			  che compaia nella sua coda dei processi (guardare primo punto), per questo provvediamo direttamente ad eliminarlo.
+	modulo ASH:
+		-	Anche se non specificato nelle descrizioni dei metodi da implementare, quando inseriamo/rimuoviamo un pcb 
+			dalla coda dei processi di un semaforo, aggiorniamo anche il campo p_semAdd.
+		-	Nel metodo headBlocked(), non controlliamo esplicitamente se la coda del semaforo è vuota (e non lo eliminiamo)
+			in quanto lo svolgiamo nei metodi di rimozione, e se la coda dei processi diventa vuota, provvediamo a 
+			eliminarlo dalla ASH. 
+		-	Nell'implementazione del metodo outBlocked(), se troviamo un semaforo grazie alla chiave del pcb passato assumiamo 
+			che compaia nella sua coda dei processi (guardare primo punto), per questo provvediamo direttamente ad eliminarlo.
 
-
-		
+	modulo NS:
+		-	In addNamespace(), al momento non sono definiti casi di errore, quindi ritorna TRUE in ogni caso.

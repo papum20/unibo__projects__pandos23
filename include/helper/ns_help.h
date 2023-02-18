@@ -1,4 +1,4 @@
-#ifdef NS_HELP_H
+#ifndef NS_HELP_H
 #define NS_HELP_H
 
 #include "ns.h"
@@ -41,4 +41,4 @@ HIDDEN inline void __addNamespace(pcb_t *p, nsd_t *ns){
 }
 
 
-#endif
+#endif /* NS_HELP_H */

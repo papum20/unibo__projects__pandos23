@@ -7,7 +7,7 @@ PARTECIPANTI/AUTORI:
 
 	Daniele		D'Ugo		0001027741
 	Osama		Elatfi		0001042877
-	Tommaso		Michetti 	000
+	Tommaso		Michetti 	0000881326
 	Giuseppe	Spathis		0001043077
 
 
@@ -128,8 +128,8 @@ IMPLEMENTAZIONE:
 								la minima potenza di 2 sufficiente a contenere tutti i processi;
 		-	ns:
 				per ogni tipo type sono definiti:
-				type_nsFree	:	lista dei ns liberi;
-				type_nsList	:	lista dei ns utilizzati;
+				type_nsFree_h	:	lista dei ns liberi;
+				type_nsList_h	:	lista dei ns utilizzati;
 				in particolare, per la prima fase sono definiti solo pid_nsFree, pid_nsList.
 
 		Inoltre, le strutture dei namespace, nelle funzioni, vengono gestite attraverso delle macro, che permettono di
@@ -144,7 +144,7 @@ IMPLEMENTAZIONE:
 	-	Tutte le funzioni risultano abbastanza semplici, perché sfruttano i metodi di list.h e hashtable.h per gestire le
 		proprie strutture private e i campi degli struct.
 
-		Il modulo PCB, in particolare, ha solo a che fare con liste, che sia p_list o p_sib, la lista dei fratelli (o dei figli
+		Il modulo PCB, in particolare, ha solo a che fare con liste, che sia p_list o p_sib, dei fratelli (o dei figli
 		dal punto di vista del padre p_parent).
 
 		ASH e NS hanno qualche riga in più perché lavorano con più strutture (la hashtable di ASH, le liste per ogni tipo di
@@ -172,9 +172,9 @@ IMPLEMENTAZIONE:
 				state = {0,0,...0}
 			il compilatore cercava di ottimizzarlo usando memset(), il che dava errore non essendo definita; si è dunque optato
 			per assegnare singolarmente i campi.
-		2-	insertProcQ() assume che p non sia già in una lista (in tal caso non si rimuoverebbe dalla lista precedente e si
+		2-	insertProcQ() assume che p non sia già in una lista (in tal caso non si rimuoverebbe dalprecedente e si
 			aggiungerebbe lo stesso alla nuova lista head).
-		3-	Per gli alberi, il campo p_child del padre rappesenta la testa della lista dei suoi figli, mentre i loro p_sib sono
+		3-	Per gli alberi, il campo p_child del padre rappesenta la testa deldei suoi figli, mentre i loro p_sib sono
 			gli elementi centrali di tale lista.
 		4-	insertChild() assume, con insertProcQ(), che p non abbia già un padre (e quindi eventuali fratelli).
 
@@ -189,3 +189,10 @@ IMPLEMENTAZIONE:
 
 	modulo NS:
 		-	In addNamespace(), al momento non sono definiti casi di errore, quindi ritorna TRUE in ogni caso.
+		-	Sempre in addNamespace per riuscire ad associare il namespace a tutti i figli del pcb in input, abbiamo preferito 
+			usare una visita in ampiezza perchè più efficiente rispetto ad una ricorsione.
+		-	Abbiamo deciso di usare delle macro per rendere il codice più generale possibile in modo tale da riuscire in futuro 
+			ad aggiungere in modo più agevole nuovi tipi di namespace. Specificamente queste macro ci permettono di accedere
+			facilmente, in base al tipo type, alla lisa di namespace giusta. In particolare le macro sono due: 
+			type_nsFree(type) che ci indirizza verso dei namespace liberi di tipo type, mentre type_nsList(type) verso 
+			la lista corretta di namespace attivi.

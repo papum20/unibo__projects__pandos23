@@ -8,7 +8,7 @@ PARTECIPANTI/AUTORI:
 	Daniele		D'Ugo		0001027741
 	Osama		Elatfi		0001042877
 	Tommaso		Michetti 	000
-	Giuseppe	Spathis		000	
+	Giuseppe	Spathis		0001043077
 
 
 

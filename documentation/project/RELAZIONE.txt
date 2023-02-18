@@ -141,7 +141,7 @@ IMPLEMENTAZIONE:
 		puntatori ai loro elementi vengono inseriti e conservati nelle opportune liste.
 	
 	in generale:
-		Tutte le funzioni risultano abbastanza semplici, perché sfruttano i metodi di list.h e hashtable.h per gestire le
+	-	Tutte le funzioni risultano abbastanza semplici, perché sfruttano i metodi di list.h e hashtable.h per gestire le
 		proprie strutture private e i campi degli struct.
 
 		Il modulo PCB, in particolare, ha solo a che fare con liste, che sia p_list o p_sib, la lista dei fratelli (o dei figli
@@ -149,6 +149,34 @@ IMPLEMENTAZIONE:
 
 		ASH e NS hanno qualche riga in più perché lavorano con più strutture (la hashtable di ASH, le liste per ogni tipo di
 		namespace in NS) e devono settare più campi degli struct.
+
+
+	-	Quando possibile, abbiamo cercato di usare le nostre stesse funzioni, piuttosto che agire direttamente sui campi delle
+		struct di un altro modulo: per esempio, si preferisce chiamare emptyProcQ() su semd_t->s_procq, essendo una lista di
+		pcb, invece di usare list_empty() - in tal modo si mantiene lo stesso tipo di implementazione delle liste di pcb.
+
+	-	list_del():
+		Per evitare problemi, abbiamo deciso di gestire tutte le rimozioni dalle liste con list_del_init() invece di
+		list_del(), inizializzando quindi, per un generico head, head->next = head->prev = head, invece che a NULL.
+
+	modulo PCB:
+		1-	In initPcbs(), nell'iterazione sull'array, nel for, sono state fatte due scelte con l'idea che fossero (forse di 
+			pochissimo) più efficienti, implicando meno calcoli: iterare sui puntatori invece che indicizzare l'array con un
+			intero, e iterare a ritroso.
+		2-	emptyProcQ() richiama la funzione inline __emptyProcQ(): questo per migliorare l'efficienza nel suo utilizzo in
+			implementazione.
+
+		-	Tali scelte potrebbero esserere riutilizzate in altre parti del codice.
+
+		1-	In __DFLT_STATE_T(), in pcb_help.h, facendo un assegnamento diretto del tipo
+				state = {0,0,...0}
+			il compilatore cercava di ottimizzarlo usando memset(), il che dava errore non essendo definita; si è dunque optato
+			per assegnare singolarmente i campi.
+		2-	insertProcQ() assume che p non sia già in una lista (in tal caso non si rimuoverebbe dalla lista precedente e si
+			aggiungerebbe lo stesso alla nuova lista head).
+		3-	Per gli alberi, il campo p_child del padre rappesenta la testa della lista dei suoi figli, mentre i loro p_sib sono
+			gli elementi centrali di tale lista.
+		4-	insertChild() assume, con insertProcQ(), che p non abbia già un padre (e quindi eventuali fratelli).
 
 	modulo ASH:
 		-	Anche se non specificato nelle descrizioni dei metodi da implementare, quando inseriamo/rimuoviamo un pcb 

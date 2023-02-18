@@ -244,6 +244,13 @@ int main(void) {
         if ((q = removeChild(procp[0])) == NULL)
             adderrbuf("removeChild: unexpected NULL   ");
     }
+	/* mine */
+	insertChild(procp[0], q);
+	addokbuf("insertChild: ok   \n");
+	q = removeChild(procp[0]);
+	addokbuf("removeChild: again ok   \n");
+	/* */
+
     if (removeChild(procp[0]) != NULL)
         adderrbuf("removeChild: removes too many children   ");
 

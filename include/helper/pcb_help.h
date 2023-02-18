@@ -10,11 +10,10 @@ HELPER FUNCTIONS FOR pcb
 #include "const.h"
 #include "pandos_const.h"
 #include "pandos_types.h"
-#include "types.h"
-/*	pandos_const.h is included before list.h,
-	as the former defines NULL while the latter requires it
-	(this is just for the editor, as in execution it doesn't matter) */
+
 #include "linux_list.h"
+#include "types.h"
+
 /* include for debug */
 #include "debug.h"
 
@@ -80,12 +79,24 @@ HIDDEN inline void __initPcb(pcb_t *p)
 HIDDEN inline pcb_t *__removeProcQ(struct list_head* head)
 {
 	pcb_t *p = container_of(head->next, pcb_t, p_list);
-	list_del(head->next);
+	list_del_init(head->next);
 	return p;
+}
+
+/**
+ * Same as emptyProcQ, but inline.
+*/
+HIDDEN inline int __emptyProcQ(struct list_head *head) {
+	return list_empty(head);
 }
 
 
 //// TREES
+
+HIDDEN inline int __emptyChild(pcb_t *p) {
+	return __emptyProcQ(&p->p_child);
+}
+
 
 /**
  * iterate over the children of pcb_t *parent.

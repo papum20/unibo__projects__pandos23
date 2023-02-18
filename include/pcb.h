@@ -48,7 +48,7 @@ extern int emptyProcQ(struct list_head *head);
 
 /**
  * Insert the element pointed to by p in the list pointed to by head.
- * p must not be in any list.
+ * Assumption: p must not be in any list.
 */
 extern void insertProcQ(struct list_head *head, pcb_t *p);
 
@@ -66,7 +66,7 @@ extern pcb_t *removeProcQ(struct list_head* head);
 	
 
 /**
- * Remove and return any element p in the list head.
+ * Remove and return an element p, in any position, from the list head.
  * Return NULL if p is not in head.
 */
 extern pcb_t *outProcQ(struct list_head *head, pcb_t *p);
@@ -83,6 +83,7 @@ extern int emptyChild(pcb_t *p);
 
 /**
  * Make the pcb pointed to by p a child of the pcb pointed to by prnt.
+ * Assumption: p has no parent.
 */
 extern void insertChild(pcb_t *prnt, pcb_t *p);
 
@@ -93,7 +94,8 @@ extern void insertChild(pcb_t *prnt, pcb_t *p);
 extern pcb_t *removeChild(pcb_t *p);
 
 /**
- * Remove and return any child p from its parent.
+ * Remove and return a child p, in any position, from its parent
+ * (i.e. p may not be the first child)
  * Return NULL if p has no parent.
 */
 extern pcb_t *outChild(pcb_t *p);

@@ -38,6 +38,7 @@ HIDDEN inline semd_t* __hash_semaphore(int* key){
 */
 
 HIDDEN inline void __remove_proc_update_ash(pcb_t* p, semd_t* sem){
+	//expands to list_del_init(&p->p_list)
 	__removeProcEntry_only(&p->p_list);															
 	if (emptyProcQ(&sem->s_procq) == true){											//elimino e controllo se la coda dei proc è diventata vuota
 		list_add_tail(&sem->s_freelink, &semdFree_h);								//se è così, tolgo il semaforo dalla ash e lo inserisco

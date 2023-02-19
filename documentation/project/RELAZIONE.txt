@@ -144,7 +144,7 @@ IMPLEMENTAZIONE:
 	-	Tutte le funzioni risultano abbastanza semplici, perché sfruttano i metodi di list.h e hashtable.h per gestire le
 		proprie strutture private e i campi degli struct.
 
-		Il modulo PCB, in particolare, ha solo a che fare con liste, che sia p_list o p_sib, dei fratelli (o dei figli
+		Il modulo PCB, in particolare, ha solo a che fare con liste, che sia p_list o p_sib, la lista dei fratelli (o dei figli
 		dal punto di vista del padre p_parent).
 
 		ASH e NS hanno qualche riga in più perché lavorano con più strutture (la hashtable di ASH, le liste per ogni tipo di
@@ -172,9 +172,9 @@ IMPLEMENTAZIONE:
 				state = {0,0,...0}
 			il compilatore cercava di ottimizzarlo usando memset(), il che dava errore non essendo definita; si è dunque optato
 			per assegnare singolarmente i campi.
-		2-	insertProcQ() assume che p non sia già in una lista (in tal caso non si rimuoverebbe dalprecedente e si
+		2-	insertProcQ() assume che p non sia già in una lista (in tal caso non si rimuoverebbe dalla lista precedente e si
 			aggiungerebbe lo stesso alla nuova lista head).
-		3-	Per gli alberi, il campo p_child del padre rappesenta la testa deldei suoi figli, mentre i loro p_sib sono
+		3-	Per gli alberi, il campo p_child del padre rappesenta la testa della lista dei suoi figli, mentre i loro p_sib sono
 			gli elementi centrali di tale lista.
 		4-	insertChild() assume, con insertProcQ(), che p non abbia già un padre (e quindi eventuali fratelli).
 

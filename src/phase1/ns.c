@@ -41,7 +41,7 @@ nsd_t *allocNamespace(int type){
 		return NULL;
 
 	nsd_t *n = container_of(tmp_Free->next, nsd_t, n_link);
-	list_del(tmp_Free->next);
+	list_del_init(tmp_Free->next);
 	n->n_type=type;
 	return(n);
 }

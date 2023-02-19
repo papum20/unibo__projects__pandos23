@@ -36,7 +36,7 @@ HIDDEN inline semd_t* __hash_semaphore(int* key){
 */
 
 HIDDEN inline void __remove_proc_update_ash(pcb_t* p, semd_t* sem){
-	list_del(&p->p_list);															
+	removeProcQ(&p->p_list);															
 	if (emptyProcQ(&sem->s_procq) == true){											//elimino e controllo se la coda dei proc è diventata vuota
 		list_add_tail(&sem->s_freelink, &semdFree_h);								//se è così, tolgo il semaforo dalla ash e lo inserisco
 		hash_del(&sem->s_link);														//nella lista dei vuoti
@@ -55,7 +55,7 @@ HIDDEN inline semd_t* __init_free_sem(int* semAdd){
 	sem->s_key = semAdd;          										//inizializzo la chiave
 	mkEmptyProcQ(&sem->s_procq);     									//inizializzo la lista dei processi bloccati su quel semaforo
 	hash_add(semd_h, &sem->s_link, *sem->s_key);     					//metto il semaforo nella hashtable
-	list_del(&sem->s_freelink);      	 								//rimuovo il sem dalla lista di quelli liberi
+	list_del_init(&sem->s_freelink);      	 								//rimuovo il sem dalla lista di quelli liberi
 	return sem;
 }
 

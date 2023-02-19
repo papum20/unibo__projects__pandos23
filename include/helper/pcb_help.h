@@ -11,6 +11,7 @@ HELPER FUNCTIONS FOR pcb
 #include "pandos_const.h"
 #include "pandos_types.h"
 
+#include "container_of.h"
 #include "linux_list.h"
 #include "types.h"
 
@@ -73,14 +74,32 @@ HIDDEN inline void __initPcb(pcb_t *p)
 
 //// LISTS
 
+
+/**
+ * remove without returning
+*/
+HIDDEN inline void __removeProcQ_only(struct list_head *head)
+{
+	list_del_init(head->next);
+}
+
 /**
  * doesn't check if list is empty
 */
-HIDDEN inline pcb_t *__removeProcQ(struct list_head* head)
+HIDDEN inline pcb_t *__removeProcQ(struct list_head *head)
 {
 	pcb_t *p = container_of(head->next, pcb_t, p_list);
-	list_del_init(head->next);
+	__removeProcQ_only(head);
 	return p;
+}
+
+/**
+ * removes entry without returning
+ * (i.e. doesn't remove ->next, but itself)
+*/
+HIDDEN inline void __removeProcEntry_only(struct list_head *head)
+{
+	list_del_init(head);
 }
 
 /**

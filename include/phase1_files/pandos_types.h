@@ -64,4 +64,4 @@ typedef struct semd_t {
     struct list_head s_freelink;
 } semd_t, *semd_PTR;
 
-#endif
+#endif /* PANDOS_TYPES_H_INCLUDED */

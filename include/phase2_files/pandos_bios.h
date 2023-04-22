@@ -9,7 +9,8 @@
  *
  ****************************************************************************/
 
-#include <umps3/umps/bios_defs.h>
+/* #include <umps3/umps/bios_defs.h>
+*/
 
 
 /* BIOS Data Page base address */

@@ -1,6 +1,6 @@
 /*
-HELPER FUNCTIONS FOR pcb
-*/
+ * HELPER FUNCTIONS FOR pcb
+ */
 
 
 #ifndef PCB_HELP_H
@@ -16,12 +16,14 @@ HELPER FUNCTIONS FOR pcb
 #include "types.h"
 
 /* include for debug */
-#include "debug.h"
+/* #include "debug.h"
+*/
 
 
 
-
-//// ALLOCATION
+/*
+ * ALLOCATION
+ */
 
 /** inits a state_t object to default values (0)
  *	@state: state_t object
@@ -45,16 +47,16 @@ HELPER FUNCTIONS FOR pcb
 */
 HIDDEN inline void __initPcb_no_plist(pcb_t *p)
 {
-    //process tree fields
+    /* process tree fields */
     p->p_parent	= NULL;
     INIT_LIST_HEAD(&p->p_child);
     INIT_LIST_HEAD(&p->p_sib);
-    //process status information
+    /* process status information */
     __DFLT_STATE_T(p->p_s);
 	p->p_time = 0;
-	//semaphore
+	/* semaphore */
     p->p_semAdd = NULL;
-    //Namespace list
+    /* Namespace list */
     for(nsd_t **p_nsd = p->namespaces + NS_TYPE_MAX - 1; p_nsd >= p->namespaces; p_nsd--)
 		*p_nsd = NULL;
 }
@@ -64,15 +66,17 @@ HIDDEN inline void __initPcb_no_plist(pcb_t *p)
 */
 HIDDEN inline void __initPcb(pcb_t *p)
 {
-    //process queue
+    /* process queue */
     INIT_LIST_HEAD(&p->p_list);
-    //other fields
+    /* other fields */
     __initPcb_no_plist(p);
 }
 
 
 
-//// LISTS
+/*
+ * LISTS
+ */
 
 
 /**
@@ -110,7 +114,9 @@ HIDDEN inline int __emptyProcQ(struct list_head *head) {
 }
 
 
-//// TREES
+/*
+ * TREES
+ */
 
 HIDDEN inline int __emptyChild(pcb_t *p) {
 	return __emptyProcQ(&p->p_child);

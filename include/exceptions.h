@@ -1,5 +1,10 @@
 
 
+extern void exceptionHandler();
+/*
+TEMPORARY NAME!!
+*/
+
 /*
 This module implements the TLB, Program Trap, and
 SYSCALL exception handlers. Furthermore, this module will contain

@@ -1,7 +1,7 @@
 #include "ash.h"
 #include "pcb_help.h"
 /* include for debug */
-#include "debug.h"
+// #include "debug.h"
 
 
 	/* enough to contain MAXPROC entries */

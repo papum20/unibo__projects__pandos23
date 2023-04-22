@@ -3,15 +3,21 @@
 
 
 
+#include "const.h"
+
+#include "pandos_arch.h"
 #include "pandos_bios.h"
 #include "pandos_types.h"
 #include "pandos_types2.h"
 #include "types.h"
 
+#include "pcb.h"
+#include "ash.h"
+#include "ns.h"
+
+#include "exceptions.h"
 
 
-
-extern void test();
 
 extern int main();
 
@@ -21,16 +27,7 @@ extern int main();
 
 
 
-	/*
 
-	- Inizializzare i moduli di fase 1: initPcbs(), 
-	initSemd() e initNS()
-	- Inizializzare le variabili elencate nella slide 
-	precedente
-	- Popolare il pass up vector con gestore e stack 
-	pointer per eccezioni e TLB-Refill
-
-	*/
 
 
 	/*
@@ -84,46 +81,14 @@ extern int main();
 	*/
 
 
+
+
 	/*
-	2. Populate the Processor 0 Pass Up Vector. The Pass Up Vector is part
-	of the BIOS Data Page, and for Processor 0, is located at 0x0FFF.F900.
-	[Section ??-pops]
-	The Pass Up Vector is where the BIOS finds the address of the Nucleus
-	functions to pass control to for both TLB-Refill events and all other
-	exceptions. Specifically,
-	• Set the Nucleus TLB-Refill event handler address to
-	xxx->tlb_refll_handler =
-	(memaddr) uTLB_RefillHandler;
-	where memaddr, in types.h, has been aliased to unsigned int.
-	Since address translation is not implemented until the Support
-	Level, uTLB_RefillHandler is a place holder function whose code
-	is provided. [Section 3.3] This code will then be replaced when
-	the Support Level is implemented.
-	• Set the Stack Pointer for the Nucleus TLB-Refill event handler to
-	the top of the Nucleus stack page: 0x2000.1000. Stacks in μMPS3
-	grow down.
-	• Set the Nucleus exception handler address to the address of your
-	Level 3 Nucleus function (e.g. foobar) that is to be the entry
-	point for exception (and interrupt) handling [Section 3.4]:
-	xxx->exception_handler = (memaddr) fooBar;
-	• Set the Stack pointer for the Nucleus exception handler to the top
-	of the Nucleus stack page: 0x2000.1000.
-
-
+	5. Load the system-wide Interval Timer with 100 milliseconds. [Section
+	3.6.3]
 	*/
 
 	/*
-
-	3. Initialize the Level 2 (phase 1 - see Chapter 2) data structures:
-	3.1. NUCLEUS INITIALIZATION 23
-	initPcbs()
-	initASH() initNamespaces()
-	4. Initialize all Nucleus maintained variables: Process Count (0), Soft-
-	block Count (0), Ready Queue (mkEmptyProcQ()), and Current Process
-	(NULL). Since the device semaphores will be used for synchronization,
-	as opposed to mutual exclusion, they should all be initialized to zero.
-	5. Load the system-wide Interval Timer with 100 milliseconds. [Section
-	3.6.3]
 	6. Instantiate a single process, place its pcb in the Ready Queue, and
 	increment Process Count. A process is instantiated by allocating a pcb
 	(i.e. allocPcb()), and initializing the processor state that is part of
@@ -147,9 +112,7 @@ extern int main();
 	yyy->p_s.s_pc = (memaddr) test;
 	24 CHAPTER 3. PHASE 2 - LEVEL 3: THE NUCLEUS
 
-	For rather technical reasons, whenever one assigns a value to the PC
-	one must also assign the same value to the general purpose register t9.
-	(a.k.a. reg_t9 as defined in types.h.) [Section ??-pops]
+
 	7. Call the Scheduler.
 	Once main() calls the Scheduler its task is complete since control should
 	never return to main(). At this point the only mechanism for re-entering
@@ -214,6 +177,43 @@ extern int main();
 	*/
 
 	/*
+	2. Populate the Processor 0 Pass Up Vector. The Pass Up Vector is part
+	of the BIOS Data Page, and for Processor 0, is located at 0x0FFF.F900.
+	[Section ??-pops]
+	The Pass Up Vector is where the BIOS finds the address of the Nucleus
+	functions to pass control to for both TLB-Refill events and all other
+	exceptions. Specifically,
+	• Set the Nucleus TLB-Refill event handler address to
+	xxx->tlb_refll_handler =
+	(memaddr) uTLB_RefillHandler;
+	where memaddr, in types.h, has been aliased to unsigned int.
+	Since address translation is not implemented until the Support
+	Level, uTLB_RefillHandler is a place holder function whose code
+	is provided. [Section 3.3] This code will then be replaced when
+	the Support Level is implemented.
+	• Set the Stack Pointer for the Nucleus TLB-Refill event handler to
+	the top of the Nucleus stack page: 0x2000.1000. Stacks in μMPS3
+	grow down.
+	• Set the Nucleus exception handler address to the address of your
+	Level 3 Nucleus function (e.g. foobar) that is to be the entry
+	point for exception (and interrupt) handling [Section 3.4]:
+	xxx->exception_handler = (memaddr) fooBar;
+	• Set the Stack pointer for the Nucleus exception handler to the top
+	of the Nucleus stack page: 0x2000.1000.
+	*/
+
+	/*
+	3. Initialize the Level 2 (phase 1 - see Chapter 2) data structures:
+	*/
+
+	/*
+	4. Initialize all Nucleus maintained variables: Process Count (0), Soft-
+	block Count (0), Ready Queue (mkEmptyProcQ()), and Current Process
+	(NULL). Since the device semaphores will be used for synchronization,
+	as opposed to mutual exclusion, they should all be initialized to zero.
+	*/
+
+	/*
 	
 	*/
 
@@ -231,6 +231,11 @@ extern int main();
 	usando la system call preposta.
 		L’esecuzione del test e’ corretta se questo arriva 
 	al termine senza andare in PANIC.
+	*/
+
+	/*
+	For rather technical reasons, whenever one assigns a value to the PC
+	one must also assign the same value to the general purpose register t9.
 	*/
 
 #pragma endregion DONE

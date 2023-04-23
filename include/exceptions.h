@@ -42,8 +42,8 @@ PROCESSO CORRENTE IN USER MODE O KERNEL MODE
 /*
 GESTIONE DELLE SYSTEM CALL
     una eccezione di tipo system call arriva quando SYSCALL istruzione assembly avviene
-    il processo che ha chiamato la system call subito prima di chiamarla mette dei valori appropriati nei registri a0 e a3
-    Il Kernel eseguirà quindi dei servizi in base al valore trovato in a0
+    bisogna vedere i valori presenti nei registri a0, a1, a2, a3, a0 contiene il numero della system call e gli altri registri sono i parametri della SYSCALL
+    il valore di ritorno della SYSCALL viene messo nel registro v0 
     In particolare se il processo era in Kernel Mode e in a0 c'è un valore fra 1 e 10 allora il Kernel deve fare uno di questi servizi:
         SYSCALL 1: Create_Process
         SYSCALL 2: Terminate_Process
@@ -69,7 +69,7 @@ GESTIONE DELLE SYSTEM CALL
         2)lo stato del processore salvato che si trova all'inizio del BIOS Data Page 0x0FFF.F000 deve essere copiato nel campo p_s del pcb corrente
         3)aggiorna il Accumulated CPU Time(sarebbe quanto il processo ha occupato il tempo della CPU) del processo corrente quindi aggiorna
           il campo p_time di pcb aggiungendo il tempo usato dalla CPU durante il time slice, per tenere traccia del tempo usiamo il TOD clock presente in µMPS3 
-        4)il processo viene bloccato in ASL(insertBlocked) facendo transitare il suo stato da running a blocked
+        4)il processo viene bloccato in ASL(insertBlocked)(si incrementa Soft-block Count e penso che poi il pcb debba essere tolto da qualche coda) facendo transitare il suo stato da running a blocked
         5)chiama lo scheduler
     
      Exceptions related constants   si trovano nella parte con le strutture dati context_t e support_t
@@ -149,3 +149,38 @@ PARTE DI DANIELE, inizializzazione di roba che serve a me
 CURIOSITA'
     LDST sarebbe il caricamento dello stato del processore
 */
+/*
+#define CREATEPROCESS 1
+#define TERMPROCESS   2
+#define PASSEREN      3
+#define VERHOGEN      4
+#define IOWAIT        5
+#define GETTIME       6
+#define CLOCKWAIT     7
+#define GETSUPPORTPTR 8
+#define TERMINATE     9
+#define GET_TOD       10
+*/
+
+#include "container_of.h"
+#include "pandos_const.h"
+#include "pandos_types.h"
+#include "types.h"
+#include "linux_list.h"
+
+//queste due strutture dati mi sa che non vanno in questo file e devono essere tolte da qui, le ho messe ora per la SYSCALL CreatePRocess
+typedef struct context_t {
+/* process context fields */
+unsigned int c_stackPtr, /* stack pointer value */
+c_status, /* status reg value */
+c_pc; /* PC address */
+} context_t;
+typedef struct support_t {
+int sup_asid; /* Process Id (asid) */
+state_t sup_exceptState[2]; /* stored excpt states */
+context_t sup_exceptContext[2]; /* pass up contexts */
+} support_t;
+
+extern void uTLB_RefillHandler ();
+extern int SYSCALL(CREATEPROCESS, state_t *statep, support_t * supportp, struct nsd_t *ns);
+

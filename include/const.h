@@ -18,6 +18,7 @@
  */
 typedef unsigned int * uint_PTR;
 
+#define TERMINATE_CURR_PROCESS 0
 #define BIT_USER 1
 #define BIT_KERNEL 0
 

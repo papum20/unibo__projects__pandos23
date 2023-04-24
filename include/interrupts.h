@@ -74,3 +74,5 @@ context_t sup_exceptContext[2];
 
 
 */
+/*sono Giuseppe, questa funzione la uso in exceptions.c*/
+extern void Interrupt_handler();

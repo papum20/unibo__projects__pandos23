@@ -168,11 +168,14 @@ CURIOSITA'
 
 
 
-
-int pippo;
+/*copio lo stato sorgente nello stato destinazione*/
+extern void cp_state(state_t* src_state, state_t* dst_state);
 extern void Exception_handler();
 extern void uTLB_RefillHandler ();
 extern void SYSCALL_handler();
+extern void PassUpOrDie(int index);
+extern void Prg_Trap_handler();
+extern void TLB_handler();
 /*SYSTEM CALL 1-10*/
 extern int SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns);
 extern void SYSCALL_TERMINATEPROCESS (int pid);/*gli altri due parametri sono 0*/
@@ -181,7 +184,7 @@ extern void SYSCALL_VERHOGEN (int *semaddr);
 extern int SYSCALL_DOIO (int *cmdAddr, int *cmdValues);/*l'ultimo parametro è 0*/
 extern cpu_t SYSCALL_GETCPUTIME ();
 extern void SYSCALL_WAITCLOCK();
-extern support_t SYSCALL_GETSUPPORTPTR();
+extern support_t * SYSCALL_GETSUPPORTPTR();
 extern int SYSCALL_GETPID( int parent);
 extern int SYSCALL_GETCHILDREN(int *children, int size);
 

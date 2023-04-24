@@ -19,7 +19,7 @@ void uTLB_RefillHandler() {
 }
 
 extern void Exception_handler(){
-	p_u_int exeCode = &current_proc->p_s.cause;
+	uint_PTR exeCode = &current_proc->p_s.cause;
 	*exeCode = CAUSE_GET_EXCCODE(*exeCode);
 	if(*exeCode==EXC_INT){
 
@@ -38,12 +38,12 @@ extern void Exception_handler(){
 
 extern void SYSCALL_handler(){
 	
-	p_u_int a1 = &current_proc->p_s.reg_a1;
-	p_u_int a2 = &current_proc->p_s.reg_a2;
-	p_u_int a3 = &current_proc->p_s.reg_a3;
-	unsigned int result;
+	uint_PTR a1 = &current_proc->p_s.reg_a1;
+	uint_PTR a2 = &current_proc->p_s.reg_a2;
+	uint_PTR a3 = &current_proc->p_s.reg_a3;
+	memaddr result;
 	if(current_proc->p_s.status==bitUser && ((current_proc->p_s.reg_a0>=0) && (current_proc->p_s.reg_a0<=10))){/*significa che sei in user mode e non va bene, da chiedere al prof*/
-		p_u_int exeCode = &current_proc->p_s.cause;
+		uint_PTR exeCode = &current_proc->p_s.cause;
 		*exeCode = CAUSE_GET_EXCCODE(*exeCode); 
 		*exeCode = EXC_RI;     /*setto il registro exeCode in RI e poi chiamo il program Trapp exception handler*/
 	/*

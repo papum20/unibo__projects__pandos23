@@ -1,6 +1,5 @@
 
 
-extern void exceptionHandler();
 /*
 TEMPORARY NAME!!
 */
@@ -156,38 +155,44 @@ PARTE DI DANIELE, inizializzazione di roba che serve a me
 CURIOSITA'
     LDST sarebbe il caricamento dello stato del processore
 */
-/*
-#define CREATEPROCESS 1
-#define TERMPROCESS   2
-#define PASSEREN      3
-#define VERHOGEN      4
-#define IOWAIT        5
-#define GETTIME       6
-#define CLOCKWAIT     7
-#define GETSUPPORTPTR 8
-#define TERMINATE     9
-#define GET_TOD       10
-*/
 
-#include "container_of.h"
+
+
 #include "pandos_const.h"
 #include "pandos_types.h"
 #include "types.h"
-#include "linux_list.h"
+#include "scheduler.h"
+#include "const.h"
+
 
 //queste due strutture dati mi sa che non vanno in questo file e devono essere tolte da qui, le ho messe ora per la SYSCALL CreatePRocess
+
+
 typedef struct context_t {
-/* process context fields */
-unsigned int c_stackPtr, /* stack pointer value */
-c_status, /* status reg value */
-c_pc; /* PC address */
+
+unsigned int c_stackPtr, 
+c_status, 
+c_pc; 
 } context_t;
 typedef struct support_t {
-int sup_asid; /* Process Id (asid) */
-state_t sup_exceptState[2]; /* stored excpt states */
-context_t sup_exceptContext[2]; /* pass up contexts */
-} support_t;
+int sup_asid; 
+state_t sup_exceptState[2]; 
+context_t sup_exceptContext[2]; 
+} support_t
+
+#define getTODLO() (*((unsigned int *)BUS_TODLOW))
 
 extern void uTLB_RefillHandler ();
-extern int SYSCALL(CREATEPROCESS, state_t *statep, support_t * supportp, struct nsd_t *ns);
+extern void SYSCALL_handler();
+/*SYSTEM CALL 1-10*/
+extern int SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns);
+extern void SYSCALL_TERMINATEPROCESS (int pid);/*gli altri due parametri sono 0*/
+extern void SYSCALL_PASSEREN (int *semaddr);/*gli altri due parametri sono 0*/
+extern void SYSCALL_VERHOGEN (int *semaddr);
+extern int SYSCALL_DOIO (int *cmdAddr, int *cmdValues);/*l'ultimo parametro è 0*/
+extern cpu_t SYSCALL_GETCPUTIME ();
+extern void SYSCALL_WAITCLOCK();
+extern support_t SYSCALL_GETSUPPORTPTR();
+extern int SYSCALL_GETPID( int parent);
+extern int SYSCALL_GETCHILDREN(int *children, int size);
 

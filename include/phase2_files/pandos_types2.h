@@ -67,8 +67,9 @@ typedef struct state {
 
 
 
-/* PROCESS CONTEXT
-*/
+/*
+ * Processor context
+ */
 
 typedef struct context_t {
 	/* process context fields */

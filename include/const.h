@@ -13,10 +13,13 @@
 #define VAL_SEM_SYNC 0
 #define VAL_SEM_MUTEX 1
 
+/*
+ * Types
+ */
 typedef unsigned int * uint_PTR;
 
-#define bitUser 1
-#define bitKernel 0
+#define BIT_USER 1
+#define BIT_KERNEL 0
 
 
 

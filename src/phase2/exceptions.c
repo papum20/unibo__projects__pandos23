@@ -7,10 +7,7 @@ the provided skeleton TLB-Refill event handler (e.g. uTLB_RefillHandler).
 
 
 #include "initial.h"
-#include "pandos_cp0.h"
-#include "pandos_types2.h"
-#include "pandos_const.h"
-#include "interrupts.h"
+
 
 void cp_state(state_t* src_state, state_t* dst_state){
 	dst_state->entry_hi = src_state->entry_hi;

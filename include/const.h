@@ -43,6 +43,7 @@ typedef unsigned int * p_u_int;
 #define EXC_CPU                11
 #define EXC_OV                 12
 
-
+#define bitUser 1
+#define bitKernel 0
 
 #endif /* CONST_H */

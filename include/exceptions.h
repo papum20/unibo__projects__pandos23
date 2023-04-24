@@ -1,3 +1,10 @@
+
+
+extern void exceptionHandler();
+/*
+TEMPORARY NAME!!
+*/
+
 /*
 indirizzi di memoria che mi servono 
     pandos_const.h

@@ -7,6 +7,11 @@
 */
 #define HIDDEN static
 
+/*
+ * Semaphores values
+ */
+#define VAL_SEM_SYNC 0
+#define VAL_SEM_MUTEX 1
 
 
 #endif /* CONST_H */

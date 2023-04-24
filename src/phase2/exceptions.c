@@ -34,7 +34,15 @@ void PassUpOrDie(int index){
 		SYSCALL_TERMINATEPROCESS(TERMINATE_CURR_PROCESS);
 		return;
 	}
-	/*da continuare caso se support non è null*/
+	/*
+	DA FARE:
+		Copy the saved exception state from the BIOS Data Page to the correct
+		sup_exceptState field of the Current Process
+
+	curr_support->sup_exceptState[index]
+	*/
+	LDCXT(curr_support->sup_exceptContext[index].c_stackPtr,curr_support->sup_exceptContext[index].c_status,curr_support->sup_exceptContext[index].c_pc);
+	
 
 }
 void Exception_handler(){

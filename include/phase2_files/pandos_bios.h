@@ -1,13 +1,14 @@
-#ifndef PANDOS_BIOS_H_INCLUDED
-#define PANDOS_BIOS_H_INCLUDED
-
-
 
 /****************************************************************************
  *
  * This header file contains bios definitions.
  *
  ****************************************************************************/
+
+
+#ifndef PANDOS_BIOS_H_INCLUDED
+#define PANDOS_BIOS_H_INCLUDED
+
 
 /* #include <umps3/umps/bios_defs.h>
 */

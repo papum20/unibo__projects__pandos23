@@ -1,10 +1,11 @@
-#ifndef PANDOS_ARCH_H_INCLUDED
-#define PANDOS_ARCH_H_INCLUDED
 
 /*
  * uMPS machine-specific constants, most notably bus & device memory
  * mapped register addresses.
  */
+
+#ifndef PANDOS_ARCH_H_INCLUDED
+#define PANDOS_ARCH_H_INCLUDED
 
 /* #include <umps3/umps/arch.h>
 */

@@ -18,11 +18,6 @@
 #include "exceptions.h"
 
 
-/*
-Pointer to the pcb that is in the “running” state,
-i.e. the current executing process.
-*/
-extern pcb_t *current_proc;
 
 extern int main();
 

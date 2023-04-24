@@ -69,7 +69,11 @@ int main() {
 	*/
 	struct list_head readyQ;
 
-	
+	/*
+	Pointer to the pcb that is in the “running” state,
+	i.e. the current executing process.
+	*/
+	pcb_t *current_proc;	
 
 	/*
 	The Nucleus maintains one integer semaphore

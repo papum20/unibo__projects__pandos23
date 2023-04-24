@@ -172,22 +172,14 @@ CURIOSITA'
 #include "container_of.h"
 #include "pandos_const.h"
 #include "pandos_types.h"
+#include "pandos_types2.h"
 #include "types.h"
 #include "linux_list.h"
 
-//queste due strutture dati mi sa che non vanno in questo file e devono essere tolte da qui, le ho messe ora per la SYSCALL CreatePRocess
-typedef struct context_t {
-/* process context fields */
-unsigned int c_stackPtr, /* stack pointer value */
-c_status, /* status reg value */
-c_pc; /* PC address */
-} context_t;
-typedef struct support_t {
-int sup_asid; /* Process Id (asid) */
-state_t sup_exceptState[2]; /* stored excpt states */
-context_t sup_exceptContext[2]; /* pass up contexts */
-} support_t;
+
+
 
 extern void uTLB_RefillHandler ();
+
 extern int SYSCALL(CREATEPROCESS, state_t *statep, support_t * supportp, struct nsd_t *ns);
 

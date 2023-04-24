@@ -1,6 +1,5 @@
 
 
-extern void exceptionHandler();
 /*
 TEMPORARY NAME!!
 */
@@ -156,30 +155,33 @@ PARTE DI DANIELE, inizializzazione di roba che serve a me
 CURIOSITA'
     LDST sarebbe il caricamento dello stato del processore
 */
-/*
-#define CREATEPROCESS 1
-#define TERMPROCESS   2
-#define PASSEREN      3
-#define VERHOGEN      4
-#define IOWAIT        5
-#define GETTIME       6
-#define CLOCKWAIT     7
-#define GETSUPPORTPTR 8
-#define TERMINATE     9
-#define GET_TOD       10
-*/
 
-#include "container_of.h"
+
+
 #include "pandos_const.h"
 #include "pandos_types.h"
 #include "pandos_types2.h"
 #include "types.h"
-#include "linux_list.h"
+#include "scheduler.h"
+#include "const.h"
 
 
 
 
+
+int pippo;
+extern void Exception_handler();
 extern void uTLB_RefillHandler ();
-
-extern int SYSCALL(CREATEPROCESS, state_t *statep, support_t * supportp, struct nsd_t *ns);
+extern void SYSCALL_handler();
+/*SYSTEM CALL 1-10*/
+extern int SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns);
+extern void SYSCALL_TERMINATEPROCESS (int pid);/*gli altri due parametri sono 0*/
+extern void SYSCALL_PASSEREN (int *semaddr);/*gli altri due parametri sono 0*/
+extern void SYSCALL_VERHOGEN (int *semaddr);
+extern int SYSCALL_DOIO (int *cmdAddr, int *cmdValues);/*l'ultimo parametro è 0*/
+extern cpu_t SYSCALL_GETCPUTIME ();
+extern void SYSCALL_WAITCLOCK();
+extern support_t SYSCALL_GETSUPPORTPTR();
+extern int SYSCALL_GETPID( int parent);
+extern int SYSCALL_GETCHILDREN(int *children, int size);
 

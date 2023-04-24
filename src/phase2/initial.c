@@ -5,7 +5,7 @@
 
 extern pcb_t instantiateProc() {
 	pcb_t *p = allocPcb();
-
+	
 	/* In particular this process needs to have interrupts enabled*/
 	/*the processor Local Timer enabled*/
 	/*kernel-mode on*/
@@ -44,7 +44,7 @@ one must also assign the same value to the general purpose register t9.
 
 int main() {
 
-
+	
 	int i;	/* for-loops counter */
 	
 	/* 1. Declare the Level 3 global variables. */
@@ -69,11 +69,7 @@ int main() {
 	*/
 	struct list_head readyQ;
 
-	/*
-	Pointer to the pcb that is in the “running” state,
-	i.e. the current executing process.
-	*/
-	pcb_t *current_proc;
+	
 
 	/*
 	The Nucleus maintains one integer semaphore

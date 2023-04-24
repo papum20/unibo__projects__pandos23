@@ -178,10 +178,10 @@ typedef struct support_t {
 int sup_asid; 
 state_t sup_exceptState[2]; 
 context_t sup_exceptContext[2]; 
-} support_t
+} support_t;
 
-#define getTODLO() (*((unsigned int *)BUS_TODLOW))
-
+int pippo;
+extern void Exception_handler();
 extern void uTLB_RefillHandler ();
 extern void SYSCALL_handler();
 /*SYSTEM CALL 1-10*/

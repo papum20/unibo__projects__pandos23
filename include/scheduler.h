@@ -69,4 +69,3 @@ or PANIC (halt execution in the presence of deadlock)
 */
 #include "pcb.h"
 
-pcb_t* runningProc(); //Funzione che permette di accere al current proc da altri file

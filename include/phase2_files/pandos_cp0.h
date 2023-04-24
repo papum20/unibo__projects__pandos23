@@ -1,12 +1,14 @@
-#ifndef PANDOS_CP_0_H_INCLUDED
-#define PANDOS_CP_0_H_INCLUDED
-
 
 /****************************************************************************
  *
  * This header file contains cpu definitions.
  *
  ****************************************************************************/
+
+
+#ifndef PANDOS_CP_0_H_INCLUDED
+#define PANDOS_CP_0_H_INCLUDED
+
 
 
 /* #include <umps3/umps/cp0.h>

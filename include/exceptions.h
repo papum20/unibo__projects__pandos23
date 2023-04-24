@@ -159,6 +159,8 @@ CURIOSITA'
 
 
 #include "pandos_const.h"
+#include "pandos_cp0.h"
+#include "pandos_libumps.h"
 #include "pandos_types.h"
 #include "pandos_types2.h"
 #include "types.h"

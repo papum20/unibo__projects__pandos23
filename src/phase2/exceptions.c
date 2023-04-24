@@ -23,7 +23,7 @@ extern void SYSCALL_handler(){
 	p_u_int a2 = &curr_process->p_s.reg_a2;
 	p_u_int a3 = &curr_process->p_s.reg_a3;
 	unsigned int result;
-	if(curr_process->p_s.status==1 && ((curr_process->p_s.reg_a0>=0) && (curr_process->p_s.reg_a0<=10))){/*significa che sei in user mode e non va bene, da chiedere al prof*/
+	if(curr_process->p_s.status==bitUser && ((curr_process->p_s.reg_a0>=0) && (curr_process->p_s.reg_a0<=10))){/*significa che sei in user mode e non va bene, da chiedere al prof*/
 		p_u_int exeCode = &curr_process->p_s.cause;
 		*exeCode = CAUSE_GET_EXCCODE(*exeCode); 
 		*exeCode = EXC_RI;     /*setto il registro exeCode in RI e poi chiamo il program Trapp exception handler*/

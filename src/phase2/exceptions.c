@@ -27,16 +27,9 @@ void PassUpOrDie(int index){
 		SYSCALL_TERMINATEPROCESS(TERMINATE_CURR_PROCESS);
 		return;
 	}
-	/*
-	DA FARE:
-		Copy the saved exception state from the BIOS Data Page to the correct
-		sup_exceptState field of the Current Process
-
-	curr_support->sup_exceptState[index]
-	*/
+	state_t * saved_exceptions_state = get_saved_exceptions_state();
+	cp_state(saved_exceptions_state, curr_support->sup_exceptState[index]);
 	LDCXT(curr_support->sup_exceptContext[index].c_stackPtr,curr_support->sup_exceptContext[index].c_status,curr_support->sup_exceptContext[index].c_pc);
-	
-
 }
 void Exception_handler(){
 	uint_PTR exeCode = &current_proc->p_s.cause;

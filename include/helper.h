@@ -10,8 +10,8 @@
 
 
 /*copio lo stato sorgente nello stato destinazione*/
-extern void cp_state(state_t* src_state, state_t* dst_state);
-extern state_t get_saved_exceptions_state();
+extern void cp_state(state_t* src_state, state_t dst_state);
+extern state_t * get_saved_exceptions_state();
 /*dice se il processo corrente è in user mode*/
 extern int is_UM();
 

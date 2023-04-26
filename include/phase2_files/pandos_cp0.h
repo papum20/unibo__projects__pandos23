@@ -36,7 +36,5 @@
 #define EXC_CPU                11
 #define EXC_OV                 12
 
-#define TLB_EXCEPTION(x)(x>=EXC_MOD && x<=EXC_TLBS)
-#define TRAP_EXCEPTION(x)((x>=EXC_ADEL && x<=EXC_DBE) || (x>=EXC_BP && x<=EXC_OV))
 
 #endif /* PANDOS_CP_0_H_INCLUDED */

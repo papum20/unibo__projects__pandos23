@@ -167,12 +167,12 @@ CURIOSITA'
 #include "scheduler.h"
 #include "const.h"
 #include "interrupts.h"
+#include "initial.h"
+#include "helper.h"
 
 
 
 
-/*copio lo stato sorgente nello stato destinazione*/
-extern void cp_state(state_t* src_state, state_t* dst_state);
 extern void Exception_handler();
 extern void uTLB_RefillHandler ();
 extern void SYSCALL_handler();
@@ -187,7 +187,7 @@ extern void SYSCALL_VERHOGEN (int *semaddr);
 extern int SYSCALL_DOIO (int *cmdAddr, int *cmdValues);/*l'ultimo parametro è 0*/
 extern cpu_t SYSCALL_GETCPUTIME ();
 extern void SYSCALL_WAITCLOCK();
-extern support_t * SYSCALL_GETSUPPORTPTR();
+extern support_t * SYSCALL_GET_SUPPORT_DATA();
 extern int SYSCALL_GETPID( int parent);
 extern int SYSCALL_GETCHILDREN(int *children, int size);
 

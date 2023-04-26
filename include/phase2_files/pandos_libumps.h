@@ -28,6 +28,19 @@ extern unsigned int setENTRYLO(unsigned int entry);
 extern unsigned int setENTRYHI(unsigned int entry);
 
 
+/* This function allows a current process to change its operating mode,
+ * turning on/off interrupt masks, turning on user mode, and at the same time
+ * changing the location of execution.
+ * It is available only in kernel mode, thru a BIOS routine
+ * (otherwise it causes a break).
+ * It updates processor status, PC and stack pointer _completely_,
+ * in one atomic operation.
+ * It has no meaningful return value.
+ */
+
+extern unsigned int LDCXT(unsigned int stackPtr, unsigned int status, unsigned int pc);
+
+
 /* these functions produce a program trap if executed in user mode
  * without CPU0 bit _set_
  */
@@ -48,16 +61,5 @@ extern void TLBWR(void);
 
 extern unsigned int LDST(STATE_PTR statep);
 
-/* This function allows a current process to change its operating mode,
- * turning on/off interrupt masks, turning on user mode, and at the same time
- * changing the location of execution.
- * It is available only in kernel mode, thru a BIOS routine
- * (otherwise it causes a break).
- * It updates processor status, PC and stack pointer _completely_,
- * in one atomic operation.
- * It has no meaningful return value.
- */
-
-extern unsigned int LDCXT(unsigned int stackPtr, unsigned int status, unsigned int pc);
 
 #endif /* PANDOS_LIBUMBS_H_INCLUDED */

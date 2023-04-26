@@ -27,8 +27,8 @@ void PassUpOrDie(int index){
 		SYSCALL_TERMINATEPROCESS(TERMINATE_CURR_PROCESS);
 		return;
 	}
-	state_t * saved_exceptions_state = get_saved_exceptions_state();
-	cp_state(saved_exceptions_state, curr_support->sup_exceptState[index]);
+	state_t * saved_exceptions_state = SAVED_EXCEPTIONS_STATE;
+	state_copy(saved_exceptions_state, curr_support->sup_exceptState[index]);
 	LDCXT(curr_support->sup_exceptContext[index].c_stackPtr,curr_support->sup_exceptContext[index].c_status,curr_support->sup_exceptContext[index].c_pc);
 }
 void Exception_handler(){
@@ -117,5 +117,26 @@ cpu_t SYSCALL_GETCPUTIME (){
 	quindi quando viene creato un pcb facciamo STCK(proc->p_time) 
 	*/
 }
+
+void SYSCALL_PASSEREN (int *semaddr){
+	if((*semaddr)>0){
+		(*semaddr) --;
+	}
+	else{
+		insertBlocked(semaddr, current_proc);
+		/*scheduler();    chiamo lo scheduler   */
+	}
+}
+
+void SYSCALL_VERHOGEN (int *semaddr){
+	if((*semaddr)>=1){
+		insertBlocked(semaddr, current_proc);
+		/*scheduler();    chiamo lo scheduler   */
+	}
+	else{
+		(*semaddr)++;
+	}
+}
+
 
 #pragma endregion SYSCALL_1-10

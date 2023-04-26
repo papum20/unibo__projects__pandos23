@@ -1,0 +1,4 @@
+
+
+cambiamenti phase1:
+	pcb : inizializzazioni campi non usati in phase1

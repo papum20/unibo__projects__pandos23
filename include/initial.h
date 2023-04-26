@@ -16,6 +16,7 @@
 #include "ns.h"
 
 #include "exceptions.h"
+#include "scheduler.h"
 
 
 
@@ -40,16 +41,7 @@ extern int main();
 	semplice costante.
 	*/
 
-	/*
-	Inizializzazione: scheduler
-	- Allocare un processo (pcb_t) in kernel mode, 
-	con interrupt abilitati, stack pointer a RAMTOP e 
-	program counter che punta alla funzione test() 
-	(fornita da noi).
-	- Inserire questo processo nella Ready Queue.
-	- invocare lo scheduler.
 
-	*/
 
 
 
@@ -104,35 +96,25 @@ extern int main();
 	Important Point: When setting up a new processor state one must
 	set the previous bits (i.e. IEp & KUp) and not the current bits (i.e.
 	IEc & KUc) in the Status register for the desired assignment to take
-	effect after the initial LDST loads the processor state. [Section ??-
-	pops]
-	Test is a supplied function/process that will help you debug your Nu-
-	cleus. One can assign a variable (i.e. the PC) the address of a function
-	by using
-	yyy->p_s.s_pc = (memaddr) test;
-	24 CHAPTER 3. PHASE 2 - LEVEL 3: THE NUCLEUS
+	effect after the initial LDST loads the processor state.
+	*/
+	/*
+	Inizializzazione: scheduler
+	- Allocare un processo (pcb_t) in kernel mode, 
+	con interrupt abilitati, stack pointer a RAMTOP e 
+	program counter che punta alla funzione test() 
+	(fornita da noi).
+	- Inserire questo processo nella Ready Queue.
+	- invocare lo scheduler.
 
-
-	7. Call the Scheduler.
-	Once main() calls the Scheduler its task is complete since control should
-	never return to main(). At this point the only mechanism for re-entering
-	the Nucleus is through an exception; which includes device interrupts. As
-	long as there are processes to run, the processor is executing instructions on
-	their behalf and only temporarily enters the Nucleus long enough to handle
-	a device interrupt or exception when they occur.
-	At boot/reset time the Nucleus is loaded into RAM beginning with the
-	second frame of RAM: 0x2000.1000. The first frame of RAM is reserved for
-	the Nucleus stack. Furthermore, Processor 0 will be in kernel-mode with
-	all interrupts masked, and the processor Local Timer disabled. The PC
-	is assigned 0x2000.1000 and the SP, which was initially set to 0x2000.1000
-	at boot-time, will now be some value less, due to the activation record for
-	main() that now sits on the stack. [Section ??-pops
 	*/
 
 #pragma endregion TODO
 
 
 #pragma region DONE
+
+	/* INTRODUCTION */
 
 	/*
 		- Al contrario di fase 1 il vostro codice ha 
@@ -143,6 +125,18 @@ extern int main();
 		Every program needs an entry point (i.e. main()). The entry point for
 	Pandos performs the Nucleus initialization, which includes:
 	*/
+
+	/*
+	At boot/reset time the Nucleus is loaded into RAM beginning with the
+	second frame of RAM: 0x2000.1000. The first frame of RAM is reserved for
+	the Nucleus stack. Furthermore, Processor 0 will be in kernel-mode with
+	all interrupts masked, and the processor Local Timer disabled. The PC
+	is assigned 0x2000.1000 and the SP, which was initially set to 0x2000.1000
+	at boot-time, will now be some value less, due to the activation record for
+	main() that now sits on the stack. [Section ??-pops
+	*/
+
+	/* STEPS */
 
 	/*
 	1. Declare the Level 3 global variables. This should include:
@@ -214,8 +208,16 @@ extern int main();
 	*/
 
 	/*
-	
+	7. Call the Scheduler.
+	Once main() calls the Scheduler its task is complete since control should
+	never return to main(). At this point the only mechanism for re-entering
+	the Nucleus is through an exception; which includes device interrupts. As
+	long as there are processes to run, the processor is executing instructions on
+	their behalf and only temporarily enters the Nucleus long enough to handle
+	a device interrupt or exception when they occur.
 	*/
+
+	/* TEST */
 
 	/*
 	Remember to declare test as “external” in your program by including
@@ -233,10 +235,16 @@ extern int main();
 	al termine senza andare in PANIC.
 	*/
 
+	/* TIPS */
+
 	/*
 	For rather technical reasons, whenever one assigns a value to the PC
 	one must also assign the same value to the general purpose register t9.
 	*/
+	/*
+	Since Pandos is intended for uniprocessor environments only,
+	interrupt line 0 may safely be ignored
+*/
 
 #pragma endregion DONE
 

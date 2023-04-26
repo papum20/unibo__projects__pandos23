@@ -45,44 +45,38 @@ one must also assign the same value to the general purpose register t9.
 int main() {
 
 	
+	/* NOTES:
+	1.	static vars?
+	*/
+	
 	int i;	/* for-loops counter */
 	
 	/* 1. Declare the Level 3 global variables. */
 
-	/*
-	integer indicating the number of started, but not
-	yet terminated processes.
-	*/
-	int proc_count;
+	/* number of started, but not yet terminated processes. */
+	static int proc_count;
 
-	/*
-	A process can be either in the “ready,” “run-
-	ning,” or “blocked” (also known as “waiting”) state. This integer
-	is the number of started, but not terminated processes that in are
-	the “blocked” state due to an I/O or timer request.
+	/*	number of started, but not terminated processes that in are
+		the “blocked” state due to an I/O or timer request.
 	*/
-	int soft_block_count;
+	static int soft_block_count;
 
-	/*
-	Tail pointer to a queue of pcbs that are in the
-	“ready” state.
-	*/
-	struct list_head readyQ;
+	/* queue of pcbs that are in the "ready" state. */
+	static struct list_head readyQ;
 
-	/*
-	Pointer to the pcb that is in the “running” state,
-	i.e. the current executing process.
+	/*	Pointer to the pcb that is in the “running” state,
+		i.e. the current executing process.
 	*/
-	pcb_t *current_proc;	
+	static pcb_t *current_proc;	
 
 	/*
 	The Nucleus maintains one integer semaphore
 	for each external (sub)device in μMPS3, plus one additional semaphore
-	to support the Pseudo-clock. [Section 3.6.3]
+	to support the Pseudo-clock.
 	Since terminal devices are actually two independent sub-devices,
 	the Nucleus maintains two semaphores for each terminal device.
 	*/
-	int dev_sems[N_SEM_DEVICES];
+	static int dev_sems[N_SEM_DEVICES];
 	/*
 	NOTES:
 	1.	N_INTERRUPT_LINES or N_INTERRUPT_LINES*N_DEV_PER_IL ?
@@ -96,37 +90,31 @@ int main() {
 	/* 2. Populate the Processor 0 Pass Up Vector. */
 	
 	/*
-	The Pass Up Vector is part
-	of the BIOS Data Page, and for Processor 0, is located at 0x0FFF.F900.
+	The Pass Up Vector is part of the BIOS Data Page.
 	The Pass Up Vector is where the BIOS finds the address of the Nucleus
 	functions to pass control to for both TLB-Refill events and all other
 	exceptions.
 	*/
-	passupvector_t *passup_vector = (passupvector_t*) BIOS_EXEC_HANDLERS_ADDRS;
-
-	/*
-	• Set the Nucleus TLB-Refill event handler address to
-	uTLB_RefillHandler;
-	where memaddr, in types.h, has been aliased to unsigned int.
+	static passupvector_t *passup_vector = (passupvector_t*) BIOS_EXEC_HANDLERS_ADDRS;
+	/* NOTES:
+	1.	with pointer? i.e. need to allocate passup_vector at that specific addr,
+		or is it already allocated there?
 	*/
+	
+
+	/* Set the Nucleus TLB-Refill event handler */
 	passup_vector->tlb_refill_handler = (memaddr) uTLB_RefillHandler;
 
-	/*
-	• Set the Stack Pointer for the Nucleus TLB-Refill event handler to
-	the top of the Nucleus stack page: 0x2000.1000.
+	/*	Set the Stack Pointer for the Nucleus TLB-Refill event handler to
+		the top of the Nucleus stack page (0x2000.1000)
 	*/
 	passup_vector->tlb_refill_stackPtr = (memaddr) KERNELSTACK;
 
-	/*
-	• Set the Nucleus exception handler address to the address of your
-	Level 3 Nucleus function that is to be the entry
-	point for exception (and interrupt) handling.
-	*/
+	/* Set the Nucleus exception (and interrupt) handler */
 	passup_vector->exception_handler = (memaddr) exceptionHandler;
 
-	/*
-	• Set the Stack pointer for the Nucleus exception handler to the top
-	of the Nucleus stack page: 0x2000.1000.
+	/*	Set the SP for the exception handler to the top
+		of the Nucleus stack page (0x2000.1000)
 	*/
 	passup_vector->exception_stackPtr = (memaddr) KERNELSTACK;
 
@@ -148,21 +136,20 @@ int main() {
 	current_proc = NULL;
 	
 	
-	/*
-	Since the device semaphores will be used for synchronization,
-	as opposed to mutual exclusion, they should all be initialized to zero.
+	/*	Since the device semaphores will be used for synchronization,
+		as opposed to mutual exclusion, they should all be initialized to zero.
 	*/
 	for(int i = 0; i < N_SEM_DEVICES; i++)
 		dev_sems[i] = VAL_SEM_SYNC;
 
-	/* 5. Load the system-wide Interval Timer with 100 milliseconds. [Section
-	3.6.3]
-	*/
+
+	/* 5. Load the system-wide Interval Timer with 100 milliseconds. */
 
 	/* 6. Instantiate a single process, place its pcb in the Ready Queue, and
 	increment Process Count. */
 	
 	//insertProcQ(&readyQ, allocPcb());
+	proc_count++;
 
 	/* NOTES:
 	1.	to do when the new pcb_t will be released (containing the p_supportStruct field):
@@ -192,25 +179,31 @@ int main() {
 	effect after the initial LDST loads the processor state. [Section ??-
 	pops]
 	*/
+	/*
+	Inizializzazione: scheduler
+	- Allocare un processo (pcb_t) in kernel mode, 
+	con interrupt abilitati, stack pointer a RAMTOP e 
+	program counter che punta alla funzione test() 
+	(fornita da noi).
+	- Inserire questo processo nella Ready Queue.
+	- invocare lo scheduler.
+
+	*/
+
+	/* 7. Call the Scheduler. */
 
 	/*
-	7. Call the Scheduler.
 	Once main() calls the Scheduler its task is complete since control should
 	never return to main(). At this point the only mechanism for re-entering
 	the Nucleus is through an exception; which includes device interrupts. As
 	long as there are processes to run, the processor is executing instructions on
 	their behalf and only temporarily enters the Nucleus long enough to handle
 	a device interrupt or exception when they occur.
-	At boot/reset time the Nucleus is loaded into RAM beginning with the
-	second frame of RAM: 0x2000.1000. The first frame of RAM is reserved for
-	the Nucleus stack. Furthermore, Processor 0 will be in kernel-mode with
-	all interrupts masked, and the processor Local Timer disabled. The PC
-	is assigned 0x2000.1000 and the SP, which was initially set to 0x2000.1000
-	at boot-time, will now be some value less, due to the activation record for
-	main() that now sits on the stack. [Section ??-pops
 	*/
+	Scheduler();
 
-	test();
+
 	/* L’esecuzione del test e’ corretta se questo arriva 
 	al termine senza andare in PANIC. */
+	test();
 }

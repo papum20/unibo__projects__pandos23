@@ -9,6 +9,7 @@
 
 #include <umps3/umps/types.h>
 #include "pandos_const.h"
+#include "pandos_types2.h"
 #include <list.h>
 
 
@@ -42,6 +43,9 @@ typedef struct pcb_t {
     /* process status information */
     state_t p_s;    /* processor state */
     cpu_t   p_time; /* cpu time used by proc */
+
+	/* process support structure */
+	support_t *p_supportStruct;	/* ptr to support struct */
 
     /* Pointer to the semaphore the process is currently blocked on */
     int *p_semAdd;

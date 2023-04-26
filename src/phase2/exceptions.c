@@ -6,18 +6,11 @@ the provided skeleton TLB-Refill event handler (e.g. uTLB_RefillHandler).
 */
 
 
-#include "initial.h"
+#include "exceptions.h"
+
+pcb_t * current_proc = NULL;
 
 
-void cp_state(state_t* src_state, state_t* dst_state){
-	dst_state->entry_hi = src_state->entry_hi;
-	dst_state->cause = src_state->cause;
-	dst_state->status = src_state->status;
-	dst_state->pc_epc = src_state->pc_epc;
-	dst_state->hi = src_state->hi;
-	dst_state->lo = src_state->lo;
-	for(int i=0;i<29;i++){dst_state->gpr[i]=src_state->gpr[i];}
-}
 
 void uTLB_RefillHandler() {
 
@@ -29,21 +22,14 @@ void uTLB_RefillHandler() {
 	
 }
 void PassUpOrDie(int index){
-	support_t * curr_support = SYSCALL_GETSUPPORTPTR();
+	support_t * curr_support = SYSCALL_GET_SUPPORT_DATA();
 	if(curr_support==NULL){
 		SYSCALL_TERMINATEPROCESS(TERMINATE_CURR_PROCESS);
 		return;
 	}
-	/*
-	DA FARE:
-		Copy the saved exception state from the BIOS Data Page to the correct
-		sup_exceptState field of the Current Process
-
-	curr_support->sup_exceptState[index]
-	*/
+	state_t * saved_exceptions_state = get_saved_exceptions_state();
+	cp_state(saved_exceptions_state, curr_support->sup_exceptState[index]);
 	LDCXT(curr_support->sup_exceptContext[index].c_stackPtr,curr_support->sup_exceptContext[index].c_status,curr_support->sup_exceptContext[index].c_pc);
-	
-
 }
 void Exception_handler(){
 	uint_PTR exeCode = &current_proc->p_s.cause;
@@ -69,13 +55,12 @@ void SYSCALL_handler(){
 	uint_PTR a2 = &current_proc->p_s.reg_a2;
 	uint_PTR a3 = &current_proc->p_s.reg_a3;
 	memaddr result;
-	if((current_proc->p_s.status==BIT_USER) && ((current_proc->p_s.status>=CREATEPROCESS) && (current_proc->p_s.status<=GET_TOD))){/*significa che sei in user mode e non va bene, da chiedere al prof*/
+
+	if((is_UM()) && ((current_proc->p_s.status>=CREATEPROCESS) && (current_proc->p_s.status<=GET_TOD))){/*significa che sei in user mode e non va bene, da chiedere al prof*/
 		uint_PTR exeCode = &current_proc->p_s.cause;
 		*exeCode = CAUSE_GET_EXCCODE(*exeCode); 
 		*exeCode = EXC_RI;     /*setto il registro exeCode in RI e poi chiamo il program Trapp exception handler*/
-	/*
-		ProgramTrapExceptionHandler();
-	*/
+		Prg_Trap_handler();
 	}
 	switch(current_proc->p_s.reg_a0){
 		case CREATEPROCESS:
@@ -100,7 +85,7 @@ void SYSCALL_handler(){
 			SYSCALL_WAITCLOCK();
 			break;
 		case GETSUPPORTPTR:
-			result = (unsigned int)SYSCALL_GETSUPPORTPTR();/*qua come faccio?*/
+			result = (memaddr)SYSCALL_GET_SUPPORT_DATA();/*qua come faccio?*/
 			break;
 		case TERMINATE:
 			result = SYSCALL_GETPID(*a1);
@@ -121,3 +106,16 @@ void Prg_Trap_handler(){
 void TLB_handler(){
 	PassUpOrDie(PGFAULTEXCEPT);
 }
+
+#pragma region SYSCALL_1-10
+
+support_t * SYSCALL_GET_SUPPORT_DATA(){
+	/*mi sa che per fare questa syscall dobbiamo aggiungere un nuovo campo nel pcb chiamato support_t*/
+}
+cpu_t SYSCALL_GETCPUTIME (){
+	/*penso che per fare questa syscall bisogna mettere nel campo p_time il tempo usato dal pcb
+	quindi quando viene creato un pcb facciamo STCK(proc->p_time) 
+	*/
+}
+
+#pragma endregion SYSCALL_1-10

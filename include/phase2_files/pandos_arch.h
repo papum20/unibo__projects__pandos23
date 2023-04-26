@@ -40,16 +40,5 @@
 #define EXT_IL_INDEX(il)    ((il) - DEV_IL_START)
 
 
-/* timer, timescale, TOD-LO and other bus regs */
-#define RAMBASEADDR     0x10000000
-#define TODLOADDR       0x1000001C
-#define INTERVALTMR     0x10000020
-#define TIMESCALEADDR   0x10000024
-
-/* Macro to load the Interval Timer */
-#define LDIT(T)         ((*((cpu_t *) INTERVALTMR)) = (T) *(*((cpu_t *) TIMESCALEADDR)))
-
-/* Macro to read the TOD clock */
-#define STCK(T)         ((T) = ((*((cpu_t *) TODLOADDR)) / (*((cpu_t *) TIMESCALEADDR))))
 
 #endif /* PANDOS_ARCH_H_INCLUDED */

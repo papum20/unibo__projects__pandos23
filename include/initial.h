@@ -22,6 +22,8 @@
 
 extern int main();
 
+extern void test();
+
 
 
 #pragma region TODO

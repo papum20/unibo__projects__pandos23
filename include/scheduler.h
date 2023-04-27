@@ -68,6 +68,6 @@ to complete (which will unblock a pcb and populate the Ready Queue),
 or PANIC (halt execution in the presence of deadlock)
 */
 
-extern void Scheduler();
+extern void scheduler();
 /* TEMPORARY NAME !!
 */

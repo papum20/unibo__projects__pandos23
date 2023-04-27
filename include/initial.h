@@ -20,8 +20,26 @@
 
 
 
+/*
+ * MAIN
+ */
 extern int main();
 
+
+/*
+ * EXCEPTIONS
+ */
+
+/* TLB_Refill exception handler - provided.
+*/
+extern void uTLB_RefillHandler();
+
+
+/*
+ * TESTS
+ */
+/* Test function
+*/
 extern void test();
 
 

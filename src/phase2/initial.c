@@ -83,7 +83,7 @@ int main() {
 
 
 	/* 5. Load the system-wide Interval Timer. */
-	LDIT(100);
+	LDIT(INTERVAL_TIMER_INIT);
 
 
 

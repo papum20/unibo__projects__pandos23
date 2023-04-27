@@ -4,6 +4,7 @@
 
 
 #include "const.h"
+#include "memory.h"
 
 #include "pandos_arch.h"
 #include "pandos_bios.h"
@@ -20,26 +21,33 @@
 
 
 
+/*
+ * MAIN
+ */
 extern int main();
+
+
+/*
+ * EXCEPTIONS
+ */
+
+/* TLB_Refill exception handler - provided.
+*/
+extern void uTLB_RefillHandler();
+
+
+/*
+ * TESTS
+ */
+/* Test function
+*/
+extern void test();
 
 
 
 #pragma region TODO
 
 
-
-
-
-
-	/*
-	Inizializzazione: dispositivi
-	- E’ sufficiente caricare l’Interval Timer con in 
-	valore corrispondente a 100 millisecondi, 
-	scrivendolo nel registro corrispondente
-	- Questo valore dipende dalla frequenza di 
-	esecuzione del processore, non puo’ essere una 
-	semplice costante.
-	*/
 
 
 
@@ -74,11 +82,6 @@ extern int main();
 
 
 
-
-	/*
-	5. Load the system-wide Interval Timer with 100 milliseconds. [Section
-	3.6.3]
-	*/
 
 	/*
 	6. Instantiate a single process, place its pcb in the Ready Queue, and
@@ -205,6 +208,20 @@ extern int main();
 	block Count (0), Ready Queue (mkEmptyProcQ()), and Current Process
 	(NULL). Since the device semaphores will be used for synchronization,
 	as opposed to mutual exclusion, they should all be initialized to zero.
+	*/
+
+
+	/*
+	5. Load the system-wide Interval Timer with 100 milliseconds.
+	*/
+	/*
+	Inizializzazione: dispositivi
+	- E’ sufficiente caricare l’Interval Timer con in 
+	valore corrispondente a 100 millisecondi, 
+	scrivendolo nel registro corrispondente
+	- Questo valore dipende dalla frequenza di 
+	esecuzione del processore, non puo’ essere una 
+	semplice costante.
 	*/
 
 	/*

@@ -2,22 +2,7 @@
 #define INITIAL_HELP_H
 
 #include "pandos_arch.h"
-
-
-
-/* Test function
-*/
-extern void test();
-
-
-
-/*
- * EXCEPTIONS
- */
-
-/* TLB_Refill exception handler - provided.
-*/
-extern void uTLB_RefillHandler();
+#include "pandos_types.h"
 
 
 
@@ -25,22 +10,14 @@ extern void uTLB_RefillHandler();
  * IMPLEMENTATION CONSTANTS
  */
 
-/* Number of semaphores for devices */
-#define N_SEM_DEVICES N_INTERRUPT_LINES
-
-
-/*
- * MEMORY MANAGEMENT
- */
-
-/* set the state PC to a new address.
-( For rather technical reasons, whenever one assigns a value to the PC
-one must also assign the same value to the general purpose register t9. )
+/*	Number of semaphores for devices.
+	It's one for each interrupt line, minus 1 as concurrency is not needed,
+	plus 3 as there are 2 terminals, each needing 2.
 */
-static inline void regSetPC(state_t *statep, memaddr addr) {
-	statep->pc_epc = addr;
-	statep->reg_t9 = addr;
-}
+#define N_SEM_DEVICES (N_INTERRUPT_LINES + 2)
+
+/*	Init value for the interval timer */
+#define INTERVAL_TIMER_INIT 100
 
 
 

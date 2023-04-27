@@ -25,7 +25,7 @@ SUPDIR = $(UMPS3_DIR_PREFIX)/share/umps3
 ## PROJECT'S REQUIREMENTS
 
 BDIR = bin
-IDIRS = include include/helper include/kernel include/phase1_files
+IDIRS = include include/helper include/kernel include/pandos_files
 IDIR = include
 ODIR = obj
 SDIR = src

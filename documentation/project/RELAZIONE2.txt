@@ -2,3 +2,13 @@
 
 cambiamenti phase1:
 	pcb : inizializzazioni campi non usati in phase1
+
+		/*
+NOTES:
+1.	N_INTERRUPT_LINES or N_INTERRUPT_LINES*N_DEV_PER_IL ?
+2.	"two semaphores for each terminal device":
+	does it mean 2*2, or 2, of which ONE for each terminal?
+3.	IL_IPI: what is it? Does it count?
+*/
+
+LDIT takes ms?

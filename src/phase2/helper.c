@@ -19,3 +19,6 @@ int is_UM(){
 	state_t * saved_exceptions_state = get_saved_exceptions_state();
 	return (saved_exceptions_state->status==BIT_USER);
 }
+
+
+#define SAVED_EXCEPTION_STATE ((state_t*) BIOS_DATA_PAGE_BASE)

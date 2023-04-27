@@ -156,6 +156,11 @@ CURIOSITA'
     LDST sarebbe il caricamento dello stato del processore
 */
 
+/*
+il pass up vector all'interno ha 4 campi unsigned int che sarebbero gli indirizzi di memoria di SP e della funzione exception handler
+quando il p2test che sarebbe un utente chiama ad esempio la funzione SYSCALL quei parametri il bios li mette nei registri a0-a3
+e poi grazie al pass up vector chiama la funzione exception handler
+*/
 
 
 #include "pandos_const.h"
@@ -169,8 +174,12 @@ CURIOSITA'
 #include "interrupts.h"
 #include "exceptions_help.h"
 #include "ash.h"
+#include "ns.h"
+#include "ash_help.h"
+#include "pandos_arch.h"
 
 
+#define RETURN_SYSCALL(x) current_proc->p_s.reg_v0 = (memaddr)x
 
 extern void Exception_handler();
 extern void uTLB_RefillHandler ();
@@ -179,14 +188,16 @@ extern void PassUpOrDie(int index);
 extern void Prg_Trap_handler();
 extern void TLB_handler();
 /*SYSTEM CALL 1-10*/
-extern int SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns);
+extern void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns);
 extern void SYSCALL_TERMINATEPROCESS (int pid);/*gli altri due parametri sono 0*/
 extern void SYSCALL_PASSEREN (int *semaddr);/*gli altri due parametri sono 0*/
 extern void SYSCALL_VERHOGEN (int *semaddr);
-extern int SYSCALL_DOIO (int *cmdAddr, int *cmdValues);/*l'ultimo parametro è 0*/
-extern cpu_t SYSCALL_GETCPUTIME ();
+extern void SYSCALL_DOIO (int *cmdAddr, int *cmdValues);/*l'ultimo parametro è 0*/
+extern void SYSCALL_GETCPUTIME ();
 extern void SYSCALL_WAITCLOCK();
-extern support_t * SYSCALL_GET_SUPPORT_DATA();
-extern int SYSCALL_GETPID( int parent);
-extern int SYSCALL_GETCHILDREN(int *children, int size);
+extern void SYSCALL_GET_SUPPORT_DATA();
+extern void SYSCALL_GETPID( int parent);
+extern void SYSCALL_GETCHILDREN(int *children, int size);
+/*operazioni da fare nel return di una system call che blocca*/
+extern void BlockingSyscall();
 

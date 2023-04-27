@@ -10,7 +10,7 @@
 /* #include <umps3/umps/arch.h>
 */
 
-
+#define WORD_SIZE 4
 
 /*
  * Interrupt lines

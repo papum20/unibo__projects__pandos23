@@ -10,6 +10,8 @@ the provided skeleton TLB-Refill event handler (e.g. uTLB_RefillHandler).
 /*questo lo metto extern come mi ha suggerito Daniele così si collega al suo puntatore del current_proc del suo file init, per 
 questo qui non devo mettergli valore ma solo dichiararlo o accederci */
 extern pcb_t * current_proc;
+/*mi serve per la prima system call*/
+extern int proc_count;
 
 
 
@@ -110,7 +112,7 @@ void TLB_handler(){
 void BlockingSyscall(int *semaddr, pcb_t * process){
 	
 	state_t * saved_exceptions_state = SAVED_EXCEPTIONS_STATE;
-	saved_exceptions_state->pc_epc += WORD_SIZE;
+	saved_exceptions_state->pc_epc += WORDLEN;
 	state_copy(saved_exceptions_state, current_proc->p_s);
 	/*DA FARE 
 	Update the accumulated CPU time for the Current Process
@@ -121,16 +123,43 @@ void BlockingSyscall(int *semaddr, pcb_t * process){
 }
 
 #pragma region SYSCALL_1-10
-/*1*/
+/*1 se tutto va bene ritorna il pid del processo creato*/
 void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns){
 	int pid;
+	pcb_t * new_proc = allocPcb();
+	if(new_proc == NULL) RETURN_SYSCALL(-1); //se non ci sono free pcb ritorni -1
+	state_copy(statep, new_proc->p_s);/*stetep è lo stato del nuovo processo*/
 
-
+	/*il nuovo pcb è messo nella ready queue e figlio del pcb corrente*/
+	struct list_head* head_rd = getHeadRd();
+	insertChild(current_proc, new_proc);
+	insertProcQ(head_rd, new_proc);
+	/*p_time is set to zero;*/
+	new_proc->p_time=0;
+	/*p_supportStruct from a2*/ /*If no parameter is provided, this field is
+									set to NULL Non ho capito sta parte*/
+	new_proc->p_supportStruct=supportp;
+	new_proc->p_semAdd=NULL;
+	if(ns!=NULL){
+		new_proc->namespaces[NS_PID]=ns;
+	}
+	else{
+		new_proc->namespaces[NS_PID]=getNamespace(current_proc,NS_PID);
+	}
+	/*process count è incrementato di 1*/
+	proc_count++;
+	pid = (int)&new_proc;  /*il pid è l'indirizzo di memoria dove è salvato il pid*/
 	RETURN_SYSCALL(pid);
 }
 /*2*/
 void SYSCALL_TERMINATEPROCESS (int pid){
+	if(pid==0){ /*devo uccidere il processo corrente e i suoi figli*/
 
+	}
+	else{ /*devo uccidere il processo con quel pid e i suoi figli*/
+		pcb_t * p = GET_PCB_FROM_PID(pid);
+	}
+	
 }
 
 /*3*/
@@ -202,6 +231,12 @@ void SYSCALL_GET_SUPPORT_DATA(){
 /*9*/
 void SYSCALL_GETPID( int parent){
 	int pid;
+
+	/*
+	if a
+	process is not in the same PID namespace of its parent, this systemcall, with
+	the correct request of the parent PID, will return 0
+	*/
 
 	RETURN_SYSCALL(pid);
 }

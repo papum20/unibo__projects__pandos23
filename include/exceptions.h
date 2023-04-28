@@ -199,5 +199,5 @@ extern void SYSCALL_GET_SUPPORT_DATA();
 extern void SYSCALL_GETPID( int parent);
 extern void SYSCALL_GETCHILDREN(int *children, int size);
 /*operazioni da fare nel return di una system call che blocca*/
-extern void BlockingSyscall();
+extern void BlockingSyscall(int *semaddr, pcb_t * process);
 

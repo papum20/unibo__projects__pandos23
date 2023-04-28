@@ -72,7 +72,6 @@
 #define PSEMVIRT      19
 #define VSEMVIRT      20
 
-#define IS_SYSCALL (x) (x>=CREATEPROCESS) && (x<=GET_TOD)
 
 /* Status register constants */
 #define ALLOFF      0x00000000

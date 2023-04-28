@@ -195,6 +195,7 @@ void SYSCALL_WAITCLOCK(){
 /*8*/
 void SYSCALL_GET_SUPPORT_DATA(){
 
+
 	RETURN_SYSCALL(current_proc->p_supportStruct);
 }
 

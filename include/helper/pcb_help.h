@@ -20,7 +20,6 @@
 */
 
 
-#define GET_PCB_FROM_PID(x) ((pcb_t *)x)
 /*
  * ALLOCATION
  */
@@ -133,6 +132,12 @@ HIDDEN inline int __emptyChild(pcb_t *p) {
 #define pcb_for_each_child(pos, parent) \
 	list_for_each_entry(pos, &(parent->p_child), p_sib)
 
+
+/*
+ * MISC
+ */
+
+#define GET_PCB_FROM_PID(x) ((pcb_t *)x)
 
 
 

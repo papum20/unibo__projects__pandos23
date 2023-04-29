@@ -7,8 +7,11 @@ the provided skeleton TLB-Refill event handler (e.g. uTLB_RefillHandler).
 
 
 #include "exceptions.h"
-
-pcb_t * current_proc = NULL;
+/*questo lo metto extern come mi ha suggerito Daniele così si collega al suo puntatore del current_proc del suo file init, per 
+questo qui non devo mettergli valore ma solo dichiararlo o accederci */
+extern pcb_t * current_proc;
+/*mi serve per la prima system call*/
+extern int proc_count;
 
 
 
@@ -22,7 +25,7 @@ void uTLB_RefillHandler() {
 	
 }
 void PassUpOrDie(int index){
-	support_t * curr_support = SYSCALL_GET_SUPPORT_DATA();
+	support_t * curr_support = current_proc->p_supportStruct;
 	if(curr_support==NULL){
 		SYSCALL_TERMINATEPROCESS(TERMINATE_CURR_PROCESS);
 		return;
@@ -39,8 +42,8 @@ void Exception_handler(){
 	}
 	else if(TLB_EXCEPTION(*exeCode)){
 		TLB_handler();
-	}
-	else if((*exeCode>=EXC_ADEL && *exeCode<=EXC_DBE) || (*exeCode>=EXC_BP && *exeCode<=EXC_OV))//Program Trap
+	}/*(*exeCode>=EXC_ADEL && *exeCode<=EXC_DBE) || (*exeCode>=EXC_BP && *exeCode<=EXC_OV)*/
+	else if(TRAP_EXCEPTION(*exeCode))//Program Trap
 	{
 		Prg_Trap_handler();
 	}
@@ -54,9 +57,8 @@ void SYSCALL_handler(){
 	uint_PTR a1 = &current_proc->p_s.reg_a1;
 	uint_PTR a2 = &current_proc->p_s.reg_a2;
 	uint_PTR a3 = &current_proc->p_s.reg_a3;
-	memaddr result;
 
-	if((is_UM()) && ((current_proc->p_s.status>=CREATEPROCESS) && (current_proc->p_s.status<=GET_TOD))){/*significa che sei in user mode e non va bene, da chiedere al prof*/
+	if((is_UM()) && IS_SYSCALL(current_proc->p_s.status)){/*significa che sei in user mode e non va bene, da chiedere al prof*/
 		uint_PTR exeCode = &current_proc->p_s.cause;
 		*exeCode = CAUSE_GET_EXCCODE(*exeCode); 
 		*exeCode = EXC_RI;     /*setto il registro exeCode in RI e poi chiamo il program Trapp exception handler*/
@@ -64,7 +66,7 @@ void SYSCALL_handler(){
 	}
 	switch(current_proc->p_s.reg_a0){
 		case CREATEPROCESS:
-			result = SYSCALL_CREATEPROCESS((state_t *)*a1, (support_t *) *a2, (struct nsd_t *) *a3);
+			SYSCALL_CREATEPROCESS((state_t *)*a1, (support_t *) *a2, (struct nsd_t *) *a3);
 			break;
 		case TERMPROCESS:
 			SYSCALL_TERMINATEPROCESS (*a1);
@@ -76,29 +78,29 @@ void SYSCALL_handler(){
 			SYSCALL_VERHOGEN((int *)a1);
 			break;
 		case IOWAIT:
-			result = SYSCALL_DOIO((int *)a1,(int *)a2);
+			SYSCALL_DOIO((int *)a1,(int *)a2);
 			break;
 		case GETTIME:
-			result = SYSCALL_GETCPUTIME();
+			SYSCALL_GETCPUTIME();
 			break;
 		case CLOCKWAIT:
 			SYSCALL_WAITCLOCK();
 			break;
 		case GETSUPPORTPTR:
-			result = (memaddr)SYSCALL_GET_SUPPORT_DATA();/*qua come faccio?*/
+			SYSCALL_GET_SUPPORT_DATA();/*qua come faccio?*/
 			break;
 		case TERMINATE:
-			result = SYSCALL_GETPID(*a1);
+			SYSCALL_GETPID(*a1);
 			break;
 		case GET_TOD:
-			result = SYSCALL_GETCHILDREN((int *)a1, *a2);
+			SYSCALL_GETCHILDREN((int *)a1, *a2);
 			break;
 		default:  /*system call con a0 >= 11*/
 			PassUpOrDie(GENERALEXCEPT);
 			break;
 
 	}
-	current_proc->p_s.reg_v0 = result;
+	
 }
 void Prg_Trap_handler(){
 	PassUpOrDie(GENERALEXCEPT);
@@ -107,36 +109,143 @@ void TLB_handler(){
 	PassUpOrDie(PGFAULTEXCEPT);
 }
 
-#pragma region SYSCALL_1-10
-
-support_t * SYSCALL_GET_SUPPORT_DATA(){
-	/*mi sa che per fare questa syscall dobbiamo aggiungere un nuovo campo nel pcb chiamato support_t*/
-}
-cpu_t SYSCALL_GETCPUTIME (){
-	/*penso che per fare questa syscall bisogna mettere nel campo p_time il tempo usato dal pcb
-	quindi quando viene creato un pcb facciamo STCK(proc->p_time) 
+void BlockingSyscall(int *semaddr, pcb_t * process){
+	
+	state_t * saved_exceptions_state = SAVED_EXCEPTIONS_STATE;
+	saved_exceptions_state->pc_epc += WORDLEN;
+	state_copy(saved_exceptions_state, current_proc->p_s);
+	/*DA FARE 
+	Update the accumulated CPU time for the Current Process
 	*/
+	insertBlocked(semaddr, current_proc);
+	/*scheduler();    chiamo lo scheduler   */
+
 }
 
+#pragma region SYSCALL_1-10
+/*1 se tutto va bene ritorna il pid del processo creato*/
+void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns){
+	int pid;
+	pcb_t * new_proc = allocPcb();
+	if(new_proc == NULL) RETURN_SYSCALL(-1); //se non ci sono free pcb ritorni -1
+	state_copy(statep, new_proc->p_s);/*stetep è lo stato del nuovo processo*/
+
+	/*il nuovo pcb è messo nella ready queue e figlio del pcb corrente*/
+	struct list_head* head_rd = getHeadRd();
+	insertChild(current_proc, new_proc);
+	insertProcQ(head_rd, new_proc);
+	/*p_time is set to zero;*/
+	new_proc->p_time=0;
+	/*p_supportStruct from a2*/ /*If no parameter is provided, this field is
+									set to NULL Non ho capito sta parte*/
+	new_proc->p_supportStruct=supportp;
+	new_proc->p_semAdd=NULL;
+	if(ns!=NULL){
+		new_proc->namespaces[NS_PID]=ns;
+	}
+	else{
+		new_proc->namespaces[NS_PID]=getNamespace(current_proc,NS_PID);
+	}
+	/*process count è incrementato di 1*/
+	proc_count++;
+	pid = (int)&new_proc;  /*il pid è l'indirizzo di memoria dove è salvato il pid*/
+	RETURN_SYSCALL(pid);
+}
+/*2*/
+void SYSCALL_TERMINATEPROCESS (int pid){
+	if(pid==0){ /*devo uccidere il processo corrente e i suoi figli*/
+
+	}
+	else{ /*devo uccidere il processo con quel pid e i suoi figli*/
+		pcb_t * p = GET_PCB_FROM_PID(pid);
+	}
+	
+}
+
+/*3*/
 void SYSCALL_PASSEREN (int *semaddr){
 	if((*semaddr)>0){
 		(*semaddr) --;
 	}
 	else{
-		insertBlocked(semaddr, current_proc);
-		/*scheduler();    chiamo lo scheduler   */
+		BlockingSyscall(semaddr, current_proc);
 	}
 }
-
+/*4*/
 void SYSCALL_VERHOGEN (int *semaddr){
 	if((*semaddr)>=1){
-		insertBlocked(semaddr, current_proc);
-		/*scheduler();    chiamo lo scheduler   */
+		BlockingSyscall(semaddr, current_proc);
 	}
 	else{
-		(*semaddr)++;
+		if(sem_queue_is_empty(semaddr)){
+			(*semaddr)++;
+		}
+		else{
+			pcb_t * awakened_process = removeBlocked(semaddr);
+			struct list_head* head_rd = getHeadRd();
+			insertProcQ(head_rd, awakened_process);
+		}
+		
+		
 	}
 }
 
+/*5*/
+void SYSCALL_DOIO (int *cmdAddr, int *cmdValues){
+	int ioStatus;
+
+	RETURN_SYSCALL(ioStatus);
+}
+
+/*6*/
+void SYSCALL_GETCPUTIME (){
+	/*
+	ancora da completare, bisogna gestire per bene il tempo
+	*/
+	RETURN_SYSCALL(current_proc->p_time);
+	/*
+	per tenere traccia del p_time si usa il timer TOD al quale si accede tramite questa macro
+	STCK(x) dove x è una variabile cpu_t nella quale viene salvato il TOD 
+	*/
+/*
+Hence, any return value described above (e.g. SYS6) needs to be put in
+the specified register in the stored exception state
+*/
+	
+}
+
+/*7*/
+void SYSCALL_WAITCLOCK(){
+	/*
+	insertBlocked(current_proc);
+	*/
+}
+
+/*8*/
+void SYSCALL_GET_SUPPORT_DATA(){
+
+
+	RETURN_SYSCALL(current_proc->p_supportStruct);
+}
+
+/*9*/
+void SYSCALL_GETPID( int parent){
+	int pid;
+
+	/*
+	if a
+	process is not in the same PID namespace of its parent, this systemcall, with
+	the correct request of the parent PID, will return 0
+	*/
+
+	RETURN_SYSCALL(pid);
+}
+/*10*/
+void SYSCALL_GETCHILDREN(int *children, int size){
+	int pid; 
+
+
+	RETURN_SYSCALL(pid);
+}
 
 #pragma endregion SYSCALL_1-10

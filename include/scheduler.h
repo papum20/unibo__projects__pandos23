@@ -68,6 +68,11 @@ to complete (which will unblock a pcb and populate the Ready Queue),
 or PANIC (halt execution in the presence of deadlock)
 */
 
-extern void scheduler();
+#include "list.h"
+
+extern void Scheduler();
 /* TEMPORARY NAME !!
 */
+
+/*ritorna la lista dei processi ready (fatta da Giuseppe, se vuoi Tommaso la puoi cambiare)*/
+extern struct list_head* getHeadRd();

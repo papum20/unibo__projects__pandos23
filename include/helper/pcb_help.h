@@ -20,7 +20,7 @@
 */
 
 
-
+#define GET_PCB_FROM_PID(x) ((pcb_t *)x)
 /*
  * ALLOCATION
  */

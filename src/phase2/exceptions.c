@@ -88,7 +88,7 @@ void SYSCALL_handler(){
 			SYSCALL_WAITCLOCK();
 			break;
 		case GETSUPPORTPTR:
-			SYSCALL_GET_SUPPORT_DATA();/*qua come faccio?*/
+			SYSCALL_GET_SUPPORT_DATA();
 			break;
 		case TERMINATE:
 			SYSCALL_GETPID(*a1);
@@ -110,14 +110,29 @@ void TLB_handler(){
 	PassUpOrDie(PGFAULTEXCEPT);
 }
 
-void BlockingSyscall(int *semaddr, pcb_t * process){
-	
+/*
+	macro ausiliaria che gestisce dove mettere il valore di ritorno delle system call che ritornano qualcosa
+	essa mette nel registro v0 del current process il pid di un processo passato come parametro
+*/
+#define __RETURN_SYSCALL(x) (current_proc->p_s.reg_v0 = (memaddr)x)
+
+/*
+	funzione che gestisce il ritorno di una system call
+	aggiorna il saved exception state aumentando program counter di una word per evitare loop e aggiornando il CPU Time del processo corrente
+*/
+
+inline void RETURN_SYSCALL(){
 	state_t * saved_exceptions_state = SAVED_EXCEPTIONS_STATE;
 	saved_exceptions_state->pc_epc += WORDLEN;
 	state_copy(saved_exceptions_state, current_proc->p_s);
 	/*DA FARE 
 	Update the accumulated CPU time for the Current Process
 	*/
+}
+
+
+void BlockingSyscall(int *semaddr, pcb_t * process){
+	RETURN_SYSCALL();
 	insertBlocked(semaddr, current_proc);
 	Scheduler();
 
@@ -128,7 +143,11 @@ void BlockingSyscall(int *semaddr, pcb_t * process){
 void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns){
 	int pid;
 	pcb_t * new_proc = allocPcb();
-	if(new_proc == NULL) RETURN_SYSCALL(-1); //se non ci sono free pcb ritorni -1
+	if(new_proc == NULL){
+		__RETURN_SYSCALL(-1); //se non ci sono free pcb ritorni -1
+		RETURN_SYSCALL();
+
+	} 
 	state_copy(statep, new_proc->p_s);/*stetep è lo stato del nuovo processo*/
 
 	/*il nuovo pcb è messo nella ready queue e figlio del pcb corrente*/
@@ -150,7 +169,8 @@ void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *
 	/*process count è incrementato di 1*/
 	proc_count++;
 	pid = GET_PROC_PID(new_proc);  /*il pid è l'indirizzo di memoria dove è salvato il pid*/
-	RETURN_SYSCALL(pid);
+	__RETURN_SYSCALL(pid);
+	RETURN_SYSCALL();
 }
 /*2*/
 void SYSCALL_TERMINATEPROCESS (int pid){
@@ -204,6 +224,7 @@ void SYSCALL_TERMINATEPROCESS (int pid){
 void SYSCALL_PASSEREN (int *semaddr){
 	if((*semaddr)>0){
 		(*semaddr) --;
+		RETURN_SYSCALL();
 	}
 	else{
 		BlockingSyscall(semaddr, current_proc);
@@ -221,12 +242,14 @@ void SYSCALL_VERHOGEN (int *semaddr){
 	else{
 		if(sem_queue_is_empty(semaddr)){
 			(*semaddr)++;
+
 		}
 		else{
 			pcb_t * awakened_process = removeBlocked(semaddr);
 			struct list_head* head_rd = getHeadRd();
 			insertProcQ(head_rd, awakened_process);
 		}
+		RETURN_SYSCALL();
 	}
 }
 
@@ -234,7 +257,8 @@ void SYSCALL_VERHOGEN (int *semaddr){
 void SYSCALL_DOIO (int *cmdAddr, int *cmdValues){
 	int ioStatus;
 
-	RETURN_SYSCALL(ioStatus);
+	__RETURN_SYSCALL(ioStatus);
+	RETURN_SYSCALL();
 }
 
 /*6*/
@@ -242,7 +266,8 @@ void SYSCALL_GETCPUTIME (){
 	/*
 	ancora da completare, bisogna gestire per bene il tempo
 	*/
-	RETURN_SYSCALL(current_proc->p_time);
+	__RETURN_SYSCALL(current_proc->p_time);
+	RETURN_SYSCALL();
 	/*
 	per tenere traccia del p_time si usa il timer TOD al quale si accede tramite questa macro
 	STCK(x) dove x è una variabile cpu_t nella quale viene salvato il TOD 
@@ -259,13 +284,15 @@ void SYSCALL_WAITCLOCK(){
 	/*
 	insertBlocked(current_proc);
 	*/
+	RETURN_SYSCALL();
 }
 
 /*8*/
 void SYSCALL_GET_SUPPORT_DATA(){
 
 
-	RETURN_SYSCALL(current_proc->p_supportStruct);
+	__RETURN_SYSCALL(current_proc->p_supportStruct);
+	RETURN_SYSCALL();
 }
 
 /*9*/
@@ -287,7 +314,8 @@ void SYSCALL_GETPID( int parent){
 	else{//we want the PID of the calling process
 		pid = GET_PROC_PID(current_proc);
 	}
-	RETURN_SYSCALL(pid);
+	__RETURN_SYSCALL(pid);
+	RETURN_SYSCALL();
 }
 /*10*/
 void SYSCALL_GETCHILDREN(int *children, int size){
@@ -304,13 +332,15 @@ void SYSCALL_GETCHILDREN(int *children, int size){
 				index++;
 			}
 			else{
-				RETURN_SYSCALL(number_of_children);
+				__RETURN_SYSCALL(number_of_children);
+				RETURN_SYSCALL();
 				return;
 			}
 		}
 	}
 	}
-	RETURN_SYSCALL(number_of_children);
+	__RETURN_SYSCALL(number_of_children);
+	RETURN_SYSCALL();
 }
 
 #pragma endregion SYSCALL_1-10

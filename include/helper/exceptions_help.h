@@ -8,6 +8,8 @@
 #include "pandos_cp0.h"
 #include "const.h"
 
+
+
 #define TLB_EXCEPTION(x) (x>=EXC_MOD && x<=EXC_TLBS)
 #define TRAP_EXCEPTION(x) (x>=EXC_ADEL && x<=EXC_DBE) || (x>=EXC_BP && x<=EXC_OV)
 

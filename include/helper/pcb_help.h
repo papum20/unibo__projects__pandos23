@@ -19,8 +19,10 @@
 /* #include "debug.h"
 */
 
-
-#define GET_PCB_FROM_PID(x) ((pcb_t *)x)
+/*dato un pid ritorna il pcb corrispondete  forse & non serve*/
+#define GET_PCB_FROM_PID(x) (pcb_t *)&x
+/*dato un processo ritorna il pid corrispondente*/
+#define GET_PROC_PID(x) (int)x
 /*
  * ALLOCATION
  */
@@ -133,6 +135,7 @@ HIDDEN inline int __emptyChild(pcb_t *p) {
 
 
 
-
+//Ritorna il puntatore al primo figlio del processo senza rimuoverlo
+pcb_t* returnChild(pcb_t *p);
 
 #endif /* PCB_HELP_H */

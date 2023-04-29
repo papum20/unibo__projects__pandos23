@@ -17,12 +17,6 @@ pops]
 int main() {
 
 
-	/* for-loops counter */
-	/* HIDDEN so it doesn't show up in other files */
-	HIDDEN int i;
-	
-
-
 	/* 1. Declare the Level 3 global variables. */
 
 	/* number of started, but not yet terminated processes. */
@@ -54,10 +48,10 @@ int main() {
 	/*	Set the Nucleus exception and TLB-Refill event handlers,
 		and their SP to the top of the Nucleus stack page.
 	*/
-	PASSUP_VECTOR->tlb_refill_handler = (memaddr) uTLB_RefillHandler;
-	PASSUP_VECTOR->tlb_refill_stackPtr = (memaddr) KERNELSTACK;
-	PASSUP_VECTOR->exception_handler = (memaddr) exceptionHandler;
-	PASSUP_VECTOR->exception_stackPtr = (memaddr) KERNELSTACK;
+	PASSUP_VECTOR->tlb_refill_handler	= (memaddr) uTLB_RefillHandler;
+	PASSUP_VECTOR->tlb_refill_stackPtr	= (memaddr) KERNELSTACK;
+	PASSUP_VECTOR->exception_handler	= (memaddr) exceptionHandler;
+	PASSUP_VECTOR->exception_stackPtr	= (memaddr) KERNELSTACK;
 
 
 

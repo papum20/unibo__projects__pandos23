@@ -54,6 +54,8 @@ HIDDEN inline void __initPcb_no_plist(pcb_t *p)
     /* process status information */
     __DFLT_STATE_T(p->p_s);
 	p->p_time = 0;
+	/* process support structure */
+	p->p_supportStruct = NULL;
 	/* semaphore */
     p->p_semAdd = NULL;
     /* Namespace list */

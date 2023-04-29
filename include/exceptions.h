@@ -197,6 +197,7 @@ extern void SYSCALL_GETCPUTIME ();
 extern void SYSCALL_WAITCLOCK();
 extern void SYSCALL_GET_SUPPORT_DATA();
 extern void SYSCALL_GETPID( int parent);
+/*ritorna il numero di figli nello stesso namespace e mette nell'array children i loro pid*/
 extern void SYSCALL_GETCHILDREN(int *children, int size);
 /*operazioni da fare nel return di una system call che blocca*/
 extern void BlockingSyscall(int *semaddr, pcb_t * process);

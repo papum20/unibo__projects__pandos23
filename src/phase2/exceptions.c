@@ -12,6 +12,7 @@ questo qui non devo mettergli valore ma solo dichiararlo o accederci */
 extern pcb_t * current_proc;
 /*mi serve per la prima system call*/
 extern int proc_count;
+extern int soft_block_count;
 
 
 
@@ -42,7 +43,7 @@ void Exception_handler(){
 	}
 	else if(TLB_EXCEPTION(*exeCode)){
 		TLB_handler();
-	}/*(*exeCode>=EXC_ADEL && *exeCode<=EXC_DBE) || (*exeCode>=EXC_BP && *exeCode<=EXC_OV)*/
+	}
 	else if(TRAP_EXCEPTION(*exeCode))//Program Trap
 	{
 		Prg_Trap_handler();
@@ -118,7 +119,7 @@ void BlockingSyscall(int *semaddr, pcb_t * process){
 	Update the accumulated CPU time for the Current Process
 	*/
 	insertBlocked(semaddr, current_proc);
-	/*scheduler();    chiamo lo scheduler   */
+	Scheduler();
 
 }
 
@@ -148,18 +149,55 @@ void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *
 	}
 	/*process count è incrementato di 1*/
 	proc_count++;
-	pid = (int)&new_proc;  /*il pid è l'indirizzo di memoria dove è salvato il pid*/
+	pid = GET_PROC_PID(new_proc);  /*il pid è l'indirizzo di memoria dove è salvato il pid*/
 	RETURN_SYSCALL(pid);
 }
 /*2*/
 void SYSCALL_TERMINATEPROCESS (int pid){
-	if(pid==0){ /*devo uccidere il processo corrente e i suoi figli*/
+	pcb_t * proc_to_terminate;
+	if(pid==0 || pid==NULL){
+		proc_to_terminate = current_proc;
+	}
+	else{
+		proc_to_terminate = GET_PCB_FROM_PID(pid);
+	}
+	/*uccido i figli*/
+	if(!emptyChild(proc_to_terminate)){
+		pcb_t * child = returnChild(proc_to_terminate);
+		/*itero ricorsivamente sui figli*/
+		while(child!=NULL){
+			SYSCALL_TERMINATEPROCESS(GET_PROC_PID(child));
+			child = returnChild(proc_to_terminate);
+		}
+	}
+	/*se proc non ha figli lo stacco dal padre*/
+	outChild(proc_to_terminate); //proc non ha più il padre
 
+	if(proc_to_terminate==current_proc){ /*il processo corrente non può essere bloccato in un semaforo quindi non considero sta cosa*/
+		freePcb(proc_to_terminate); /*libero il pcb*/
+		current_proc = NULL;
+		Scheduler();     /*chiamo lo scheduler per decidere quale processo mettere in current_proc*/
 	}
-	else{ /*devo uccidere il processo con quel pid e i suoi figli*/
-		pcb_t * p = GET_PCB_FROM_PID(pid);
+	else{
+		if(proc_to_terminate->p_semAdd!=NULL){ /*controllo se il processo sia bloccato ad un semaforo non device*/
+			//Rimuovo il processo dal semaforo
+			outBlocked(current_proc);
+			//Rilascio il semaforo
+			*(current_proc->p_semAdd) +=1;
+		}
+		else if(is_blocked_by_devSem(proc_to_terminate)){ //questo else if dipende molto dall'implementazione di Osama, da rivedere
+			//Rimuovo il processo dal semaforo
+			outBlocked(current_proc);
+			soft_block_count--;
+		}
+		else{/*vedo se è nella coda ready*/
+			struct list_head* head_rd = getHeadRd();
+			//Rimuovo il processo dalla coda ready
+			outProcQ(head_rd, proc_to_terminate);
+		}
 	}
-	
+	freePcb(proc_to_terminate); /*libero il pcb*/
+	proc_count--; /*decremento proc_count*/
 }
 
 /*3*/
@@ -169,12 +207,16 @@ void SYSCALL_PASSEREN (int *semaddr){
 	}
 	else{
 		BlockingSyscall(semaddr, current_proc);
+		current_proc = NULL;
+		Scheduler();
 	}
 }
 /*4*/
 void SYSCALL_VERHOGEN (int *semaddr){
 	if((*semaddr)>=1){
 		BlockingSyscall(semaddr, current_proc);
+		current_proc = NULL;
+		Scheduler();
 	}
 	else{
 		if(sem_queue_is_empty(semaddr)){
@@ -185,8 +227,6 @@ void SYSCALL_VERHOGEN (int *semaddr){
 			struct list_head* head_rd = getHeadRd();
 			insertProcQ(head_rd, awakened_process);
 		}
-		
-		
 	}
 }
 
@@ -231,21 +271,46 @@ void SYSCALL_GET_SUPPORT_DATA(){
 /*9*/
 void SYSCALL_GETPID( int parent){
 	int pid;
-
-	/*
-	if a
-	process is not in the same PID namespace of its parent, this systemcall, with
-	the correct request of the parent PID, will return 0
-	*/
-
+	if(parent==TRUE){//we want the PID of the parent of the calling process
+		/*
+		if a
+		process is not in the same PID namespace of its parent, this systemcall, with
+		the correct request of the parent PID, will return 0
+		*/
+		if(getNamespace(current_proc, NS_PID)!=getNamespace(current_proc->p_parent, NS_PID)){
+			pid = 0;
+		}
+		else{
+			pid = GET_PROC_PID(current_proc->p_parent);
+		}
+	}
+	else{//we want the PID of the calling process
+		pid = GET_PROC_PID(current_proc);
+	}
 	RETURN_SYSCALL(pid);
 }
 /*10*/
 void SYSCALL_GETCHILDREN(int *children, int size){
-	int pid; 
-
-
-	RETURN_SYSCALL(pid);
+	int number_of_children = 0; 
+	int index = 0;
+	/*scorro tutta la lista dei figli del current_proc*/
+	if(!emptyChild(current_proc)){
+		struct list_head *pos;
+	list_for_each(pos, &current_proc->p_child){ 
+		pcb_t *child = container_of(pos, pcb_t, p_sib); 
+		if(getNamespace(child, NS_PID)==getNamespace(current_proc,NS_PID)){
+			if(index<size){
+				children[index] = GET_PROC_PID(child);
+				index++;
+			}
+			else{
+				RETURN_SYSCALL(number_of_children);
+				return;
+			}
+		}
+	}
+	}
+	RETURN_SYSCALL(number_of_children);
 }
 
 #pragma endregion SYSCALL_1-10

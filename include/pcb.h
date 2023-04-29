@@ -9,7 +9,6 @@
 #include "linux_list.h"
 
 
-
 /**
  * Initialize the pcbFree_h list to contain MAXPROC elements.
  * This function should be called once during data structure initialization.

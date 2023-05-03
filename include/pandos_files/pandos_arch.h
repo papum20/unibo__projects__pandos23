@@ -10,7 +10,6 @@
 /* #include <umps3/umps/arch.h>
 */
 
-
 /*
  * Interrupt lines
  */

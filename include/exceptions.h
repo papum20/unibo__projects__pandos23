@@ -179,26 +179,60 @@ e poi grazie al pass up vector chiama la funzione exception handler
 #include "pandos_arch.h"
 
 
-#define RETURN_SYSCALL(x) current_proc->p_s.reg_v0 = (memaddr)x
 
+
+/*gestisce le varie eccezioni*/
 extern void Exception_handler();
+
 extern void uTLB_RefillHandler ();
+/*gestisce le system call*/
 extern void SYSCALL_handler();
+/*per le eccezioni 11 o superiore o eccezioni Program Trap o Tlb si esegue una Pass Up or Die*/
 extern void PassUpOrDie(int index);
+/*gestisce le eccezioni Program Trap*/
 extern void Prg_Trap_handler();
+/*gestisce le eccezioni TLB*/
 extern void TLB_handler();
+
 /*SYSTEM CALL 1-10*/
-extern void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns);
-extern void SYSCALL_TERMINATEPROCESS (int pid);/*gli altri due parametri sono 0*/
-extern void SYSCALL_PASSEREN (int *semaddr);/*gli altri due parametri sono 0*/
-extern void SYSCALL_VERHOGEN (int *semaddr);
-extern void SYSCALL_DOIO (int *cmdAddr, int *cmdValues);/*l'ultimo parametro è 0*/
-extern void SYSCALL_GETCPUTIME ();
-extern void SYSCALL_WAITCLOCK();
-extern void SYSCALL_GET_SUPPORT_DATA();
-extern void SYSCALL_GETPID( int parent);
-/*ritorna il numero di figli nello stesso namespace e mette nell'array children i loro pid*/
-extern void SYSCALL_GETCHILDREN(int *children, int size);
-/*operazioni da fare nel return di una system call che blocca*/
+	/*
+	crea un nuovo processo  diventando figlio del processo chiamante, se tutto va bene questa system call ritorna il pid
+	del nuovo processo creato, se invece la lista dei pcb free è vuota allora ritorna -1
+	statep è il p_s del nuovo processo creato, supportp è la struttura di supporto del nuovo processo e ns il suo namespace
+	*/
+	extern void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns);
+	/*
+	termina il processo con quel rispettivo pid e i suoi figli, se pid=0 allora termina il processo corrente e i figli
+	*/
+	extern void SYSCALL_TERMINATEPROCESS (int pid);
+	/*
+	P su un semaforo
+	*/
+	extern void SYSCALL_PASSEREN (int *semaddr);
+	/*
+	V su un semaforo
+	*/
+	extern void SYSCALL_VERHOGEN (int *semaddr);
+	extern void SYSCALL_DOIO (int *cmdAddr, int *cmdValues);
+	extern void SYSCALL_GETCPUTIME ();
+	extern void SYSCALL_WAITCLOCK();
+	/*
+	ritorna il puntatore alla struttura di supporto del processo corrente
+	*/
+	extern void SYSCALL_GET_SUPPORT_DATA();
+	/*
+	se parent = TRUE 
+		se il processo padre del processo corrente è nello stesso PID namespace del processo corrente allora ritorna il PID del padre
+		invece se non è nello stesso namespace ritorna 0
+	se parente = FALSE
+		ritorna il pid del processo corrente
+	*/
+	extern void SYSCALL_GETPID( int parent);
+	/*
+	ritorna il numero di figli nello stesso namespace e mette nell'array children i loro pid
+	*/
+	extern void SYSCALL_GETCHILDREN(int *children, int size);
+
+/*operazioni da fare nel return di una system call che blocca capitolo 3.5.13*/
 extern void BlockingSyscall(int *semaddr, pcb_t * process);
 

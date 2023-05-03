@@ -11,35 +11,35 @@ effect after the initial LDST loads the processor state. [Section ??-
 pops]
 */
 
+/* 1. Declare the Level 3 global variables. */
+
+/* number of started, but not yet terminated processes. */
+int proc_count;
+
+/*	number of started, but not terminated, processes, that are
+	in the “blocked” state due to an I/O or timer request.
+*/
+int soft_block_count;
+
+/* queue of pcbs that are in the "ready" state. */
+struct list_head readyQ;
+
+/*	Pointer to the pcb that is in the “running” state,
+	i.e. the current executing process.
+*/
+pcb_t *current_proc;	
+
+/*	One integer semaphore for each external (sub)device, plus one
+	for the Pseudo-clock, plus four for two, independend terminal
+	devices, each needing two semaphores for read and write. 
+*/
+int dev_sems[N_SEM_DEVICES];
+
 
 
 
 int main() {
 
-
-	/* 1. Declare the Level 3 global variables. */
-
-	/* number of started, but not yet terminated processes. */
-	static int proc_count;
-
-	/*	number of started, but not terminated, processes, that are
-		in the “blocked” state due to an I/O or timer request.
-	*/
-	static int soft_block_count;
-
-	/* queue of pcbs that are in the "ready" state. */
-	static struct list_head readyQ;
-
-	/*	Pointer to the pcb that is in the “running” state,
-		i.e. the current executing process.
-	*/
-	static pcb_t *current_proc;	
-
-	/*	One integer semaphore for each external (sub)device, plus one
-		for the Pseudo-clock, plus four for two, independend terminal
-		devices, each needing two semaphores for read and write. 
-	*/
-	static int dev_sems[N_SEM_DEVICES];
 
 
 

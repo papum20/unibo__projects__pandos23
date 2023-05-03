@@ -183,6 +183,23 @@ e poi grazie al pass up vector chiama la funzione exception handler
 
 
 
+/*
+	macro ausiliaria che gestisce dove mettere il valore di ritorno delle system call che ritornano qualcosa
+	essa mette nel registro v0 del current process il pid di un processo passato come parametro
+*/
+#define __RETURN_SYSCALL(x) (current_proc->p_s.reg_v0 = (memaddr)x)
+
+/*
+	funzione che gestisce il ritorno di una system call
+	aggiorna il saved exception state aumentando program counter di una word per evitare loop e aggiornando il CPU Time del processo corrente
+*/
+
+inline void RETURN_SYSCALL(){
+	state_t * saved_exceptions_state = SAVED_EXCEPTIONS_STATE;
+	saved_exceptions_state->pc_epc += WORDLEN;
+	state_copy(saved_exceptions_state, current_proc->p_s);
+}
+
 
 /*gestisce le varie eccezioni*/
 extern void Exception_handler();

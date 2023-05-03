@@ -13,6 +13,8 @@ extern pcb_t * current_proc;
 /*mi serve per la prima system call*/
 extern int proc_count;
 extern int soft_block_count;
+/*semaforo dell'intervall timer, lo uso nella system call wait for clock */
+extern semd_t * sem_IT;
 
 
 
@@ -125,15 +127,16 @@ inline void RETURN_SYSCALL(){
 	state_t * saved_exceptions_state = SAVED_EXCEPTIONS_STATE;
 	saved_exceptions_state->pc_epc += WORDLEN;
 	state_copy(saved_exceptions_state, current_proc->p_s);
-	/*DA FARE 
-	Update the accumulated CPU time for the Current Process
-	*/
 }
 
 
-void BlockingSyscall(int *semaddr, pcb_t * process){
+void BlockingSyscall(int *semaddr){
 	RETURN_SYSCALL();
+	/*DA FARE 
+	Update the accumulated CPU time for the Current Process
+	*/
 	insertBlocked(semaddr, current_proc);
+	current_proc = NULL;
 	Scheduler();
 
 }
@@ -222,30 +225,28 @@ void SYSCALL_TERMINATEPROCESS (int pid){
 
 /*3*/
 void SYSCALL_PASSEREN (int *semaddr){
-	if((*semaddr)>0){
-		(*semaddr) --;
+	semd_t * sem = (semd_t *)semaddr;
+	if((*sem->s_key)>0){
+		(*sem->s_key) --;
 		RETURN_SYSCALL();
 	}
 	else{
-		BlockingSyscall(semaddr, current_proc);
-		current_proc = NULL;
-		Scheduler();
+		BlockingSyscall(sem->s_key);
 	}
 }
 /*4*/
 void SYSCALL_VERHOGEN (int *semaddr){
-	if((*semaddr)>=1){
-		BlockingSyscall(semaddr, current_proc);
-		current_proc = NULL;
-		Scheduler();
+	semd_t * sem = (semd_t *)semaddr;
+	if((*sem->s_key)>=1){
+		BlockingSyscall(sem->s_key);
 	}
 	else{
-		if(sem_queue_is_empty(semaddr)){
-			(*semaddr)++;
+		if(emptyProcQ(&sem->s_procq) == true){
+			(*sem->s_key)++;
 
 		}
 		else{
-			pcb_t * awakened_process = removeBlocked(semaddr);
+			pcb_t * awakened_process = removeBlocked(sem->s_key);
 			struct list_head* head_rd = getHeadRd();
 			insertProcQ(head_rd, awakened_process);
 		}
@@ -263,6 +264,7 @@ void SYSCALL_DOIO (int *cmdAddr, int *cmdValues){
 
 /*6*/
 void SYSCALL_GETCPUTIME (){
+	
 	/*
 	ancora da completare, bisogna gestire per bene il tempo
 	*/
@@ -280,17 +282,13 @@ the specified register in the stored exception state
 }
 
 /*7*/
+/*bisogna usare lo speudo clock cioè l'interval timer che io rendo da zero a numeri negativi e poi l'interrupt handler riporta a zero ogni tot*/
 void SYSCALL_WAITCLOCK(){
-	/*
-	insertBlocked(current_proc);
-	*/
-	RETURN_SYSCALL();
+	BlockingSyscall(sem_IT->s_key);
 }
 
 /*8*/
 void SYSCALL_GET_SUPPORT_DATA(){
-
-
 	__RETURN_SYSCALL(current_proc->p_supportStruct);
 	RETURN_SYSCALL();
 }

@@ -34,7 +34,7 @@ static inline void regSetPC(state_t *statep, memaddr addr) {
 	i.e. the part of the BIOS Data Page, where the BIOS finds the address of the Nucleus functions
 	to pass control to for both TLB-Refill events and all other exceptions.
 */
-#define PASSUP_VECTOR = ((passupvector_t*) BIOS_EXEC_HANDLERS_ADDRS)
+#define PASSUP_VECTOR ((passupvector_t*)BIOS_EXEC_HANDLERS_ADDRS)
 
 
 

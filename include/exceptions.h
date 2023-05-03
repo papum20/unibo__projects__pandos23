@@ -163,20 +163,22 @@ e poi grazie al pass up vector chiama la funzione exception handler
 */
 
 
+#include "pandos_arch.h"
 #include "pandos_const.h"
 #include "pandos_cp0.h"
 #include "pandos_libumps.h"
 #include "pandos_types.h"
-#include "pandos_types2.h"
 #include "types.h"
-#include "scheduler.h"
-#include "const.h"
-#include "interrupts.h"
-#include "exceptions_help.h"
+
 #include "ash.h"
 #include "ns.h"
+
+#include "interrupts.h"
+#include "scheduler.h"
+
+#include "const.h"
 #include "ash_help.h"
-#include "pandos_arch.h"
+#include "exceptions_help.h"
 
 
 

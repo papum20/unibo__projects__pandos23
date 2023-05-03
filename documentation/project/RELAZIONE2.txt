@@ -12,3 +12,6 @@ NOTES:
 */
 
 LDIT takes ms?
+
+
+ns: non aggiunge ns se già presente uno del tipo?

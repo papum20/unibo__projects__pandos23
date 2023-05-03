@@ -19,10 +19,7 @@
 /* #include "debug.h"
 */
 
-/*dato un pid ritorna il pcb corrispondete  forse & non serve*/
-#define GET_PCB_FROM_PID(x) (pcb_t *)&x
-/*dato un processo ritorna il pid corrispondente*/
-#define GET_PROC_PID(x) (int)x
+
 /*
  * ALLOCATION
  */
@@ -56,6 +53,8 @@ HIDDEN inline void __initPcb_no_plist(pcb_t *p)
     /* process status information */
     __DFLT_STATE_T(p->p_s);
 	p->p_time = 0;
+	/* process support structure */
+	p->p_supportStruct = NULL;
 	/* semaphore */
     p->p_semAdd = NULL;
     /* Namespace list */
@@ -134,8 +133,17 @@ HIDDEN inline int __emptyChild(pcb_t *p) {
 	list_for_each_entry(pos, &(parent->p_child), p_sib)
 
 
+/*
+ * MISC
+ */
 
-//Ritorna il puntatore al primo figlio del processo senza rimuoverlo
-pcb_t* returnChild(pcb_t *p);
+#define GET_PCB_FROM_PID(x) ((pcb_t *)x)
+/*dato un pid ritorna il pcb corrispondete  forse & non serve*/
+#define GET_PCB_FROM_PID(x) (pcb_t *)&x
+/*dato un processo ritorna il pid corrispondente*/
+#define GET_PROC_PID(x) (int)x
+/*Ritorna il puntatore al primo figlio del processo senza rimuoverlo
+pcb_t* returnChild(pcb_t *p);*/
+
 
 #endif /* PCB_HELP_H */

@@ -3,7 +3,6 @@
 
 
 #include "pandos_bios.h"
-#include "pandos_types2.h"
 
 #include "pandos_cp0.h"
 #include "const.h"

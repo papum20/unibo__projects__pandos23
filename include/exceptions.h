@@ -162,6 +162,9 @@ quando il p2test che sarebbe un utente chiama ad esempio la funzione SYSCALL que
 e poi grazie al pass up vector chiama la funzione exception handler
 */
 
+#ifndef EXCEPTIONS_H
+#define EXCEPTIONS_H
+
 
 #include "pandos_arch.h"
 #include "pandos_const.h"
@@ -238,3 +241,5 @@ extern void TLB_handler();
 /*operazioni da fare nel return di una system call che blocca capitolo 3.5.13*/
 extern void BlockingSyscall(int *semaddr);
 
+
+#endif /* EXCEPTIONS_H */

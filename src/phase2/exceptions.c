@@ -82,6 +82,9 @@ void uTLB_RefillHandler() {
     LDST((state_t *)0x0FFFF000);
 	
 }
+
+
+
 void PassUpOrDie(int index){
 	support_t * curr_support = current_proc->p_supportStruct;
 	if(curr_support==NULL){
@@ -90,12 +93,12 @@ void PassUpOrDie(int index){
 	}
 	state_t * saved_exceptions_state = SAVED_EXCEPTIONS_STATE;
 	state_copy(saved_exceptions_state, curr_support->sup_exceptState[index]);
-	LDCXT(curr_support->sup_exceptContext[index].c_stackPtr,curr_support->sup_exceptContext[index].c_status,curr_support->sup_exceptContext[index].c_pc);
+	LDCXT(curr_support->sup_exceptContext[index].c_stackPtr, curr_support->sup_exceptContext[index].c_status, curr_support->sup_exceptContext[index].c_pc);
 }
 void Exception_handler(){
 	uint_PTR exeCode = &current_proc->p_s.cause;
 	*exeCode = CAUSE_GET_EXCCODE(*exeCode);
-	if(*exeCode==EXC_INT){
+	if(*exeCode == EXC_INT){
 		Interrupt_handler();
 	}
 	else if(TLB_EXCEPTION(*exeCode)){

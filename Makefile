@@ -61,7 +61,7 @@ DEFS = $(DEPS) $(INCDIR)/libumps.h Makefile
 # std=gnu99 supports: inline, typeof
 CFLAGS = -ffreestanding -std=gnu99 -Wall -c -mips1 -mabi=32 -mfp32 \
  	-mno-gpopt -G 0 -fno-pic -mno-abicalls -o
-CFLAGSINC = $(patsubst %, -iquote%, $(IDIRS)) -Iinclude/phase1_files/
+CFLAGSINC = $(patsubst %, -iquote%, $(IDIRS)) -Iinclude/pandos_files/
 LDAOUTFLAGS = -G 0 -nostdlib -T $(SUPDIR)/umpsaout.ldscript
 LDCOREFLAGS = -G 0 -nostdlib -T $(SUPDIR)/umpscore.ldscript
 

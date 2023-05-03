@@ -142,8 +142,15 @@ HIDDEN inline int __emptyChild(pcb_t *p) {
 #define GET_PCB_FROM_PID(x) (pcb_t *)&x
 /*dato un processo ritorna il pid corrispondente*/
 #define GET_PROC_PID(x) (int)x
-/*Ritorna il puntatore al primo figlio del processo senza rimuoverlo
-pcb_t* returnChild(pcb_t *p);*/
 
+
+
+//Ritorna il puntatore al primo figlio del processo senza rimuoverlo
+inline pcb_t* returnChild(pcb_t *p){
+	if(__emptyChild(p)) //p non ha figli
+		return NULL;
+	pcb_t *tmp = container_of(p->p_child.next, pcb_t, p_sib); 
+	return tmp;	
+}
 
 #endif /* PCB_HELP_H */

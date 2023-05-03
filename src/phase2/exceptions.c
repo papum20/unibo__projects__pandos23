@@ -13,8 +13,10 @@ extern pcb_t * current_proc;
 /*mi serve per la prima system call*/
 extern int proc_count;
 extern int soft_block_count;
-/*semaforo dell'intervall timer, lo uso nella system call wait for clock */
+/*semaforo dell'intervall timer, lo uso nella system call wait for clock 
+  NOME TEMPORANEO*/
 extern semd_t * sem_IT;
+
 
 
 
@@ -132,9 +134,10 @@ inline void RETURN_SYSCALL(){
 
 void BlockingSyscall(int *semaddr){
 	RETURN_SYSCALL();
-	/*DA FARE 
+	/*
 	Update the accumulated CPU time for the Current Process
 	*/
+	current_proc->p_time = get_cpu_time();
 	insertBlocked(semaddr, current_proc);
 	current_proc = NULL;
 	Scheduler();
@@ -264,11 +267,14 @@ void SYSCALL_DOIO (int *cmdAddr, int *cmdValues){
 
 /*6*/
 void SYSCALL_GETCPUTIME (){
-	
+	current_proc->p_time = get_cpu_time();
+	/*questa system call ritorna il p_time + plus the amount of
+CPU time used during the current quantum/time slice,   il clock PLT viene usato per dire quando il time slice del current
+process finisce, quindi fra un time slice e un altro bisogna salvarsi il tempo*/
 	/*
 	ancora da completare, bisogna gestire per bene il tempo
 	*/
-	__RETURN_SYSCALL(current_proc->p_time);
+	__RETURN_SYSCALL(current_proc->p_time + get_CPU_time_slice_passed()); //questa funzione deve essere implementata da Tommaso e ritorna il tempo della CPU usato nel time slice
 	RETURN_SYSCALL();
 	/*
 	per tenere traccia del p_time si usa il timer TOD al quale si accede tramite questa macro

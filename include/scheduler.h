@@ -69,6 +69,7 @@ or PANIC (halt execution in the presence of deadlock)
 */
 
 #include "list.h"
+#include "scheduler_help.h"
 
 extern void Scheduler();
 /* TEMPORARY NAME !!

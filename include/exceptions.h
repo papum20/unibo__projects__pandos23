@@ -234,5 +234,5 @@ extern void TLB_handler();
 	extern void SYSCALL_GETCHILDREN(int *children, int size);
 
 /*operazioni da fare nel return di una system call che blocca capitolo 3.5.13*/
-extern void BlockingSyscall(int *semaddr, pcb_t * process);
+extern void BlockingSyscall(int *semaddr);
 

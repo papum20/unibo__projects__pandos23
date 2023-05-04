@@ -199,21 +199,30 @@ e poi grazie al pass up vector chiama la funzione exception handler
 
 inline void RETURN_SYSCALL(){
 	state_t * saved_exceptions_state = SAVED_EXCEPTIONS_STATE;
+	/* assegnamento inutile, usa direttamente SAVED_EXCEPTION_STATE*/
 	saved_exceptions_state->pc_epc += WORDLEN;
 	state_copy(saved_exceptions_state, current_proc->p_s);
 }
+
+/* non sono evindenti le differenze tra queste due funzioni con lo stesso nome
+*/
 
 
 /*gestisce le varie eccezioni*/
 extern void Exception_handler();
 
 extern void uTLB_RefillHandler ();
+
 /*gestisce le system call*/
 extern void SYSCALL_handler();
+
 /*per le eccezioni 11 o superiore o eccezioni Program Trap o Tlb si esegue una Pass Up or Die*/
+
 extern void PassUpOrDie(int index);
+
 /*gestisce le eccezioni Program Trap*/
 extern void Prg_Trap_handler();
+
 /*gestisce le eccezioni TLB*/
 extern void TLB_handler();
 

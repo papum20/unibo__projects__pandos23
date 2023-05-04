@@ -3,8 +3,9 @@
 
 
 #include "pandos_bios.h"
-
 #include "pandos_cp0.h"
+#include "pandos_types.h"
+
 #include "const.h"
 
 
@@ -13,8 +14,8 @@
 #define TRAP_EXCEPTION(x) (x>=EXC_ADEL && x<=EXC_DBE) || (x>=EXC_BP && x<=EXC_OV)
 
 #define IS_SYSCALL(x) ((x>=CREATEPROCESS) && (x<=GET_TOD))
-//ritorna il saved exceptions state
-#define SAVED_EXCEPTIONS_STATE  ((state_t *)BIOS_DATA_PAGE_BASE);
+// saved exceptions state
+#define SAVED_EXCEPTIONS_STATE  ((state_t *)BIOS_DATA_PAGE_BASE)
 
 /*copio lo stato sorgente nello stato destinazione*/
 extern void state_copy(state_t* src_state, state_t dst_state);

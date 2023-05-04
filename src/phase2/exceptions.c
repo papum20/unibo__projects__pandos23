@@ -7,6 +7,8 @@ the provided skeleton TLB-Refill event handler (e.g. uTLB_RefillHandler).
 
 
 #include "exceptions.h"
+
+
 /*questo lo metto extern come mi ha suggerito Daniele così si collega al suo puntatore del current_proc del suo file init, per 
 questo qui non devo mettergli valore ma solo dichiararlo o accederci */
 extern pcb_t * current_proc;
@@ -29,21 +31,11 @@ void uTLB_RefillHandler() {
 }
 
 
-void PassUpOrDie(int index){
-	support_t * curr_support = current_proc->p_supportStruct;
-	if(curr_support==NULL){
-		SYSCALL_TERMINATEPROCESS(TERMINATE_CURR_PROCESS);
-		return;
-	}
-	state_t * saved_exceptions_state = SAVED_EXCEPTIONS_STATE;
-	state_copy(saved_exceptions_state, curr_support->sup_exceptState[index]);
-	LDCXT(curr_support->sup_exceptContext[index].c_stackPtr, curr_support->sup_exceptContext[index].c_status, curr_support->sup_exceptContext[index].c_pc);
-}
-
 
 void Exception_handler(){
 	uint_PTR exeCode = &current_proc->p_s.cause;
 	*exeCode = CAUSE_GET_EXCCODE(*exeCode);
+
 	if(*exeCode == EXC_INT){
 		Interrupt_handler();
 	}
@@ -65,13 +57,42 @@ void SYSCALL_handler(){
 	uint_PTR a1 = &current_proc->p_s.reg_a1;
 	uint_PTR a2 = &current_proc->p_s.reg_a2;
 	uint_PTR a3 = &current_proc->p_s.reg_a3;
+	/* spunto:
+	uint_PTR	a1 = &current_proc->p_s.reg_a1,
+				a2 = &current_proc->p_s.reg_a2,
+				a3 = &current_proc->p_s.reg_a3;
+	*/
 
 	if((is_UM()) && IS_SYSCALL(current_proc->p_s.status)){/*significa che sei in user mode e non va bene, da chiedere al prof*/
+	/* parentesi non necessarie */
+	/* if(is_UM() && IS_SYSCALL(current_proc->p_s.status)) { */
 		uint_PTR exeCode = &current_proc->p_s.cause;
+		/* non serve il puntatore al puntatore (&current_proc) */
 		*exeCode = CAUSE_GET_EXCCODE(*exeCode); 
-		*exeCode = EXC_RI;     /*setto il registro exeCode in RI e poi chiamo il program Trapp exception handler*/
+		/* assegnamento inutile, poi sovrascritto */
+		/* 2 ambiguità:
+			1. exeCode prima è unsigned int*, poi unsigned int
+			2. exeCode prima è un registro cause (&current_proc->p_s.cause), poi un valore di exeCode
+		*/
+		/* e.g. solution:
+			cause & !CAUSE_EXCCODE_MASK		// (and not) applica la (un)mask, cioè resetta la parte exc del registro cause
+			// dopo ...
+			cause | (EXC_RI << CAUSE_EXCCODE_BIT)	// setta la part exc del registro cause (dopo averlo azzerato)
+
+			mettendo insieme:
+
+			#define __CAUSE_EXCCODE_SETTED(cause, x) (cause & !CAUSE_EXCCODE_MASK) | (x << CAUSE_EXCCODE_BIT)
+			static inline CAUSE_SET_EXCCODE(state_t *state, unsigned int code) {
+				state.cause = __CAUSE_EXCCODE_SETTED(state.cause, code);
+			}
+
+			assegnamento: CAUSE_SET_EXCCODE(&current_proc->p_s);
+		*/
+		*exeCode = EXC_RI;     /*setto il registro exeCode in RI e poi chiamo il program Trap exception handler*/
+		
 		Prg_Trap_handler();
 	}
+	
 	switch(current_proc->p_s.reg_a0){
 		case CREATEPROCESS:
 			SYSCALL_CREATEPROCESS((state_t *)*a1, (support_t *) *a2, (struct nsd_t *) *a3);
@@ -108,8 +129,62 @@ void SYSCALL_handler(){
 			break;
 
 	}
+
+	/*
+	prova questo:
+
+	#include <stdio.h>
+	#define DOIO 1
+	#define VERHOGEN 2
+	#define SYSCALL(number, a0, a1) SYSCALL_##number(a0, a1)
+
+	void SYSCALL_DOIO(int a0, int a1) {
+		printf("DOIO %d %d\n", a0, a1);
+	}
+	void SYSCALL_VERHOGEN(int a0, int a1) {
+		printf("V %d %d\n", a0, a1);
+
+	}
+
+	int main() {
+		SYSCALL(DOIO, 1, 2);
+		SYSCALL(VERHOGEN, 3, 2);
+		int a = 5, b = 6;
+		SYSCALL(VERHOGEN, a, b);
+	}
+	*/
 	
 }
+
+
+
+void PassUpOrDie(int index){
+	support_t * curr_support = current_proc->p_supportStruct;
+	
+	if(curr_support==NULL){
+		SYSCALL_TERMINATEPROCESS(TERMINATE_CURR_PROCESS);
+		return;
+	}
+
+	state_copy(SAVED_EXCEPTIONS_STATE, curr_support->sup_exceptState[index]);
+	LDCXT(curr_support->sup_exceptContext[index].c_stackPtr, curr_support->sup_exceptContext[index].c_status, curr_support->sup_exceptContext[index].c_pc);
+	/* return qui e non sopra */
+}
+/* il fatto che un'espressione così lunga sia ripetuta cosi tante volte dovrebbe far pensare: 
+	curr_support->sup_exceptContext[index]
+
+	per es.:
+	1. curr_support: dargli nome più corto (purché sia ancora leggibile)
+	2.
+	void PassUpOrDie(int excpt_type) {
+		if(current_proc->p_supportStruct == NULL)
+			SYSCALL_TERMINATEPROCESS(TERMINATE_CURR_PROCESS);
+
+		context_t *cxt = proc->p_supportStruct->sup_exceptContext[excpt_type];
+		LDCXT(cxt.c_stackPtr, cxt.c_status, cxt.c_pc);
+		return
+	}
+*/
 
 
 void Prg_Trap_handler(){
@@ -121,10 +196,18 @@ void TLB_handler(){
 	PassUpOrDie(PGFAULTEXCEPT);
 }
 
+/* funzioni così corte, e soprattutto senza parametri, hanno senso di essere macro,
+	o quantomento, sicuramente, inline.
+	*/
+
 
 
 void BlockingSyscall(int *semaddr){
 	RETURN_SYSCALL();
+	/* un return come prima istruzione di una funzione?
+		o è sbagliato,
+		o lo scopo della macro è ben diverso da quello intuibile.
+	*/
 	//Update the accumulated CPU time for the Current Process
 	update_p_time();
 	insertBlocked(semaddr, current_proc);

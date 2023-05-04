@@ -13,6 +13,10 @@
 
 	//macro da chiamare quando viene scelto un nuovo current process
 	#define start_timer (STCK(initIntervall))
+	/* qaule timer??
+	già ci sono 4-5 timer in umps, cercherei almeno di far capire a quale si riferisce;
+	inoltre in quanto macro, dovrebbe essere UPPERCASE
+	*/
 
 	//ritorna il tempo di esecuzione della cpu per il current process, serve alla system call get_cpu_time
 	inline cpu_t get_cpu_time () {

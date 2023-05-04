@@ -14,10 +14,8 @@ extern pcb_t * current_proc;
 extern int proc_count;
 extern int soft_block_count;
 /*semaforo dell'intervall timer, lo uso nella system call wait for clock 
-  NOME TEMPORANEO*/
+  NOME TEMPORANEO   OSAMA lo deve modificare se vuole*/
 extern semd_t * sem_IT;
-
-
 
 
 void uTLB_RefillHandler() {
@@ -31,7 +29,6 @@ void uTLB_RefillHandler() {
 }
 
 
-
 void PassUpOrDie(int index){
 	support_t * curr_support = current_proc->p_supportStruct;
 	if(curr_support==NULL){
@@ -42,6 +39,8 @@ void PassUpOrDie(int index){
 	state_copy(saved_exceptions_state, curr_support->sup_exceptState[index]);
 	LDCXT(curr_support->sup_exceptContext[index].c_stackPtr, curr_support->sup_exceptContext[index].c_status, curr_support->sup_exceptContext[index].c_pc);
 }
+
+
 void Exception_handler(){
 	uint_PTR exeCode = &current_proc->p_s.cause;
 	*exeCode = CAUSE_GET_EXCCODE(*exeCode);
@@ -60,6 +59,7 @@ void Exception_handler(){
 	}
 
 }
+
 
 void SYSCALL_handler(){
 	uint_PTR a1 = &current_proc->p_s.reg_a1;
@@ -110,45 +110,33 @@ void SYSCALL_handler(){
 	}
 	
 }
+
+
 void Prg_Trap_handler(){
 	PassUpOrDie(GENERALEXCEPT);
 }
+
+
 void TLB_handler(){
 	PassUpOrDie(PGFAULTEXCEPT);
 }
 
-/*
-	macro ausiliaria che gestisce dove mettere il valore di ritorno delle system call che ritornano qualcosa
-	essa mette nel registro v0 del current process il pid di un processo passato come parametro
-*/
-#define __RETURN_SYSCALL(x) (current_proc->p_s.reg_v0 = (memaddr)x)
-
-/*
-	funzione che gestisce il ritorno di una system call
-	aggiorna il saved exception state aumentando program counter di una word per evitare loop e aggiornando il CPU Time del processo corrente
-*/
-
-inline void RETURN_SYSCALL(){
-	state_t * saved_exceptions_state = SAVED_EXCEPTIONS_STATE;
-	saved_exceptions_state->pc_epc += WORDLEN;
-	state_copy(saved_exceptions_state, current_proc->p_s);
-}
 
 
 void BlockingSyscall(int *semaddr){
 	RETURN_SYSCALL();
-	/*
-	Update the accumulated CPU time for the Current Process
-	*/
-	current_proc->p_time = get_cpu_time();
+	//Update the accumulated CPU time for the Current Process
+	update_p_time();
 	insertBlocked(semaddr, current_proc);
 	current_proc = NULL;
 	Scheduler();
 
 }
 
-#pragma region SYSCALL_1-10
-/*1 se tutto va bene ritorna il pid del processo creato*/
+
+#pragma region SYSCALL_1_10
+
+/*1*/
 void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns){
 	int pid;
 	pcb_t * new_proc = allocPcb();
@@ -181,6 +169,8 @@ void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *
 	__RETURN_SYSCALL(pid);
 	RETURN_SYSCALL();
 }
+
+
 /*2*/
 void SYSCALL_TERMINATEPROCESS (int pid){
 	pcb_t * proc_to_terminate;
@@ -229,6 +219,7 @@ void SYSCALL_TERMINATEPROCESS (int pid){
 	proc_count--; /*decremento proc_count*/
 }
 
+
 /*3*/
 void SYSCALL_PASSEREN (int *semaddr){
 	semd_t * sem = (semd_t *)semaddr;
@@ -240,6 +231,8 @@ void SYSCALL_PASSEREN (int *semaddr){
 		BlockingSyscall(sem->s_key);
 	}
 }
+
+
 /*4*/
 void SYSCALL_VERHOGEN (int *semaddr){
 	semd_t * sem = (semd_t *)semaddr;
@@ -260,6 +253,7 @@ void SYSCALL_VERHOGEN (int *semaddr){
 	}
 }
 
+
 /*5*/
 void SYSCALL_DOIO (int *cmdAddr, int *cmdValues){
 	int ioStatus;
@@ -268,39 +262,31 @@ void SYSCALL_DOIO (int *cmdAddr, int *cmdValues){
 	RETURN_SYSCALL();
 }
 
+
 /*6*/
 void SYSCALL_GETCPUTIME (){
-	current_proc->p_time = get_cpu_time();
+	
 	/*questa system call ritorna il p_time + plus the amount of
 CPU time used during the current quantum/time slice,   il clock PLT viene usato per dire quando il time slice del current
 process finisce, quindi fra un time slice e un altro bisogna salvarsi il tempo*/
-	/*
-	ancora da completare, bisogna gestire per bene il tempo
-	*/
-	__RETURN_SYSCALL(current_proc->p_time + get_CPU_time_slice_passed()); //questa funzione deve essere implementata da Tommaso e ritorna il tempo della CPU usato nel time slice
+
+	__RETURN_SYSCALL(get_cpu_time() + get_CPU_time_slice_passed()); //questa funzione deve essere implementata da Tommaso e ritorna il tempo della CPU usato nel time slice
 	RETURN_SYSCALL();
-	/*
-	per tenere traccia del p_time si usa il timer TOD al quale si accede tramite questa macro
-	STCK(x) dove x è una variabile cpu_t nella quale viene salvato il TOD 
-	*/
-/*
-Hence, any return value described above (e.g. SYS6) needs to be put in
-the specified register in the stored exception state
-*/
-	
 }
 
+
 /*7*/
-/*bisogna usare lo speudo clock cioè l'interval timer che io rendo da zero a numeri negativi e poi l'interrupt handler riporta a zero ogni tot*/
 void SYSCALL_WAITCLOCK(){
 	BlockingSyscall(sem_IT->s_key);
 }
+
 
 /*8*/
 void SYSCALL_GET_SUPPORT_DATA(){
 	__RETURN_SYSCALL(current_proc->p_supportStruct);
 	RETURN_SYSCALL();
 }
+
 
 /*9*/
 void SYSCALL_GETPID( int parent){
@@ -324,6 +310,8 @@ void SYSCALL_GETPID( int parent){
 	__RETURN_SYSCALL(pid);
 	RETURN_SYSCALL();
 }
+
+
 /*10*/
 void SYSCALL_GETCHILDREN(int *children, int size){
 	int number_of_children = 0; 
@@ -350,4 +338,4 @@ void SYSCALL_GETCHILDREN(int *children, int size){
 	RETURN_SYSCALL();
 }
 
-#pragma endregion SYSCALL_1-10
+#pragma endregion SYSCALL_1_10

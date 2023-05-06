@@ -76,3 +76,5 @@ context_t sup_exceptContext[2];
 */
 /*sono Giuseppe, questa funzione la uso in exceptions.c*/
 extern void Interrupt_handler();
+//sono sempre io Giuseppe, questa funzione prende un pcb e dice se esso è bloccato un un semaforo dei devices
+extern int is_blocked_by_devSem(pcb_t * process);

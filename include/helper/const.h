@@ -5,7 +5,7 @@
 /*
  * Basic types
  */
-typedef unsigned int * uint_PTR;
+//typedef unsigned int * uint_PTR;
 
 
 /*	alias of static, for disambiguating its use to declare

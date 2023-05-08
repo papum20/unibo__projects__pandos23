@@ -77,5 +77,6 @@ extern void Scheduler();
 
 /*ritorna la lista dei processi ready (fatta da Giuseppe, se vuoi Tommaso la puoi cambiare)*/
 extern struct list_head* getHeadRd();
-//sono io Giuseppe, questa funzione ritorna the amount of CPU time used during the current quantum/time slice.
+
+/* returns the amount of CPU time used during the current quantum/time slice. */
 extern cpu_t get_CPU_time_slice_passed();

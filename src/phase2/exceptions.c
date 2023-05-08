@@ -11,6 +11,8 @@
 /*
 * COMMENTI TEMPORANEI MOLTO ROZZI CHE HO SCRITTO ORA SOLO PER RICORDARMI COSA SONO, DA RIFINIRE IN SEGUITO
 */
+/* ok, poi metticene di giusti/"non rozzi" (cioè che dicono cosa sono le variabili) */
+
 	/*questo lo metto extern come mi ha suggerito Daniele così si collega al suo puntatore del current_proc del suo file init, per 
 	questo qui non devo mettergli valore ma solo dichiararlo o accederci */
 	extern pcb_t * current_proc;
@@ -49,7 +51,7 @@ void SYSCALL_handler(){
 			a2 = current_proc->p_s.reg_a2,
 			a3 = current_proc->p_s.reg_a3;
 	
-	if(is_UM() && IS_SYSCALL(current_proc->p_s.status)) {/*significa che sei in user mode e non va bene*/
+	if(is_UM() && IS_SYSCALL(current_proc->p_s.status)) {	/*significa che sei in user mode e non va bene*/
 		CAUSE_SET_EXCCODE(current_proc->p_s, EXC_RI); /*setto il registro exeCode in RI e poi chiamo il program Trap exception handler*/		
 		Prg_Trap_handler();
 		return;
@@ -64,6 +66,7 @@ void SYSCALL_handler(){
 			break;
 		case PASSEREN:
 			SYSCALL_PASSEREN((int *)a1);
+			/* guarda i warning: cast.. */
 			break;
 		case VERHOGEN:
 			SYSCALL_VERHOGEN((int *)a1);
@@ -89,6 +92,7 @@ void SYSCALL_handler(){
 		default:  /*system call con a0 >= 11*/
 			PassUpOrDie(GENERALEXCEPT);
 			break;
+			/* (break inutile) */
 
 	}
 
@@ -129,6 +133,7 @@ void PassUpOrDie(int excpt_type) {
 		state_copy(SAVED_EXCEPTIONS_STATE, curr_sup->sup_exceptState[excpt_type]);
 		context_t cxt = curr_sup->sup_exceptContext[excpt_type];
 		LDCXT(cxt.c_stackPtr, cxt.c_status, cxt.c_pc);
+		/* return qui e non sopra, hai tolto il commento o risolto? */
 }
 
 
@@ -155,6 +160,9 @@ void BlockingSyscall(int *semaddr){
 
 
 #pragma region SYSCALL_1_10
+/* comunque poi li toglierei i pragma region (Sostituendoli con commenti appropriati):
+	non so come si comportano con c e sembrano fuori contesto/convenzioni attuali
+*/
 
 
 /*
@@ -172,26 +180,46 @@ void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *
 
 	/*il nuovo pcb è messo nella ready queue e figlio del pcb corrente*/
 	struct list_head* head_rd = getHeadRd();
+	/*##
+	1. se vedi initial.c, la ready queue si chiama ReadyQ, per cui la funzione si dovrebbe chiamare piuttosto headProcQ, per coerenza
+	2. tuttavia, readyQ gia dovrebbe essere la testa, quindi puoi usare quella come extern
+	*/
 	insertChild(current_proc, new_proc);
 	insertProcQ(head_rd, new_proc);
 	/*p_time is set to zero;*/
+	/*## lo vedo (famosa slide dei commenti inutili) */
+	/*## l'init del time è già fatta dall'alloc pcb (lo aggiungerò al commento suo)*/
 	new_proc->p_time=0;
 	/*p_supportStruct from a2*/ /*If no parameter is provided, this field is
 									set to NULL Non ho capito sta parte*/
+	/*## questo commento lo puoi togliere*/
 	new_proc->p_supportStruct=supportp;
+	/*## devo fare in modo che sia fatto in inizializzazione*/
 	new_proc->p_semAdd=NULL;
+	/*## già fatto in inizializzazione, rivediti la parte vecchia*/
+	/*## spazi per favore*/
 	if(ns!=NULL){
 		new_proc->namespaces[NS_PID]=ns;
 	}
 	else{
 		new_proc->namespaces[NS_PID]=getNamespace(current_proc,NS_PID);
 	}
+	/*## non devi accedere ai campi (sono come variabili private, non le devi toccare di solito)..
+	piuttosto usa le funzioni già definite, che ci sono. (ripeto, rivedi la parte vecchia, prima di scrivere)*/
 	/*process count è incrementato di 1*/
+	/*## di nuovo, lo vedo, commenti inutili..*/
 	proc_count++;
 	pid = GET_PROC_PID(new_proc);  /*il pid è l'indirizzo di memoria dove è salvato il pid*/
+	/*## cos'è, un commento ricorsivo? piuttosto, almeno, "pid è l'indirizzo di memoria dove è salvato il pid" */
+	/*## dove l'hai visto che il pid si ottiene cosi?*/
 	UPDATE_REGV0(pid);
 	RETURN_SYSCALL();
 }
+/*## per leggere le altre funzioni aspetto questi fix..
+rivedi le funzioni già definite, metti un po di spazi, e in generale rendi più piacevole la lettura
+(accorcia/togli commenti quando puoi.. un commento inutile come questi segnati sopra comunque lo devo leggere, e
+se perdo 5s per ognuno, conta che comunque io (e chiunque legga) mi stanco di più)
+*/
 
 
 /*

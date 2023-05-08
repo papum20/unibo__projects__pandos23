@@ -40,15 +40,18 @@ void Exception_handler(){
 		Interrupt_handler();
 	}
 	else if(TLB_EXCEPTION(*exeCode)){
+	/* mi da undefined.. dov'è? (mi sa che l'hai tolto, o non so se è problema mio)*/
 		TLB_handler();
 	}
 	else if(TRAP_EXCEPTION(*exeCode))//Program Trap
+	/* uno spazio per il comment no? */
 	{
 		Prg_Trap_handler();
 	}
 	else if(*exeCode == EXC_SYS){
 		SYSCALL_handler();
 	}
+	/* else? non so se sia definito una caso di default, o se ritornare qualcosa.. */
 
 }
 
@@ -190,6 +193,7 @@ void PassUpOrDie(int index){
 void Prg_Trap_handler(){
 	PassUpOrDie(GENERALEXCEPT);
 }
+/* già definite nell'h*/
 
 
 void TLB_handler(){

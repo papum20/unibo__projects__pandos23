@@ -11,6 +11,10 @@
 /*
 * ECCEZIONI
 */
+	/* usa i comment con /*,
+		perché 1. vecchie versioni di c non supportano //,
+		2. per coerenza (quasi tutti sono cosi)
+		*/
 	// saved exceptions state
 	#define SAVED_EXCEPTIONS_STATE  ((state_t *)BIOS_DATA_PAGE_BASE)
 
@@ -25,10 +29,12 @@
 
 
 	//dice se si è sollevata una eccezione TLB
+	/* no: dice se l'exe_code contiene una tlb exception */
 	#define IS_TLB_EXCEPTION(exe_code) (exe_code>=EXC_MOD && exe_code<=EXC_TLBS)
 
 
 	//dice se si è sollevata una eccezione TRAP
+	/* no: vd su */
 	#define IS_TRAP_EXCEPTION(exe_code) (exe_code>=EXC_ADEL && exe_code<=EXC_DBE) || (exe_code>=EXC_BP && exe_code<=EXC_OV)
 
 
@@ -46,8 +52,9 @@
 		macro che gestisce dove mettere il valore di ritorno delle system call che ritornano qualcosa
 		essa mette nel registro v0 del current process il pid di un processo passato come parametro
 	*/
-
-
+	/* 1.lo vedo che è una macro, non serve che scrivi che è una macro */
+	/* 2.l'italiano: 1. la punteggiatura, 2 essa (vd scheduler..)*/
+	/* 3.chi è current_proc? */
 	#define UPDATE_REGV0(value) (current_proc->p_s.reg_v0 = (memaddr)value)
 
 
@@ -58,6 +65,9 @@
 
 
 
+	/* usa la punteggiatura, esiste... */
+	/* lo vedo che è una funzione */
+	/* non mettere spazi tra commenti e funzioni, o non si capisce a cosa si riferiscono*/
 	inline void RETURN_SYSCALL(){
 		SAVED_EXCEPTIONS_STATE->pc_epc += WORDLEN;
 		state_copy(SAVED_EXCEPTIONS_STATE, current_proc->p_s);
@@ -65,6 +75,7 @@
 
 
 /*copio lo stato sorgente nello stato destinazione*/
+/* non copi tu, lo fa il programma */
 extern void state_copy(state_t* src_state, state_t dst_state);
 
 

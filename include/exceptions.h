@@ -189,6 +189,7 @@ e poi grazie al pass up vector chiama la funzione exception handler
 * ECCEZIONI
 */
 	/*gestisce le varie eccezioni*/
+	/*gestisce le eccezioni (di ogni tipo) */
 	extern void Exception_handler();
 
 
@@ -196,7 +197,7 @@ e poi grazie al pass up vector chiama la funzione exception handler
 	extern void SYSCALL_handler();
 
 
-	/*per le eccezioni 11 o superiore o eccezioni Program Trap o Tlb si esegue una Pass Up or Die*/
+	/*per le eccezioni 11 o superiore o eccezioni Program Trap o Tlb, si esegue una Pass Up or Die*/
 	extern void PassUpOrDie(int excpt_type);
 
 
@@ -216,9 +217,10 @@ e poi grazie al pass up vector chiama la funzione exception handler
 
 
 /*
-* SYSTEM CALL
-*/
+ * SYSTEM CALL
+ */
 	/*operazioni da fare nel return di una system call che blocca capitolo 3.5.13*/
+	/* cosa fa? */
 	extern void BlockingSyscall(int *semaddr);
 
 

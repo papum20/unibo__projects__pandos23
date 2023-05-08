@@ -1,52 +1,42 @@
 /*
-exceptions.c
-This module implements the TLB, Program Trap, and
-SYSCALL exception handlers. Furthermore, this module will contain
-the provided skeleton TLB-Refill event handler (e.g. uTLB_RefillHandler).
+* exceptions.c
+* This module implements the TLB, Program Trap, and
+* SYSCALL exception handlers. Furthermore, this module will contain
+* the provided skeleton TLB-Refill event handler (e.g. uTLB_RefillHandler).
 */
 
 
 #include "exceptions.h"
 
+/*
+* COMMENTI TEMPORANEI MOLTO ROZZI CHE HO SCRITTO ORA SOLO PER RICORDARMI COSA SONO, DA RIFINIRE IN SEGUITO
+*/
+	/*questo lo metto extern come mi ha suggerito Daniele così si collega al suo puntatore del current_proc del suo file init, per 
+	questo qui non devo mettergli valore ma solo dichiararlo o accederci */
+	extern pcb_t * current_proc;
+	/*mi serve per la prima system call*/
+	extern int proc_count;
+	extern int soft_block_count;
+	/*semaforo dell'intervall timer, lo uso nella system call wait for clock 
+	NOME TEMPORANEO   OSAMA lo deve modificare se vuole*/
+	extern semd_t * sem_IT;
 
-/*questo lo metto extern come mi ha suggerito Daniele così si collega al suo puntatore del current_proc del suo file init, per 
-questo qui non devo mettergli valore ma solo dichiararlo o accederci */
-extern pcb_t * current_proc;
-/*mi serve per la prima system call*/
-extern int proc_count;
-extern int soft_block_count;
-/*semaforo dell'intervall timer, lo uso nella system call wait for clock 
-  NOME TEMPORANEO   OSAMA lo deve modificare se vuole*/
-extern semd_t * sem_IT;
-
-
-void uTLB_RefillHandler() {
-
-    setENTRYHI(0x80000000);
-    setENTRYLO(0x00000000);
-    TLBWR();
-
-    LDST((state_t *)0x0FFFF000);
-	
-}
 
 
 
 void Exception_handler(){
-	uint_PTR exeCode = &current_proc->p_s.cause;
-	*exeCode = CAUSE_GET_EXCCODE(*exeCode);
-
-	if(*exeCode == EXC_INT){
+	memaddr exeCode = CAUSE_GET_EXCCODE(current_proc->p_s.cause);
+	if(exeCode == EXC_INT){
 		Interrupt_handler();
 	}
-	else if(TLB_EXCEPTION(*exeCode)){
+	else if(IS_TLB_EXCEPTION(exeCode)){
 		TLB_handler();
 	}
-	else if(TRAP_EXCEPTION(*exeCode))//Program Trap
+	else if(IS_TRAP_EXCEPTION(exeCode))
 	{
 		Prg_Trap_handler();
 	}
-	else if(*exeCode == EXC_SYS){
+	else if(exeCode == EXC_SYS){
 		SYSCALL_handler();
 	}
 
@@ -54,51 +44,22 @@ void Exception_handler(){
 
 
 void SYSCALL_handler(){
-	uint_PTR a1 = &current_proc->p_s.reg_a1;
-	uint_PTR a2 = &current_proc->p_s.reg_a2;
-	uint_PTR a3 = &current_proc->p_s.reg_a3;
-	/* spunto:
-	uint_PTR	a1 = &current_proc->p_s.reg_a1,
-				a2 = &current_proc->p_s.reg_a2,
-				a3 = &current_proc->p_s.reg_a3;
-	*/
-
-	if((is_UM()) && IS_SYSCALL(current_proc->p_s.status)){/*significa che sei in user mode e non va bene, da chiedere al prof*/
-	/* parentesi non necessarie */
-	/* if(is_UM() && IS_SYSCALL(current_proc->p_s.status)) { */
-		uint_PTR exeCode = &current_proc->p_s.cause;
-		/* non serve il puntatore al puntatore (&current_proc) */
-		*exeCode = CAUSE_GET_EXCCODE(*exeCode); 
-		/* assegnamento inutile, poi sovrascritto */
-		/* 2 ambiguità:
-			1. exeCode prima è unsigned int*, poi unsigned int
-			2. exeCode prima è un registro cause (&current_proc->p_s.cause), poi un valore di exeCode
-		*/
-		/* e.g. solution:
-			cause & !CAUSE_EXCCODE_MASK		// (and not) applica la (un)mask, cioè resetta la parte exc del registro cause
-			// dopo ...
-			cause | (EXC_RI << CAUSE_EXCCODE_BIT)	// setta la part exc del registro cause (dopo averlo azzerato)
-
-			mettendo insieme:
-
-			#define __CAUSE_EXCCODE_SETTED(cause, x) (cause & !CAUSE_EXCCODE_MASK) | (x << CAUSE_EXCCODE_BIT)
-			static inline CAUSE_SET_EXCCODE(state_t *state, unsigned int code) {
-				state.cause = __CAUSE_EXCCODE_SETTED(state.cause, code);
-			}
-
-			assegnamento: CAUSE_SET_EXCCODE(&current_proc->p_s);
-		*/
-		*exeCode = EXC_RI;     /*setto il registro exeCode in RI e poi chiamo il program Trap exception handler*/
-		
+	memaddr	a1 = current_proc->p_s.reg_a1,
+			a2 = current_proc->p_s.reg_a2,
+			a3 = current_proc->p_s.reg_a3;
+	
+	if(is_UM() && IS_SYSCALL(current_proc->p_s.status)) {/*significa che sei in user mode e non va bene*/
+		CAUSE_SET_EXCCODE(current_proc->p_s, EXC_RI); /*setto il registro exeCode in RI e poi chiamo il program Trap exception handler*/		
 		Prg_Trap_handler();
+		return;
 	}
 	
 	switch(current_proc->p_s.reg_a0){
 		case CREATEPROCESS:
-			SYSCALL_CREATEPROCESS((state_t *)*a1, (support_t *) *a2, (struct nsd_t *) *a3);
+			SYSCALL_CREATEPROCESS((state_t *)a1, (support_t *) a2, (struct nsd_t *) a3);
 			break;
 		case TERMPROCESS:
-			SYSCALL_TERMINATEPROCESS (*a1);
+			SYSCALL_TERMINATEPROCESS (a1);
 			break;
 		case PASSEREN:
 			SYSCALL_PASSEREN((int *)a1);
@@ -119,10 +80,10 @@ void SYSCALL_handler(){
 			SYSCALL_GET_SUPPORT_DATA();
 			break;
 		case TERMINATE:
-			SYSCALL_GETPID(*a1);
+			SYSCALL_GETPID(a1);
 			break;
 		case GET_TOD:
-			SYSCALL_GETCHILDREN((int *)a1, *a2);
+			SYSCALL_GETCHILDREN((int *)a1, a2);
 			break;
 		default:  /*system call con a0 >= 11*/
 			PassUpOrDie(GENERALEXCEPT);
@@ -157,57 +118,31 @@ void SYSCALL_handler(){
 }
 
 
-
-void PassUpOrDie(int index){
-	support_t * curr_support = current_proc->p_supportStruct;
-	
-	if(curr_support==NULL){
-		SYSCALL_TERMINATEPROCESS(TERMINATE_CURR_PROCESS);
-		return;
-	}
-
-	state_copy(SAVED_EXCEPTIONS_STATE, curr_support->sup_exceptState[index]);
-	LDCXT(curr_support->sup_exceptContext[index].c_stackPtr, curr_support->sup_exceptContext[index].c_status, curr_support->sup_exceptContext[index].c_pc);
-	/* return qui e non sopra */
-}
-/* il fatto che un'espressione così lunga sia ripetuta cosi tante volte dovrebbe far pensare: 
-	curr_support->sup_exceptContext[index]
-
-	per es.:
-	1. curr_support: dargli nome più corto (purché sia ancora leggibile)
-	2.
-	void PassUpOrDie(int excpt_type) {
-		if(current_proc->p_supportStruct == NULL)
+void PassUpOrDie(int excpt_type) {
+		support_t * curr_sup = current_proc->p_supportStruct;
+		if(curr_sup == NULL){
 			SYSCALL_TERMINATEPROCESS(TERMINATE_CURR_PROCESS);
-
-		context_t *cxt = proc->p_supportStruct->sup_exceptContext[excpt_type];
+			return;
+		}
+			
+		state_copy(SAVED_EXCEPTIONS_STATE, curr_sup->sup_exceptState[excpt_type]);
+		context_t cxt = curr_sup->sup_exceptContext[excpt_type];
 		LDCXT(cxt.c_stackPtr, cxt.c_status, cxt.c_pc);
-		return
-	}
-*/
-
-
-void Prg_Trap_handler(){
-	PassUpOrDie(GENERALEXCEPT);
 }
 
 
-void TLB_handler(){
-	PassUpOrDie(PGFAULTEXCEPT);
+void uTLB_RefillHandler() {
+
+    setENTRYHI(0x80000000);
+    setENTRYLO(0x00000000);
+    TLBWR();
+
+    LDST((state_t *)0x0FFFF000);
+	
 }
-
-/* funzioni così corte, e soprattutto senza parametri, hanno senso di essere macro,
-	o quantomento, sicuramente, inline.
-	*/
-
 
 
 void BlockingSyscall(int *semaddr){
-	RETURN_SYSCALL();
-	/* un return come prima istruzione di una funzione?
-		o è sbagliato,
-		o lo scopo della macro è ben diverso da quello intuibile.
-	*/
 	//Update the accumulated CPU time for the Current Process
 	update_p_time();
 	insertBlocked(semaddr, current_proc);
@@ -219,12 +154,15 @@ void BlockingSyscall(int *semaddr){
 
 #pragma region SYSCALL_1_10
 
-/*1*/
+
+/*
+* 1
+*/
 void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns){
 	int pid;
 	pcb_t * new_proc = allocPcb();
 	if(new_proc == NULL){
-		__RETURN_SYSCALL(-1); //se non ci sono free pcb ritorni -1
+		UPDATE_REGV0(-1); //se non ci sono free pcb ritorni -1
 		RETURN_SYSCALL();
 
 	} 
@@ -249,12 +187,14 @@ void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *
 	/*process count è incrementato di 1*/
 	proc_count++;
 	pid = GET_PROC_PID(new_proc);  /*il pid è l'indirizzo di memoria dove è salvato il pid*/
-	__RETURN_SYSCALL(pid);
+	UPDATE_REGV0(pid);
 	RETURN_SYSCALL();
 }
 
 
-/*2*/
+/*
+* 2
+*/
 void SYSCALL_TERMINATEPROCESS (int pid){
 	pcb_t * proc_to_terminate;
 	if(pid==0 || pid==NULL){
@@ -303,7 +243,9 @@ void SYSCALL_TERMINATEPROCESS (int pid){
 }
 
 
-/*3*/
+/*
+* 3
+*/
 void SYSCALL_PASSEREN (int *semaddr){
 	semd_t * sem = (semd_t *)semaddr;
 	if((*sem->s_key)>0){
@@ -311,15 +253,19 @@ void SYSCALL_PASSEREN (int *semaddr){
 		RETURN_SYSCALL();
 	}
 	else{
+		RETURN_SYSCALL();
 		BlockingSyscall(sem->s_key);
 	}
 }
 
 
-/*4*/
+/*
+* 4
+*/
 void SYSCALL_VERHOGEN (int *semaddr){
 	semd_t * sem = (semd_t *)semaddr;
 	if((*sem->s_key)>=1){
+		RETURN_SYSCALL();
 		BlockingSyscall(sem->s_key);
 	}
 	else{
@@ -337,41 +283,52 @@ void SYSCALL_VERHOGEN (int *semaddr){
 }
 
 
-/*5*/
+/*
+* 5
+*/
 void SYSCALL_DOIO (int *cmdAddr, int *cmdValues){
 	int ioStatus;
 
-	__RETURN_SYSCALL(ioStatus);
+	UPDATE_REGV0(ioStatus);
 	RETURN_SYSCALL();
 }
 
 
-/*6*/
+/*
+* 6
+*/
 void SYSCALL_GETCPUTIME (){
 	
 	/*questa system call ritorna il p_time + plus the amount of
 CPU time used during the current quantum/time slice,   il clock PLT viene usato per dire quando il time slice del current
 process finisce, quindi fra un time slice e un altro bisogna salvarsi il tempo*/
 
-	__RETURN_SYSCALL(get_cpu_time() + get_CPU_time_slice_passed()); //questa funzione deve essere implementata da Tommaso e ritorna il tempo della CPU usato nel time slice
+	UPDATE_REGV0(get_cpu_time() + get_CPU_time_slice_passed()); 
 	RETURN_SYSCALL();
 }
 
 
-/*7*/
+/*
+* 7
+*/
 void SYSCALL_WAITCLOCK(){
+	RETURN_SYSCALL();
 	BlockingSyscall(sem_IT->s_key);
 }
 
 
-/*8*/
+/*
+* 8
+*/
 void SYSCALL_GET_SUPPORT_DATA(){
-	__RETURN_SYSCALL(current_proc->p_supportStruct);
+	UPDATE_REGV0(current_proc->p_supportStruct);
 	RETURN_SYSCALL();
 }
 
 
-/*9*/
+/*
+* 9
+*/
 void SYSCALL_GETPID( int parent){
 	int pid;
 	if(parent==TRUE){//we want the PID of the parent of the calling process
@@ -390,12 +347,14 @@ void SYSCALL_GETPID( int parent){
 	else{//we want the PID of the calling process
 		pid = GET_PROC_PID(current_proc);
 	}
-	__RETURN_SYSCALL(pid);
+	UPDATE_REGV0(pid);
 	RETURN_SYSCALL();
 }
 
 
-/*10*/
+/*
+* 10
+*/
 void SYSCALL_GETCHILDREN(int *children, int size){
 	int number_of_children = 0; 
 	int index = 0;
@@ -410,15 +369,17 @@ void SYSCALL_GETCHILDREN(int *children, int size){
 				index++;
 			}
 			else{
-				__RETURN_SYSCALL(number_of_children);
+				UPDATE_REGV0(number_of_children);
 				RETURN_SYSCALL();
 				return;
 			}
 		}
 	}
 	}
-	__RETURN_SYSCALL(number_of_children);
+	UPDATE_REGV0(number_of_children);
 	RETURN_SYSCALL();
 }
 
 #pragma endregion SYSCALL_1_10
+
+

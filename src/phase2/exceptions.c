@@ -22,6 +22,8 @@
 	/*semaforo dell'intervall timer, lo uso nella system call wait for clock 
 	NOME TEMPORANEO   OSAMA lo deve modificare se vuole*/
 	extern semd_t * sem_IT;
+	
+	extern struct list_head readyQ;
 
 
 
@@ -41,7 +43,7 @@ void Exception_handler(){
 	else if(exeCode == EXC_SYS){
 		SYSCALL_handler();
 	}
-	/* else? non so se sia definito una caso di default, o se ritornare qualcosa.. */
+	/* else? non so se sia definito una caso di default, o se ritornare qualcosa.. sul libro non dice di un valore di default */
 
 }
 
@@ -66,7 +68,7 @@ void SYSCALL_handler(){
 			break;
 		case PASSEREN:
 			SYSCALL_PASSEREN((int *)a1);
-			/* guarda i warning: cast.. */
+			/* guarda i warning: cast..  questi warning dei cast non dovrebbero creare problemi, ho fatto qualche test e comunque non saprei come non averli  */
 			break;
 		case VERHOGEN:
 			SYSCALL_VERHOGEN((int *)a1);
@@ -91,8 +93,6 @@ void SYSCALL_handler(){
 			break;
 		default:  /*system call con a0 >= 11*/
 			PassUpOrDie(GENERALEXCEPT);
-			break;
-			/* (break inutile) */
 
 	}
 
@@ -133,7 +133,7 @@ void PassUpOrDie(int excpt_type) {
 		state_copy(SAVED_EXCEPTIONS_STATE, curr_sup->sup_exceptState[excpt_type]);
 		context_t cxt = curr_sup->sup_exceptContext[excpt_type];
 		LDCXT(cxt.c_stackPtr, cxt.c_status, cxt.c_pc);
-		/* return qui e non sopra, hai tolto il commento o risolto? */
+		/* return qui e non sopra, hai tolto il commento o risolto? ho risolto */
 }
 
 
@@ -150,7 +150,6 @@ void uTLB_RefillHandler() {
 
 
 void BlockingSyscall(int *semaddr){
-	//Update the accumulated CPU time for the Current Process
 	update_p_time();
 	insertBlocked(semaddr, current_proc);
 	current_proc = NULL;
@@ -159,11 +158,9 @@ void BlockingSyscall(int *semaddr){
 }
 
 
-#pragma region SYSCALL_1_10
-/* comunque poi li toglierei i pragma region (Sostituendoli con commenti appropriati):
-	non so come si comportano con c e sembrano fuori contesto/convenzioni attuali
-*/
-
+/*
+ * SYSTEM CALL
+ */
 
 /*
 * 1
@@ -176,50 +173,27 @@ void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *
 		RETURN_SYSCALL();
 
 	} 
-	state_copy(statep, new_proc->p_s);/*stetep è lo stato del nuovo processo*/
+	state_copy(statep, new_proc->p_s);/*stetep è lo stato del nuovo processo e quindi lo copio in p_s del new_proc*/
 
 	/*il nuovo pcb è messo nella ready queue e figlio del pcb corrente*/
-	struct list_head* head_rd = getHeadRd();
-	/*##
-	1. se vedi initial.c, la ready queue si chiama ReadyQ, per cui la funzione si dovrebbe chiamare piuttosto headProcQ, per coerenza
-	2. tuttavia, readyQ gia dovrebbe essere la testa, quindi puoi usare quella come extern
-	*/
 	insertChild(current_proc, new_proc);
-	insertProcQ(head_rd, new_proc);
-	/*p_time is set to zero;*/
-	/*## lo vedo (famosa slide dei commenti inutili) */
-	/*## l'init del time è già fatta dall'alloc pcb (lo aggiungerò al commento suo)*/
-	new_proc->p_time=0;
-	/*p_supportStruct from a2*/ /*If no parameter is provided, this field is
-									set to NULL Non ho capito sta parte*/
-	/*## questo commento lo puoi togliere*/
-	new_proc->p_supportStruct=supportp;
-	/*## devo fare in modo che sia fatto in inizializzazione*/
-	new_proc->p_semAdd=NULL;
-	/*## già fatto in inizializzazione, rivediti la parte vecchia*/
-	/*## spazi per favore*/
-	if(ns!=NULL){
-		new_proc->namespaces[NS_PID]=ns;
+	insertProcQ(&readyQ, new_proc);
+
+	if(ns!=NULL){//ns diventa il namespace di new_proc
+		addNamespace(new_proc, ns);
 	}
-	else{
-		new_proc->namespaces[NS_PID]=getNamespace(current_proc,NS_PID);
+	else{//eredita il namespace del padre
+		addNamespace(new_proc, getNamespace(current_proc,NS_PID));
 	}
-	/*## non devi accedere ai campi (sono come variabili private, non le devi toccare di solito)..
-	piuttosto usa le funzioni già definite, che ci sono. (ripeto, rivedi la parte vecchia, prima di scrivere)*/
-	/*process count è incrementato di 1*/
-	/*## di nuovo, lo vedo, commenti inutili..*/
+
 	proc_count++;
-	pid = GET_PROC_PID(new_proc);  /*il pid è l'indirizzo di memoria dove è salvato il pid*/
-	/*## cos'è, un commento ricorsivo? piuttosto, almeno, "pid è l'indirizzo di memoria dove è salvato il pid" */
-	/*## dove l'hai visto che il pid si ottiene cosi?*/
+	pid = GET_PROC_PID(new_proc);  /*il pid è l'indirizzo di memoria dove è salvato il pcb*/
+	/*## dove l'hai visto che il pid si ottiene cosi? il libro ha suggerito di farlo in questo modo
+	This unique identifier(Il pid associato a un pcb) can be the address of the PCB structure or a sequential value. 
+	The only constraints on this value are that this value must be not null (0) and there shall not be two processes with the same identifier.*/
 	UPDATE_REGV0(pid);
 	RETURN_SYSCALL();
 }
-/*## per leggere le altre funzioni aspetto questi fix..
-rivedi le funzioni già definite, metti un po di spazi, e in generale rendi più piacevole la lettura
-(accorcia/togli commenti quando puoi.. un commento inutile come questi segnati sopra comunque lo devo leggere, e
-se perdo 5s per ognuno, conta che comunque io (e chiunque legga) mi stanco di più)
-*/
 
 
 /*
@@ -243,10 +217,10 @@ void SYSCALL_TERMINATEPROCESS (int pid){
 		}
 	}
 	/*se proc non ha figli lo stacco dal padre*/
-	outChild(proc_to_terminate); //proc non ha più il padre
+	outChild(proc_to_terminate); 
 
 	if(proc_to_terminate==current_proc){ /*il processo corrente non può essere bloccato in un semaforo quindi non considero sta cosa*/
-		freePcb(proc_to_terminate); /*libero il pcb*/
+		freePcb(proc_to_terminate); 
 		current_proc = NULL;
 		Scheduler();     /*chiamo lo scheduler per decidere quale processo mettere in current_proc*/
 	}
@@ -263,13 +237,12 @@ void SYSCALL_TERMINATEPROCESS (int pid){
 			soft_block_count--;
 		}
 		else{/*vedo se è nella coda ready*/
-			struct list_head* head_rd = getHeadRd();
 			//Rimuovo il processo dalla coda ready
-			outProcQ(head_rd, proc_to_terminate);
+			outProcQ(&readyQ, proc_to_terminate);
 		}
 	}
-	freePcb(proc_to_terminate); /*libero il pcb*/
-	proc_count--; /*decremento proc_count*/
+	freePcb(proc_to_terminate); 
+	proc_count--; 
 }
 
 
@@ -294,7 +267,7 @@ void SYSCALL_PASSEREN (int *semaddr){
 */
 void SYSCALL_VERHOGEN (int *semaddr){
 	semd_t * sem = (semd_t *)semaddr;
-	if((*sem->s_key)>=1){
+	if((*sem->s_key)>=1){//essendo un semaforo binario pure la V blocca
 		RETURN_SYSCALL();
 		BlockingSyscall(sem->s_key);
 	}
@@ -303,10 +276,9 @@ void SYSCALL_VERHOGEN (int *semaddr){
 			(*sem->s_key)++;
 
 		}
-		else{
+		else{//risveglio un processo dalla coda dei bloccati
 			pcb_t * awakened_process = removeBlocked(sem->s_key);
-			struct list_head* head_rd = getHeadRd();
-			insertProcQ(head_rd, awakened_process);
+			insertProcQ(&readyQ, awakened_process);
 		}
 		RETURN_SYSCALL();
 	}
@@ -328,11 +300,6 @@ void SYSCALL_DOIO (int *cmdAddr, int *cmdValues){
 * 6
 */
 void SYSCALL_GETCPUTIME (){
-	
-	/*questa system call ritorna il p_time + plus the amount of
-CPU time used during the current quantum/time slice,   il clock PLT viene usato per dire quando il time slice del current
-process finisce, quindi fra un time slice e un altro bisogna salvarsi il tempo*/
-
 	UPDATE_REGV0(get_cpu_time() + get_CPU_time_slice_passed()); 
 	RETURN_SYSCALL();
 }
@@ -361,11 +328,9 @@ void SYSCALL_GET_SUPPORT_DATA(){
 */
 void SYSCALL_GETPID( int parent){
 	int pid;
-	if(parent==TRUE){//we want the PID of the parent of the calling process
+	if(parent==TRUE){//vogliamo il pid del padre del current_process
 		/*
-		if a
-		process is not in the same PID namespace of its parent, this systemcall, with
-		the correct request of the parent PID, will return 0
+		se il current_process non è nello stesso namespace del padre allora questa system call ritorna 0
 		*/
 		if(getNamespace(current_proc, NS_PID)!=getNamespace(current_proc->p_parent, NS_PID)){
 			pid = 0;
@@ -374,7 +339,7 @@ void SYSCALL_GETPID( int parent){
 			pid = GET_PROC_PID(current_proc->p_parent);
 		}
 	}
-	else{//we want the PID of the calling process
+	else{//vogliamo il pid del current_process
 		pid = GET_PROC_PID(current_proc);
 	}
 	UPDATE_REGV0(pid);
@@ -388,7 +353,7 @@ void SYSCALL_GETPID( int parent){
 void SYSCALL_GETCHILDREN(int *children, int size){
 	int number_of_children = 0; 
 	int index = 0;
-	/*scorro tutta la lista dei figli del current_proc*/
+	/*scorro tutta la lista dei figli del current_proc e metto nell'array children tutti i pid dei figli che sono nello stesso namespace*/
 	if(!emptyChild(current_proc)){
 		struct list_head *pos;
 	list_for_each(pos, &current_proc->p_child){ 
@@ -410,6 +375,5 @@ void SYSCALL_GETCHILDREN(int *children, int size){
 	RETURN_SYSCALL();
 }
 
-#pragma endregion SYSCALL_1_10
 
 

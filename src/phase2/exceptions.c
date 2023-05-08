@@ -130,7 +130,7 @@ void PassUpOrDie(int excpt_type) {
 		context_t cxt = curr_sup->sup_exceptContext[excpt_type];
 		LDCXT(cxt.c_stackPtr, cxt.c_status, cxt.c_pc);
 }
-/* già definite nell'h*/
+
 
 
 void uTLB_RefillHandler() {

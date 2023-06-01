@@ -2,90 +2,153 @@
 #define EXCEPTIONS_HELP_H
 
 
-#include "pandos_bios.h"
 #include "pandos_cp0.h"
 #include "pandos_types.h"
 
-#include "const.h"
+#include "memory.h"
 
-/*
-* ECCEZIONI
-*/
-	/* usa i comment con /*,
-		perché 1. vecchie versioni di c non supportano //,
-		2. per coerenza (quasi tutti sono cosi)
-		*/
-	// saved exceptions state
-	#define SAVED_EXCEPTIONS_STATE  ((state_t *)BIOS_DATA_PAGE_BASE)
+#include "ash.h"
+#include "pcb.h"
 
-
-	#define __CAUSE_EXCCODE_SETTED(cause, x) (cause & !CAUSE_EXCCODE_MASK) | (x << CAUSE_EXCCODE_BIT)
-
-
-	//setta il registro exe_code
-	static inline CAUSE_SET_EXCCODE(state_t state, unsigned int code) {
-		state.cause = __CAUSE_EXCCODE_SETTED(state.cause, code);
-	}
-
-
-	//dice se si è sollevata una eccezione TLB
-	/* no: dice se l'exe_code contiene una tlb exception */
-	#define IS_TLB_EXCEPTION(exe_code) (exe_code>=EXC_MOD && exe_code<=EXC_TLBS)
-
-
-	//dice se si è sollevata una eccezione TRAP
-	/* no: vd su */
-	#define IS_TRAP_EXCEPTION(exe_code) (exe_code>=EXC_ADEL && exe_code<=EXC_DBE) || (exe_code>=EXC_BP && exe_code<=EXC_OV)
 
 
 /*
-* SYSTEM CALL
+ * EXCEPTIONS
+ */
+
+/* get cause register setted to exec_code x.
 */
-	/*
-		dice se nel registro a0 è presente un valore fra 1 e 10 quindi è stata chiamata una fra le varie SYSTEM CALL, dando per 
-		presupposto che già nel registo exe_code ci sia il valore 8
-	*/
-	#define IS_SYSCALL(reg_a0) ((reg_a0>=CREATEPROCESS) && (reg_a0<=GET_TOD))
+#define __CAUSE_EXCCODE_SETTED(cause, code) (cause & !CAUSE_EXCCODE_MASK) | (code << CAUSE_EXCCODE_BIT)
+
+/* set cause register to exec_code code.
+*/
+static inline CAUSE_SET_EXCCODE(state_t state, unsigned int code) {
+	state.cause = __CAUSE_EXCCODE_SETTED(state.cause, code);
+}
 
 
-	/*
-		macro che gestisce dove mettere il valore di ritorno delle system call che ritornano qualcosa
-		essa mette nel registro v0 del current process il pid di un processo passato come parametro
-	*/
-	/*## 1.lo vedo che è una macro, non serve che scrivi che è una macro */
-	/*## 2.l'italiano: 1. la punteggiatura, 2 essa (vd scheduler..)*/
-	/*## 3.chi è current_proc? */
-	/*## chiamata cosi è poco chiaro il suo uso (cioè perché cambi v0). piuttosto, visto il codice, farei
-	RETURN_SYSCALL(val): ritorna con valore
-	RETURN_SYSCALL_VOID(): ritorna senza valore
-	e così chiami ogni volta solo una return
-	*/
-	#define UPDATE_REGV0(value) (current_proc->p_s.reg_v0 = (memaddr)value)
+/* check if an exception code is associated to a TLB exception.
+*/
+#define IS_TLB_EXCEPTION(code) (code >= EXC_MOD && code <= EXC_TLBS)
 
-
-	/*
-		funzione che gestisce il ritorno di una system call
-		aggiorna il saved exception state aumentando program counter di una word per evitare loop e aggiornando il CPU Time del processo corrente
-	*/
+/* check if an exception code is associated to a Trap exception.
+*/
+#define IS_TRAP_EXCEPTION(code) (code >= EXC_ADEL && code <= EXC_DBE) || (code >= EXC_BP && code <= EXC_OV)
 
 
 
-	/*## usa la punteggiatura, esiste... */
-	/*## lo vedo che è una funzione */
-	/*## non mettere spazi tra commenti e funzioni, o non si capisce a cosa si riferiscono*/
-	inline void RETURN_SYSCALL(){
-		SAVED_EXCEPTIONS_STATE->pc_epc += WORDLEN;
-		state_copy(SAVED_EXCEPTIONS_STATE, current_proc->p_s);
-	}
+/*
+ * SYSTEM CALLS
+ */
+
+/* return value for error */
+#define ERR -1
 
 
-/*copio lo stato sorgente nello stato destinazione*/
-/*## non copi tu, lo fa il programma */
-extern void state_copy(state_t* src_state, state_t dst_state);
+/* check if syscall code is valid (i.e. first parameter, a0)
+*/
+#define IS_SYSCALL_CODE_VALID(code) (code >= CREATEPROCESS && code <= GET_TOD)
 
 
-/*dice se il processo corrente è in user mode*/
-extern int is_UM();
+/**
+ * copy the new state to pcb p, with pc updated to the next line
+ * in order to avoid loop.
+ * pcb_t *@p: process whose state is updated.
+ */
+#define __RETURN_SYSCALL(p) ({					\
+	regIncrPC(SAVED_EXCEPTIONS_STATE);			\
+	STATE_CP(*SAVED_EXCEPTIONS_STATE, &p->p_s);	\
+})
+
+/**
+ * save the return state for current_proc (from a syscall),
+ * with return value.
+ * int @val: return value
+ */
+#define RETURN_SYSCALL(val) ({			\
+	__RETURN_SYSCALL(proc_curr);		\
+	V0(proc_curr) = val;				\
+})
+
+/**
+ * save the return state for current_proc (from a syscall),
+ * without return value.
+ */
+#define RETURN_SYSCALL_VOID() __RETURN_SYSCALL(proc_curr)
+
+/**
+ * save the return state for current_proc (from a syscall),
+ * return from syscall (without value) and block the current process.
+ * @semaddr: address of the key of the semaphore where to block the process.
+ */
+static inline void RETURN_SYSCALL_BLOCK(int *semAdd) {
+	update_p_time();
+	insertBlocked(semAdd, proc_curr);
+	proc_curr = NULL;
+	RETURN_SYSCALL_VOID();
+	Scheduler();
+}
+
+
+/* syscall dispatcher,
+ * i.e. dispatches to syscall sub-functions.
+ */
+#define SYSCALL(a0, a1, a2, a3)						\
+	switch(a0){										\
+		case CREATEPROCESS:							\
+			SYSCALL_CREATEPROCESS((state_t *)a1, (support_t *) a2, (struct nsd_t *) a3);	\
+			break;									\
+		case TERMPROCESS:							\
+			SYSCALL_TERMINATEPROCESS (a1);			\
+			break;									\
+		case PASSEREN:								\
+			SYSCALL_PASSEREN(&a1);					\
+			break;									\
+		case VERHOGEN:								\
+			SYSCALL_VERHOGEN(&a1);					\
+			break;									\
+		case IOWAIT:								\
+			SYSCALL_DOIO((int *)a1,(int *)a2);		\
+			break;									\
+		case GETTIME:								\
+			SYSCALL_GETCPUTIME();					\
+			break;									\
+		case CLOCKWAIT:								\
+			SYSCALL_WAITCLOCK();					\
+			break;									\
+		case GETSUPPORTPTR:							\
+			SYSCALL_GET_SUPPORT_DATA();				\
+			break;									\
+		case TERMINATE:								\
+			SYSCALL_GETPID(a1);						\
+			break;									\
+		case GET_TOD:								\
+			SYSCALL_GETCHILDREN((int *)a1, a2);		\
+		}	
+
+
+/**
+ * init proc's pcb fields (for create_process syscall).
+ * @p: proc to init
+ * @prnt: new parent
+ * @state: new state
+ * @sup: new support struct
+ * @ns: new pid namespace. set to parent's pid ns if it's null.
+*/
+static inline void __init_createProc(pcb_t *p, pcb_t *prnt, state_t *state, support_t *sup, nsd_t *ns) {
+	if(state != NULL) STATE_CP(*state, &p->p_s);
+	p->p_supportStruct = sup;
+	(ns != NULL)
+	? addNamespace(p, ns)
+	: addNamespace(p, getNamespace(p->p_parent, NS_PID));
+}
+
+
+/* terminate all of process' children.
+ * process is not NULL.
+ */
+extern void __terminateTree();
+
 
 
 #endif /* EXCEPTIONS_HELP_H */

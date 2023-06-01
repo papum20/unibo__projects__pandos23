@@ -15,3 +15,24 @@ LDIT takes ms?
 
 
 ns: non aggiunge ns se già presente uno del tipo?
+
+
+EXCEPTIONS:
+syscall cast tipi
+
+
+SEMAFORI:
+diventano anche negativi,
+così abs(s_key) = n proc blocked
+//decidere comportamento semafori (binari)
+
+
+NS:
+si deve cambiare la visita in ampiezza, perché interferisce con readyQ ed eventuali
+altre code.
+per ora in TERMINATE_PROC uso la ricorsione; se si vuole fare con interazione, basta creare
+una struct aggiuntiva
+struct iterator {
+	list_head list;
+	pcb_t *p;
+}

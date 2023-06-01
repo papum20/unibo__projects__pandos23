@@ -1,35 +1,21 @@
-/*
-* exceptions.c
-* This module implements the TLB, Program Trap, and
-* SYSCALL exception handlers. Furthermore, this module will contain
-* the provided skeleton TLB-Refill event handler (e.g. uTLB_RefillHandler).
+/* notes:
+1. Furthermore, SYSCALLs that do not result in process termination (even-
+tually) return control to the process’s execution stream. This is done either
+immediately (e.g. SYS6) or after the process is blocked and eventually un-
+blocked (e.g. SYS5)
 */
-
 
 #include "exceptions.h"
+#include "exceptions_help.h"
+#include "env_nucleus.h"
 
-/*
-* COMMENTI TEMPORANEI MOLTO ROZZI CHE HO SCRITTO ORA SOLO PER RICORDARMI COSA SONO, DA RIFINIRE IN SEGUITO
-*/
-/* ok, poi metticene di giusti/"non rozzi" (cioè che dicono cosa sono le variabili) */
 
-	/*questo lo metto extern come mi ha suggerito Daniele così si collega al suo puntatore del current_proc del suo file init, per 
-	questo qui non devo mettergli valore ma solo dichiararlo o accederci */
-	extern pcb_t * current_proc;
-	/*mi serve per la prima system call*/
-	extern int proc_count;
-	extern int soft_block_count;
-	/*semaforo dell'intervall timer, lo uso nella system call wait for clock 
-	NOME TEMPORANEO   OSAMA lo deve modificare se vuole*/
-	extern semd_t * sem_IT;
-	
-	extern struct list_head readyQ;
 
 
 
 
 void Exception_handler(){
-	memaddr exeCode = CAUSE_GET_EXCCODE(current_proc->p_s.cause);
+	memaddr exeCode = CAUSE_GET_EXCCODE(proc_curr->p_s.cause);
 	if(exeCode == EXC_INT){
 		Interrupt_handler();
 	}
@@ -49,52 +35,24 @@ void Exception_handler(){
 
 
 void SYSCALL_handler(){
-	memaddr	a1 = current_proc->p_s.reg_a1,
-			a2 = current_proc->p_s.reg_a2,
-			a3 = current_proc->p_s.reg_a3;
+	unsigned int	a0 = A0(proc_curr),
+					a1 = A1(proc_curr),
+					a2 = A2(proc_curr),
+					a3 = A3(proc_curr);
 	
-	if(is_UM() && IS_SYSCALL(current_proc->p_s.status)) {	/*significa che sei in user mode e non va bene*/
-		CAUSE_SET_EXCCODE(current_proc->p_s, EXC_RI); /*setto il registro exeCode in RI e poi chiamo il program Trap exception handler*/		
+	if(is_UM()) {	/*significa che sei in user mode e non va bene*/
+		CAUSE_SET_EXCCODE(proc_curr->p_s, EXC_RI); /*setto il registro exeCode in RI e poi chiamo il program Trap exception handler*/		
 		Prg_Trap_handler();
 		return;
 	}
 	
-	switch(current_proc->p_s.reg_a0){
-		case CREATEPROCESS:
-			SYSCALL_CREATEPROCESS((state_t *)a1, (support_t *) a2, (struct nsd_t *) a3);
-			break;
-		case TERMPROCESS:
-			SYSCALL_TERMINATEPROCESS (a1);
-			break;
-		case PASSEREN:
-			SYSCALL_PASSEREN((int *)a1);
-			/* guarda i warning: cast..  questi warning dei cast non dovrebbero creare problemi, ho fatto qualche test e comunque non saprei come non averli  */
-			break;
-		case VERHOGEN:
-			SYSCALL_VERHOGEN((int *)a1);
-			break;
-		case IOWAIT:
-			SYSCALL_DOIO((int *)a1,(int *)a2);
-			break;
-		case GETTIME:
-			SYSCALL_GETCPUTIME();
-			break;
-		case CLOCKWAIT:
-			SYSCALL_WAITCLOCK();
-			break;
-		case GETSUPPORTPTR:
-			SYSCALL_GET_SUPPORT_DATA();
-			break;
-		case TERMINATE:
-			SYSCALL_GETPID(a1);
-			break;
-		case GET_TOD:
-			SYSCALL_GETCHILDREN((int *)a1, a2);
-			break;
-		default:  /*system call con a0 >= 11*/
-			PassUpOrDie(GENERALEXCEPT);
-
+	if(a0 >= CREATEPROCESS && a0 <= GET_TOD) {
+		SYSCALL(a0, a1, a2, a3);
+	} else {	/*system call con a0 >= 11*/
+		PassUpOrDie(GENERALEXCEPT);
 	}
+
+}
 
 	/*
 	prova questo:
@@ -120,20 +78,18 @@ void SYSCALL_handler(){
 	}
 	*/
 	
-}
 
 
 void PassUpOrDie(int excpt_type) {
-		support_t * curr_sup = current_proc->p_supportStruct;
+		support_t * curr_sup = proc_curr->p_supportStruct;
 		if(curr_sup == NULL){
-			SYSCALL_TERMINATEPROCESS(TERMINATE_CURR_PROCESS);
+			SYSCALL(TERMPROCESS, TERMINATE_CURR_PROCESS, NULL, NULL);
 			return;
 		}
 			
-		state_copy(SAVED_EXCEPTIONS_STATE, curr_sup->sup_exceptState[excpt_type]);
+		STATE_CP(*SAVED_EXCEPTIONS_STATE, &(curr_sup->sup_exceptState[excpt_type]) );
 		context_t cxt = curr_sup->sup_exceptContext[excpt_type];
 		LDCXT(cxt.c_stackPtr, cxt.c_status, cxt.c_pc);
-		/* return qui e non sopra, hai tolto il commento o risolto? ho risolto */
 }
 
 
@@ -149,231 +105,165 @@ void uTLB_RefillHandler() {
 }
 
 
-void BlockingSyscall(int *semaddr){
-	update_p_time();
-	insertBlocked(semaddr, current_proc);
-	current_proc = NULL;
-	Scheduler();
-
-}
-
 
 /*
- * SYSTEM CALL
+ * SYSTEM CALLS
  */
 
 /*
 * 1
 */
-void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns){
-	int pid;
-	pcb_t * new_proc = allocPcb();
-	if(new_proc == NULL){
-		UPDATE_REGV0(-1); //se non ci sono free pcb ritorni -1
-		RETURN_SYSCALL();
+void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns) {
+	pcb_t *new_proc = allocPcb();
 
-	} 
-	state_copy(statep, new_proc->p_s);/*stetep è lo stato del nuovo processo e quindi lo copio in p_s del new_proc*/
+	/* if there are no free pcbs, return -1 */
+	if(new_proc == NULL) {
+		RETURN_SYSCALL(ERR);
+	}
 
-	/*il nuovo pcb è messo nella ready queue e figlio del pcb corrente*/
-	insertChild(current_proc, new_proc);
+	/* init pcb fields */
+	__init_createProc(new_proc, proc_curr, statep, supportp, ns);
+	/* other fields already were set to 0/NULL by allocPcb() */
+	
+	/* update Nucleus variables */
 	insertProcQ(&readyQ, new_proc);
+	proc_alive_n++;
 
-	if(ns!=NULL){//ns diventa il namespace di new_proc
-		addNamespace(new_proc, ns);
-	}
-	else{//eredita il namespace del padre
-		addNamespace(new_proc, getNamespace(current_proc,NS_PID));
-	}
-
-	proc_count++;
-	pid = GET_PROC_PID(new_proc);  /*il pid è l'indirizzo di memoria dove è salvato il pcb*/
-	/*## dove l'hai visto che il pid si ottiene cosi? il libro ha suggerito di farlo in questo modo
-	This unique identifier(Il pid associato a un pcb) can be the address of the PCB structure or a sequential value. 
-	The only constraints on this value are that this value must be not null (0) and there shall not be two processes with the same identifier.*/
-	UPDATE_REGV0(pid);
-	RETURN_SYSCALL();
+	RETURN_SYSCALL(PID(new_proc));
 }
-
 
 /*
 * 2
 */
-void SYSCALL_TERMINATEPROCESS (int pid){
-	pcb_t * proc_to_terminate;
-	if(pid==0 || pid==NULL){
-		proc_to_terminate = current_proc;
-	}
-	else{
-		proc_to_terminate = GET_PCB_FROM_PID(pid);
-	}
-	/*uccido i figli*/
-	if(!emptyChild(proc_to_terminate)){
-		pcb_t * child = returnChild(proc_to_terminate);
-		/*itero ricorsivamente sui figli*/
-		while(child!=NULL){
-			SYSCALL_TERMINATEPROCESS(GET_PROC_PID(child));
-			child = returnChild(proc_to_terminate);
-		}
-	}
-	/*se proc non ha figli lo stacco dal padre*/
-	outChild(proc_to_terminate); 
+void SYSCALL_TERMINATEPROCESS (int pid) {
+	
+	if(pid == 0)
+		__terminateTree(proc_curr);
+	else
+		__terminateTree(pcb_from_PID(pid));
 
-	if(proc_to_terminate==current_proc){ /*il processo corrente non può essere bloccato in un semaforo quindi non considero sta cosa*/
-		freePcb(proc_to_terminate); 
-		current_proc = NULL;
-		Scheduler();     /*chiamo lo scheduler per decidere quale processo mettere in current_proc*/
-	}
-	else{
-		if(proc_to_terminate->p_semAdd!=NULL){ /*controllo se il processo sia bloccato ad un semaforo non device*/
-			//Rimuovo il processo dal semaforo
-			outBlocked(current_proc);
-			//Rilascio il semaforo
-			*(current_proc->p_semAdd) +=1;
-		}
-		else if(is_blocked_by_devSem(proc_to_terminate)){ //questo else if dipende molto dall'implementazione di Osama, da rivedere
-			//Rimuovo il processo dal semaforo
-			outBlocked(current_proc);
-			soft_block_count--;
-		}
-		else{/*vedo se è nella coda ready*/
-			//Rimuovo il processo dalla coda ready
-			outProcQ(&readyQ, proc_to_terminate);
-		}
-	}
-	freePcb(proc_to_terminate); 
-	proc_count--; 
+	if(proc_curr == NULL)
+		/* current process was terminated */
+		Scheduler();
 }
 
-
-/*
-* 3
+/* 3
 */
-void SYSCALL_PASSEREN (int *semaddr){
-	semd_t * sem = (semd_t *)semaddr;
-	if((*sem->s_key)>0){
-		(*sem->s_key) --;
-		RETURN_SYSCALL();
+void SYSCALL_PASSEREN (int *semaddr) {
+
+	(*semaddr)--;
+	
+	if(*semaddr > 0) {
+		/* no process is blocked on a P */
+		
+		if(*semaddr > 1)
+			/* wake up a process blocked on a V */
+			removeBlocked(semaddr);
+
+		RETURN_SYSCALL_VOID();
 	}
-	else{
-		RETURN_SYSCALL();
-		BlockingSyscall(sem->s_key);
-	}
+	else
+		RETURN_SYSCALL_BLOCK(semaddr);
+
 }
 
-
-/*
-* 4
+/* 4
 */
-void SYSCALL_VERHOGEN (int *semaddr){
-	semd_t * sem = (semd_t *)semaddr;
-	if((*sem->s_key)>=1){//essendo un semaforo binario pure la V blocca
-		RETURN_SYSCALL();
-		BlockingSyscall(sem->s_key);
-	}
-	else{
-		if(emptyProcQ(&sem->s_procq) == true){
-			(*sem->s_key)++;
+void SYSCALL_VERHOGEN (int *semaddr) {
 
-		}
-		else{//risveglio un processo dalla coda dei bloccati
-			pcb_t * awakened_process = removeBlocked(sem->s_key);
-			insertProcQ(&readyQ, awakened_process);
-		}
-		RETURN_SYSCALL();
+	(*semaddr)++;
+	
+	/* blocking V, as it's a binary semaphore */
+	if(*semaddr >= 1) {
+		RETURN_SYSCALL_BLOCK(semaddr);
+		return;
 	}
+
+	if(*semaddr < 0) {
+		/* wake up a process blocked on a P */
+		pcb_t *awakened_proc = removeBlocked(semaddr);
+		insertProcQ(&readyQ, awakened_proc);
+	}
+
+	RETURN_SYSCALL_VOID();
 }
 
-
-/*
-* 5
+/* 5
 */
 void SYSCALL_DOIO (int *cmdAddr, int *cmdValues){
+
 	int ioStatus;
-
-	UPDATE_REGV0(ioStatus);
-	RETURN_SYSCALL();
+	RETURN_SYSCALL(ioStatus);
 }
 
 
-/*
-* 6
+/* 6
 */
-void SYSCALL_GETCPUTIME (){
-	UPDATE_REGV0(get_cpu_time() + get_CPU_time_slice_passed()); 
-	RETURN_SYSCALL();
+void SYSCALL_GETCPUTIME() {
+
+	RETURN_SYSCALL(get_cpu_time() + get_CPU_time_slice_passed());
 }
 
-
-/*
-* 7
+/* 7
 */
-void SYSCALL_WAITCLOCK(){
-	RETURN_SYSCALL();
-	BlockingSyscall(sem_IT->s_key);
+void SYSCALL_WAITCLOCK() {
+
+	/* block the process on the interval timer semaphore */
+	RETURN_SYSCALL_BLOCK(DEV_SEM(SEM_TIMER));
 }
 
-
-/*
-* 8
+/* 8
 */
 void SYSCALL_GET_SUPPORT_DATA(){
-	UPDATE_REGV0(current_proc->p_supportStruct);
-	RETURN_SYSCALL();
+
+	RETURN_SYSCALL((memaddr)(&proc_curr->p_supportStruct));
 }
 
-
-/*
-* 9
+/* 9
 */
-void SYSCALL_GETPID( int parent){
+void SYSCALL_GETPID(int parent) {
+
 	int pid;
-	if(parent==TRUE){//vogliamo il pid del padre del current_process
-		/*
-		se il current_process non è nello stesso namespace del padre allora questa system call ritorna 0
-		*/
-		if(getNamespace(current_proc, NS_PID)!=getNamespace(current_proc->p_parent, NS_PID)){
-			pid = 0;
-		}
-		else{
-			pid = GET_PROC_PID(current_proc->p_parent);
-		}
-	}
-	else{//vogliamo il pid del current_process
-		pid = GET_PROC_PID(current_proc);
-	}
-	UPDATE_REGV0(pid);
-	RETURN_SYSCALL();
+	
+	if(parent != TRUE)
+		pid = PID(proc_curr);
+	else if(getNamespace(proc_curr, NS_PID) == getNamespace(proc_curr->p_parent, NS_PID))
+		pid = PID(proc_curr->p_parent);
+	else
+		pid = 0;
+
+	RETURN_SYSCALL(pid);
 }
 
 
-/*
-* 10
+/* 10
 */
 void SYSCALL_GETCHILDREN(int *children, int size){
 	int number_of_children = 0; 
 	int index = 0;
 	/*scorro tutta la lista dei figli del current_proc e metto nell'array children tutti i pid dei figli che sono nello stesso namespace*/
-	if(!emptyChild(current_proc)){
+	
+	if(!emptyChild(proc_curr)){
 		struct list_head *pos;
-	list_for_each(pos, &current_proc->p_child){ 
-		pcb_t *child = container_of(pos, pcb_t, p_sib); 
-		if(getNamespace(child, NS_PID)==getNamespace(current_proc,NS_PID)){
-			if(index<size){
-				children[index] = GET_PROC_PID(child);
-				index++;
-			}
-			else{
-				UPDATE_REGV0(number_of_children);
-				RETURN_SYSCALL();
-				return;
+		
+		list_for_each(pos, &proc_curr->p_child) { 
+			pcb_t *child = container_of(pos, pcb_t, p_sib); 
+			if(getNamespace(child, NS_PID)==getNamespace(proc_curr,NS_PID)){
+				if(index<size){
+					children[index] = GET_PROC_PID(child);
+					index++;
+				}
+				/*
+				else{
+					RETURN_SYSCALL(number_of_children);
+					return;
+				}*/
 			}
 		}
 	}
-	}
-	UPDATE_REGV0(number_of_children);
-	RETURN_SYSCALL();
+	RETURN_SYSCALL(number_of_children);
 }
+
 
 
 

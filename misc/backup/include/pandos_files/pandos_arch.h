@@ -26,9 +26,9 @@
 
 #define DEV_IL_START        (N_INTERRUPT_LINES - N_EXT_IL)
 
-#define IL_IPI              0	/* for multi-rocessing */
-#define IL_CPUTIMER         1	/* Processor Local Timer (PLT), for scheduling */
-#define IL_TIMER            2	/* Interval Timer, for pseudo-clock ticks */
+#define IL_IPI              0
+#define IL_CPUTIMER         1
+#define IL_TIMER            2
 #define IL_DISK             3
 #define IL_FLASH            4
 #define IL_ETHERNET         5

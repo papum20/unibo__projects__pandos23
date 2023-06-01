@@ -80,7 +80,7 @@ HIDDEN inline void __initPcb(pcb_t *p)
  */
 
 
-/*
+/**
  * remove without returning
 */
 HIDDEN inline void __removeProcQ_only(struct list_head *head)
@@ -88,7 +88,7 @@ HIDDEN inline void __removeProcQ_only(struct list_head *head)
 	list_del_init(head->next);
 }
 
-/*
+/**
  * doesn't check if list is empty
 */
 HIDDEN inline pcb_t *__removeProcQ(struct list_head *head)
@@ -98,7 +98,7 @@ HIDDEN inline pcb_t *__removeProcQ(struct list_head *head)
 	return p;
 }
 
-/*
+/**
  * removes entry without returning
  * (i.e. doesn't remove ->next, but itself)
 */
@@ -107,7 +107,7 @@ HIDDEN inline void __removeProcEntry_only(struct list_head *head)
 	list_del_init(head);
 }
 
-/*
+/**
  * Same as emptyProcQ, but inline.
 */
 HIDDEN inline int __emptyProcQ(struct list_head *head) {
@@ -123,14 +123,6 @@ HIDDEN inline int __emptyChild(pcb_t *p) {
 	return __emptyProcQ(&p->p_child);
 }
 
-/* get the first child, or null if p has no children.
-*/
-static inline pcb_t* firstChild_or_Null(pcb_t *p){
-	if(__emptyChild(p))
-		return NULL;
-	return container_of(p->p_child.next, pcb_t, p_sib); 
-}
-
 
 /**
  * iterate over the children of pcb_t *parent.
@@ -142,17 +134,23 @@ static inline pcb_t* firstChild_or_Null(pcb_t *p){
 
 
 /*
- * PIDS
+ * MISC
  */
 
-/* get a process's (pcb*) pid.
- * In order to have unique, non-zero pids, they're chosen as the pcb's address.
-*/
-#define PID(pcb_p) (int)pcb_p
+#define GET_PCB_FROM_PID(x) ((pcb_t *)x)
+/*dato un pid ritorna il pcb corrispondete  forse & non serve*/
+#define GET_PCB_FROM_PID(x) (pcb_t *)&x
+/*dato un processo ritorna il pid corrispondente*/
+#define GET_PROC_PID(x) (int)x
 
-/* get a process' pcb addr from its pid.
-*/
-#define pcb_from_PID(pid) (pcb_t *)pid
 
+
+//Ritorna il puntatore al primo figlio del processo senza rimuoverlo
+inline pcb_t* returnChild(pcb_t *p){
+	if(__emptyChild(p)) //p non ha figli
+		return NULL;
+	pcb_t *tmp = container_of(p->p_child.next, pcb_t, p_sib); 
+	return tmp;	
+}
 
 #endif /* PCB_HELP_H */

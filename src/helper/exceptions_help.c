@@ -1,30 +1,31 @@
-#include "helper/exceptions_help.h"
+#include "exceptions_help.h"
+#include "env_nucleus.h"
 
 
-/* farla inline / macro
-per coerenza potrebbe avere senso UPPERCASE,
-come le macro CAUSE_*
-*/
-void state_copy(state_t* src_state, state_t dst_state){
-/* src e dst già sono chiari come nomi, ma almeno più corti */
-/* i tab rendrebbero tutto più leggibile:
-	dst_state.entry_hi	= src_state->entry_hi;
-	dst_state.cause		= src_state->cause;
-	dst_state.status	= src_state->status;
-	...
-*/
-	dst_state.entry_hi = src_state->entry_hi;
-	dst_state.cause	= src_state->cause;
-	dst_state.status = src_state->status;
-	dst_state.pc_epc = src_state->pc_epc;
-	dst_state.hi = src_state->hi;
-	dst_state.lo = src_state->lo;
-	/* non servono le graffe {} per i for a 1 riga */
-	for(int i=0;i<STATE_GPR_LEN;i++){dst_state.gpr[i]=src_state->gpr[i];}
-	/* qualche spazio non farebbe schifo */
+
+void __terminateTree(pcb_t *p) {
+
+		
+	if(p == proc_curr)
+		/* p is the current process */
+		proc_curr = NULL;
+	
+	if(outBlocked(p)) {
+		/* p is blocked on (some) semaphore */
+		/* remove p from its semaphore */
+
+		if(is_DEV_SEM(p->p_semAdd))
+			proc_soft_blocked_n--;
+		else
+			/*	if p was blocked on a device semaphore,
+				adjust its key to keep the binary semaphore invariant */
+			SEM_ADJUST(p->p_semAdd);
+	}
+	else
+		/* p is in the ready state */
+		outProcQ(&readyQ, p);
+
+	freePcb(p); 
+	proc_alive_n--;
+
 }
-
-int is_UM(){
-	return (SAVED_EXCEPTIONS_STATE->status==BIT_USER);
-}
-/* MACRO, in h */

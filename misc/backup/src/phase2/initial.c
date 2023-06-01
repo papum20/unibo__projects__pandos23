@@ -1,6 +1,6 @@
 #include "initial.h"
 #include "helper/initial_help.h"
-#include "env_nucleus.h"
+
 
 
 /*
@@ -33,7 +33,7 @@ pcb_t *proc_curr;
 	for the Pseudo-clock, plus four for two, independend terminal
 	devices, each needing two semaphores for read and write. 
 */
-int dev_sems[N_DEV_SEM];
+int dev_sems[SEM_DEVICES_N];
 
 
 
@@ -48,14 +48,14 @@ int main() {
 	/*	Set the Nucleus exception and TLB-Refill event handlers,
 		and their SP to the top of the Nucleus stack page.
 	*/
-	PASSUP_VECTOR->tlb_refill_handler	= (memaddr)uTLB_RefillHandler;
-	PASSUP_VECTOR->tlb_refill_stackPtr	= (memaddr)KERNELSTACK;
-	PASSUP_VECTOR->exception_handler	= (memaddr)Exception_handler;
-	PASSUP_VECTOR->exception_stackPtr	= (memaddr)KERNELSTACK;
+	PASSUP_VECTOR->tlb_refill_handler	= (memaddr) uTLB_RefillHandler;
+	PASSUP_VECTOR->tlb_refill_stackPtr	= (memaddr) KERNELSTACK;
+	PASSUP_VECTOR->exception_handler	= (memaddr) exceptionHandler;
+	PASSUP_VECTOR->exception_stackPtr	= (memaddr) KERNELSTACK;
 
 
 
-	/* 3. Initialize the Level 2 data structures */
+	/* 3. Initialize the Level 2 (phase 1 - see Chapter 2) data structures */
 
 	initPcbs();
 	initASH();
@@ -65,13 +65,13 @@ int main() {
 
 	/* 4. Initialize all Nucleus maintained variables */
 
-	proc_alive_n		= 0;
+	proc_alive_n			= 0;
 	proc_soft_blocked_n	= 0;
-	mkEmptyProcQ ( &readyQ );
-	proc_curr			= NULL;
+	mkEmptyProcQ (		&readyQ );
+	proc_curr		= NULL;
 	
 	/* Semaphores set to 0, as they will be used for synchronization. */
-	for(int i = 0; i < N_DEV_SEM; i++)
+	for(int i = 0; i < SEM_DEVICES_N; i++)
 		dev_sems[i] = SEM_VALUE_SYNC;
 
 
@@ -111,7 +111,7 @@ int main() {
 
 	/* 7. Call the Scheduler. */
 
-	Scheduler();
+	scheduler();
 
 
 	/* L’esecuzione del test e’ corretta se questo arriva 

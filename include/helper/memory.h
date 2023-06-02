@@ -1,13 +1,15 @@
 
 /****************************************************************************
  *
- * This header file contains utilities for managing memory/registers.
+ * This header file contains utilities for accessing memory/registers addresses.
  *
  ****************************************************************************/
 
 
 #ifndef MEMORY_HELP_H
 #define MEMORY_HELP_H
+
+#include "const.h"
 
 #include "pandos_arch.h"
 #include "pandos_bios.h"
@@ -33,6 +35,33 @@ static inline void regIncrPC(state_t *statep) {
 	statep->pc_epc += WORDLEN;
 }
 
+/* STATE_T
+*/
+
+/* Status bits values
+*/
+#define BIT_KERNEL 0
+#define BIT_USER 1
+
+/* check if the current saved exception state is in User Mode.
+*/
+#define IS_UM ( (SAVED_EXCEPTION_STATE->status & STATUS_KUp) == BIT_USER )
+
+/* copy a state from src to dst.
+*/
+static inline void STATE_CP(state_t src, state_t *dst) {
+	dst->entry_hi	= src.entry_hi;
+	dst->cause		= src.cause;
+	dst->status		= src.status;
+	dst->pc_epc		= src.pc_epc;
+	dst->hi			= src.hi;
+	dst->lo			= src.lo;
+
+	for(int i=0; i < STATE_GPR_LEN; i++)
+		dst->gpr[i] = src.gpr[i];
+}
+
+
 /*
  * BIOS DATA PAGE
  */
@@ -46,7 +75,26 @@ static inline void regIncrPC(state_t *statep) {
 /* Access the saved exception state,
  * i.e. the location where a process' state is saved when an exception happens.
  */
-#define SAVED_EXCEPTIONS_STATE  ((state_t *)BIOS_DATA_PAGE_BASE)
+#define SAVED_EXCEPTION_STATE  ((state_t *)BIOS_DATA_PAGE_BASE)
+
+
+/*
+ * DEVICES
+ */
+
+/* get the device interrupt line from its address */
+#define DEV_IL(addr) ( (addr - DEV_REG_START) / (DEV_REG_SIZE * N_DEV_PER_IL) + DEV_IL_START )
+
+/* copy the DOIO arguments (cmdValues) to the device register (cmdAddr)
+*/
+static inline void dev_setArgs(int *cmdAddr, int *cmdValues) {
+
+	/* get the right number of arguments, depending on the device type*/
+	int argc = (DEV_IL((memaddr)cmdAddr) == IL_TERMINAL) ? N_ARGS_TERM : N_ARGS_DEV;
+	/* copy register fields */
+	for( ; argc > 0; argc--)
+		*(cmdAddr + argc * WORDLEN) = *(cmdValues + argc * WORDLEN);
+}
 
 
 

@@ -10,6 +10,19 @@
 /* #include <umps3/umps/arch.h>
 */
 
+
+
+/*
+ * Generalities
+ */
+#define WORD_SIZE 4
+#define WS        WORD_SIZE
+
+/* Device register size */
+#define DEV_REG_SIZE_W   4
+#define DEV_REG_SIZE     (DEV_REG_SIZE_W * WS)
+
+
 /*
  * Interrupt lines
  */
@@ -36,6 +49,11 @@
 #define IL_TERMINAL         7
 
 #define EXT_IL_INDEX(il)    ((il) - DEV_IL_START)
+
+
+/* Device register area */
+#define DEV_REG_START           0x10000054
+#define DEV_REG_ADDR(line, dev) (DEV_REG_START + ((line) - DEV_IL_START) * N_DEV_PER_IL * DEV_REG_SIZE + (dev) * DEV_REG_SIZE)
 
 
 

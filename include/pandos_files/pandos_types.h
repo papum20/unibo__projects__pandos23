@@ -12,6 +12,27 @@
 #include <list.h>
 
 
+/* Device register type for disks, flash devices and printers (dtp) */
+typedef struct dtpreg {
+	unsigned int status;
+	unsigned int command;
+	unsigned int data0;
+	unsigned int data1;
+} dtpreg_t;
+
+/* Device register type for terminals */
+typedef struct termreg {
+	unsigned int recv_status;
+	unsigned int recv_command;
+	unsigned int transm_status;
+	unsigned int transm_command;
+} termreg_t;
+
+typedef union devreg {
+	dtpreg_t dtp;
+	termreg_t term;
+} devreg_t;
+
 /* Pass Up Vector */
 typedef struct passupvector {
 	unsigned int tlb_refill_handler;
@@ -73,6 +94,7 @@ typedef struct state {
 
 typedef signed int   cpu_t;
 typedef unsigned int memaddr;
+typedef unsigned int devregtr;
 
 /* Page Table Entry descriptor */
 typedef struct pteEntry_t {
@@ -89,10 +111,10 @@ typedef struct context_t {
 
 /* Support level descriptor */
 typedef struct support_t {
-    int        sup_asid;                        /* process ID                                 */
-    state_t    sup_exceptState[2];              /* old state exceptions                       */
-    context_t  sup_exceptContext[2];            /* new contexts for passing up        */
-    pteEntry_t sup_privatePgTbl[USERPGTBLSIZE]; /* user page table                            */
+    int        sup_asid;                        /* process ID					*/
+    state_t    sup_exceptState[2];              /* old state exceptions			*/
+    context_t  sup_exceptContext[2];            /* new contexts for passing up	*/
+    pteEntry_t sup_privatePgTbl[USERPGTBLSIZE]; /* user page table				*/
 } support_t;
 
 

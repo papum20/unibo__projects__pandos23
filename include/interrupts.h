@@ -1,3 +1,6 @@
+#ifndef INTERRUPTS_H
+#define INTERRUPTS_H
+
 
 /*
 This module implements the device/timer interrupt excep-
@@ -71,15 +74,18 @@ int sup_asid;
 state_t sup_exceptState[2];
 context_t sup_exceptContext[2];
 } support t;
-
-
 */
-/*sono Giuseppe, questa funzione la uso in exceptions.c*/
-/* non ci importa che sei giuseppe */
-/* dici piuttosto cosa fa la funzione */
+
+
+
+/* The interrupt handling function.
+*/
 extern void Interrupt_handler();
-//sono sempre io Giuseppe, questa funzione prende un pcb e dice se esso è bloccato un un semaforo dei devices
-/* l'italiano: le parole straniere al plurale rimangono invariate.*/
-/* lo vedo chè è una funzione*/
-/* gli spazi*/
-extern int is_blocked_by_devSem(pcb_t * process);
+
+/* Complete an IO request, returning the result.
+*/
+extern void SYSCALL_DOIO_return();
+
+
+
+#endif /* INTERRUPTS_H */

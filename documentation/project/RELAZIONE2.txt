@@ -19,13 +19,25 @@ ns: non aggiunge ns se già presente uno del tipo?
 
 EXCEPTIONS:
 syscall cast tipi
+- syscall macro
+- 3 tipi return
+- impl. pid
+- syscall doio: 
+	-	uso le struct di umps
+	-	assumo che con i terminali comunque si passino 4word di args, ma quella non usata sia =0 (come dice il libro,
+		se si usano solo 2 arg con i terminal perché si fa r/w)
+-	device identificato da suo addr (cmdAddr)
 
 
 SEMAFORI:
 diventano anche negativi,
 così abs(s_key) = n proc blocked
 //decidere comportamento semafori (binari)
-
+( the value of a semaphore is negative, it is an invariant that the abso-
+lute value of the semaphore equal the number of pcb’s blocked on that
+semaphore. Hence if a terminated process is blocked on a semaphore,
+the value of the semaphore must be adjusted; i.e. incremented.
+)
 
 NS:
 si deve cambiare la visita in ampiezza, perché interferisce con readyQ ed eventuali

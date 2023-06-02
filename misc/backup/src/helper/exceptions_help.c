@@ -23,8 +23,3 @@ void state_copy(state_t* src_state, state_t dst_state){
 	for(int i=0;i<STATE_GPR_LEN;i++){dst_state.gpr[i]=src_state->gpr[i];}
 	/* qualche spazio non farebbe schifo */
 }
-
-int is_UM(){
-	return (SAVED_EXCEPTIONS_STATE->status==BIT_USER);
-}
-/* MACRO, in h */

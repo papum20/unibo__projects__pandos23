@@ -74,8 +74,8 @@
 	/*## lo vedo che è una funzione */
 	/*## non mettere spazi tra commenti e funzioni, o non si capisce a cosa si riferiscono*/
 	inline void RETURN_SYSCALL(){
-		SAVED_EXCEPTIONS_STATE->pc_epc += WORDLEN;
-		state_copy(SAVED_EXCEPTIONS_STATE, current_proc->p_s);
+		SAVED_EXCEPTION_STATE->pc_epc += WORDLEN;
+		state_copy(SAVED_EXCEPTION_STATE, current_proc->p_s);
 	}
 
 

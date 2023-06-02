@@ -1,3 +1,5 @@
+#ifndef SCHEDULER_H
+#define SCHEDULER_H
 
 /*
 his module implements the Scheduler and the deadlock
@@ -68,15 +70,15 @@ to complete (which will unblock a pcb and populate the Ready Queue),
 or PANIC (halt execution in the presence of deadlock)
 */
 
+
+
 #include "list.h"
 #include "scheduler_help.h"
 
+
+
 extern void Scheduler();
-/* TEMPORARY NAME !!
-*/
 
-/*ritorna la lista dei processi ready (fatta da Giuseppe, se vuoi Tommaso la puoi cambiare)*/
-extern struct list_head* getHeadRd();
 
-/* returns the amount of CPU time used during the current quantum/time slice. */
-extern cpu_t get_CPU_time_slice_passed();
+
+#endif /* SCHEDULER_H */

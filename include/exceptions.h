@@ -84,10 +84,9 @@ PASS UP VECTOR
 #include "interrupts.h"
 #include "scheduler.h"
 
+#include "clocks.h"
 #include "const.h"
-#include "ash_help.h"
-#include "exceptions_help.h"
-#include "pcb_help.h"
+
 
 
 /*
@@ -130,10 +129,10 @@ extern void uTLB_RefillHandler();
  * also initializing the fields given as parameters, and the others (including NULL parameters) to 0/NULL.
  * Return -1 on failure.
  */
-extern void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns);
-/*
-SYSCALL_TERMINATEPROCESS
-termina il processo con quel rispettivo pid e i suoi figli, se pid=0 allora termina il processo corrente e i figli
+extern void SYSCALL_CREATEPROCESS (state_t *statep, support_t * supportp, struct nsd_t *ns);
+
+/*	Terminate the process to which the pid is associated, along with its children.
+	If pid is 0, the current process is terminated (with its children).
 */
 extern void SYSCALL_TERMINATEPROCESS (int pid);
 
@@ -144,24 +143,23 @@ extern void SYSCALL_PASSEREN (int *semaddr);
 /* perfirm a V on a semaphore.
 */
 extern void SYSCALL_VERHOGEN (int *semaddr);
-/*
-SYSCALL_DOIO
+
+/* Start an IO request.
 */
 extern void SYSCALL_DOIO (int *cmdAddr, int *cmdValues);
-/*
-SYSCALL_GETCPUTIME
-ritorna il tempo che il processo ha impiegato la CPU + tempo usato dalla CPU durante il current quantum/time slice
+
+/*	Return the CPU time used by the calling process.
 */
-extern void SYSCALL_GETCPUTIME();
+extern void SYSCALL_GETCPUTIME ();
 
 /* Perform a P on the pseudo-clock semaphore.
  * Thus, the calling process will remain blocked, waiting for a V from the Interval Timer.
  */
-extern void SYSCALL_WAITCLOCK();
+extern void SYSCALL_WAITCLOCK ();
 
 /* get a pointer to current process' support struct (or NULL).
 */
-extern void SYSCALL_GET_SUPPORT_DATA();
+extern void SYSCALL_GET_SUPPORT_DATA ();
 
 /* if parent isn't TRUE, return process's pid;
  * else return parent's pid only if it shares process's pid namespace,
@@ -169,11 +167,10 @@ extern void SYSCALL_GET_SUPPORT_DATA();
  */
 extern void SYSCALL_GETPID (int parent);
 
-/*
-SYSCALL_GETCHILDREN
-ritorna il numero di figli nello stesso namespace e mette nell'array children i loro pid
+/*	Load the `children` array with up to `size` children of the current process
+	which are in its same namaspace; return the total number of children.
 */
-extern void SYSCALL_GETCHILDREN(int *children, int size);
+extern void SYSCALL_GETCHILDREN (int *children, int size);
 
 
 #endif /* EXCEPTIONS_H */

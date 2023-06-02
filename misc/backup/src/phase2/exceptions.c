@@ -101,7 +101,7 @@ void PassUpOrDie(int excpt_type) {
 			return;
 		}
 			
-		state_copy(SAVED_EXCEPTIONS_STATE, curr_sup->sup_exceptState[excpt_type]);
+		state_copy(SAVED_EXCEPTION_STATE, curr_sup->sup_exceptState[excpt_type]);
 		context_t cxt = curr_sup->sup_exceptContext[excpt_type];
 		LDCXT(cxt.c_stackPtr, cxt.c_status, cxt.c_pc);
 }

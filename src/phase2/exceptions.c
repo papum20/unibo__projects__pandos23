@@ -6,16 +6,18 @@ blocked (e.g. SYS5)
 */
 
 #include "exceptions.h"
-#include "exceptions_help.h"
+
 #include "env_nucleus.h"
 
-
-
+#include "exceptions_help.h"
+#include "pcb_help.h"
 
 
 
 void Exception_handler(){
-	memaddr exeCode = CAUSE_GET_EXCCODE(proc_curr->p_s.cause);
+
+	unsigned int exeCode = CAUSE_GET_EXCCODE(SAVED_EXCEPTION_STATE->cause);
+	
 	if(exeCode == EXC_INT){
 		Interrupt_handler();
 	}
@@ -29,8 +31,7 @@ void Exception_handler(){
 	else if(exeCode == EXC_SYS){
 		SYSCALL_handler();
 	}
-	/* else? non so se sia definito una caso di default, o se ritornare qualcosa.. sul libro non dice di un valore di default */
-
+	/* no default fallback case */
 }
 
 
@@ -40,56 +41,34 @@ void SYSCALL_handler(){
 					a2 = A2(proc_curr),
 					a3 = A3(proc_curr);
 	
-	if(is_UM()) {	/*significa che sei in user mode e non va bene*/
-		CAUSE_SET_EXCCODE(proc_curr->p_s, EXC_RI); /*setto il registro exeCode in RI e poi chiamo il program Trap exception handler*/		
+	if(IS_UM) {
+		CAUSE_SET_EXCCODE(EXC_RI);	
 		Prg_Trap_handler();
 		return;
 	}
 	
 	if(a0 >= CREATEPROCESS && a0 <= GET_TOD) {
-		SYSCALL(a0, a1, a2, a3);
-	} else {	/*system call con a0 >= 11*/
+		_SYSCALL(a0, a1, a2, a3);
+	} else {
+		/* system call con a0 >= 11 */
 		PassUpOrDie(GENERALEXCEPT);
 	}
 
 }
-
-	/*
-	prova questo:
-
-	#include <stdio.h>
-	#define DOIO 1
-	#define VERHOGEN 2
-	#define SYSCALL(number, a0, a1) SYSCALL_##number(a0, a1)
-
-	void SYSCALL_DOIO(int a0, int a1) {
-		printf("DOIO %d %d\n", a0, a1);
-	}
-	void SYSCALL_VERHOGEN(int a0, int a1) {
-		printf("V %d %d\n", a0, a1);
-
-	}
-
-	int main() {
-		SYSCALL(DOIO, 1, 2);
-		SYSCALL(VERHOGEN, 3, 2);
-		int a = 5, b = 6;
-		SYSCALL(VERHOGEN, a, b);
-	}
-	*/
 	
 
 
 void PassUpOrDie(int excpt_type) {
+
 		support_t * curr_sup = proc_curr->p_supportStruct;
 		if(curr_sup == NULL){
-			SYSCALL(TERMPROCESS, TERMINATE_CURR_PROCESS, NULL, NULL);
+			SYSCALL_TERMINATEPROCESS(SYSCALL_TERMINATE_CURR_PROC);
 			return;
 		}
 			
-		STATE_CP(*SAVED_EXCEPTIONS_STATE, &(curr_sup->sup_exceptState[excpt_type]) );
+		STATE_CP( *SAVED_EXCEPTION_STATE, &(curr_sup->sup_exceptState[excpt_type]) );
 		context_t cxt = curr_sup->sup_exceptContext[excpt_type];
-		LDCXT(cxt.c_stackPtr, cxt.c_status, cxt.c_pc);
+		LDCXT(cxt.stackPtr, cxt.status, cxt.pc);
 }
 
 
@@ -110,10 +89,10 @@ void uTLB_RefillHandler() {
  * SYSTEM CALLS
  */
 
-/*
-* 1
+/* 1
 */
 void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *ns) {
+
 	pcb_t *new_proc = allocPcb();
 
 	/* if there are no free pcbs, return -1 */
@@ -132,8 +111,7 @@ void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *
 	RETURN_SYSCALL(PID(new_proc));
 }
 
-/*
-* 2
+/* 2
 */
 void SYSCALL_TERMINATEPROCESS (int pid) {
 	
@@ -153,10 +131,10 @@ void SYSCALL_PASSEREN (int *semaddr) {
 
 	(*semaddr)--;
 	
-	if(*semaddr > 0) {
+	if(*semaddr >= 0) {
 		/* no process is blocked on a P */
 		
-		if(*semaddr > 1)
+		if(*semaddr >= 1)
 			/* wake up a process blocked on a V */
 			removeBlocked(semaddr);
 
@@ -174,12 +152,12 @@ void SYSCALL_VERHOGEN (int *semaddr) {
 	(*semaddr)++;
 	
 	/* blocking V, as it's a binary semaphore */
-	if(*semaddr >= 1) {
+	if(*semaddr > 1) {
 		RETURN_SYSCALL_BLOCK(semaddr);
 		return;
 	}
 
-	if(*semaddr < 0) {
+	if(*semaddr <= 0) {
 		/* wake up a process blocked on a P */
 		pcb_t *awakened_proc = removeBlocked(semaddr);
 		insertProcQ(&readyQ, awakened_proc);
@@ -192,16 +170,19 @@ void SYSCALL_VERHOGEN (int *semaddr) {
 */
 void SYSCALL_DOIO (int *cmdAddr, int *cmdValues){
 
-	int ioStatus;
-	RETURN_SYSCALL(ioStatus);
+	/* pass the parameters to the device */
+	dev_setArgs(cmdAddr, cmdValues);
+	/* get the corresponding semaphore */
+	int *sem = dev_sems + DEV_SEM_IDX(cmdAddr);
+	/* block the process */
+	SYSCALL_PASSEREN(sem);
 }
-
 
 /* 6
 */
 void SYSCALL_GETCPUTIME() {
 
-	RETURN_SYSCALL(get_cpu_time() + get_CPU_time_slice_passed());
+	RETURN_SYSCALL(CPU_TIME_USED(proc_curr));
 }
 
 /* 7
@@ -209,12 +190,12 @@ void SYSCALL_GETCPUTIME() {
 void SYSCALL_WAITCLOCK() {
 
 	/* block the process on the interval timer semaphore */
-	RETURN_SYSCALL_BLOCK(DEV_SEM(SEM_TIMER));
+	RETURN_SYSCALL_BLOCK(DEV_SEM_TIMER);
 }
 
 /* 8
 */
-void SYSCALL_GET_SUPPORT_DATA(){
+void SYSCALL_GET_SUPPORT_DATA() {
 
 	RETURN_SYSCALL((memaddr)(&proc_curr->p_supportStruct));
 }
@@ -239,29 +220,20 @@ void SYSCALL_GETPID(int parent) {
 /* 10
 */
 void SYSCALL_GETCHILDREN(int *children, int size){
-	int number_of_children = 0; 
-	int index = 0;
-	/*scorro tutta la lista dei figli del current_proc e metto nell'array children tutti i pid dei figli che sono nello stesso namespace*/
-	
-	if(!emptyChild(proc_curr)){
-		struct list_head *pos;
+
+	int n = 0;
+	struct pcb_t *child;
 		
-		list_for_each(pos, &proc_curr->p_child) { 
-			pcb_t *child = container_of(pos, pcb_t, p_sib); 
-			if(getNamespace(child, NS_PID)==getNamespace(proc_curr,NS_PID)){
-				if(index<size){
-					children[index] = GET_PROC_PID(child);
-					index++;
-				}
-				/*
-				else{
-					RETURN_SYSCALL(number_of_children);
-					return;
-				}*/
-			}
+	pcb_for_each_child(child, proc_curr) { 
+
+		if(getNamespace(child, NS_PID) == getNamespace(proc_curr, NS_PID)) {
+			if(n < size)
+				children[n++] = PID(child);
+			n++;
 		}
 	}
-	RETURN_SYSCALL(number_of_children);
+
+	RETURN_SYSCALL(n);
 }
 
 

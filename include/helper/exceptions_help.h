@@ -8,6 +8,7 @@
 #include "memory.h"
 
 #include "ash.h"
+#include "ns.h"
 #include "pcb.h"
 
 
@@ -20,11 +21,9 @@
 */
 #define __CAUSE_EXCCODE_SETTED(cause, code) (cause & !CAUSE_EXCCODE_MASK) | (code << CAUSE_EXCCODE_BIT)
 
-/* set cause register to exec_code code.
+/* set cause register to exec_code code for the Saved Exception State.
 */
-static inline CAUSE_SET_EXCCODE(state_t state, unsigned int code) {
-	state.cause = __CAUSE_EXCCODE_SETTED(state.cause, code);
-}
+#define CAUSE_SET_EXCCODE(code) SAVED_EXCEPTION_STATE->cause = __CAUSE_EXCCODE_SETTED(SAVED_EXCEPTION_STATE->cause, code)
 
 
 /* check if an exception code is associated to a TLB exception.
@@ -56,9 +55,19 @@ static inline CAUSE_SET_EXCCODE(state_t state, unsigned int code) {
  * pcb_t *@p: process whose state is updated.
  */
 #define __RETURN_SYSCALL(p) ({					\
-	regIncrPC(SAVED_EXCEPTIONS_STATE);			\
-	STATE_CP(*SAVED_EXCEPTIONS_STATE, &p->p_s);	\
+	regIncrPC(SAVED_EXCEPTION_STATE);			\
+	STATE_CP(*SAVED_EXCEPTION_STATE, &p->p_s);	\
 })
+
+/**
+ * block the current process on the semaphore.
+ * @semaddr: address of the key of the semaphore where to block the process.
+ */
+static inline void SYSCALL_BLOCK(int *semAdd) {
+	update_p_time();
+	insertBlocked(semAdd, proc_curr);
+	proc_curr = NULL;
+}
 
 /**
  * save the return state for current_proc (from a syscall),
@@ -82,9 +91,7 @@ static inline CAUSE_SET_EXCCODE(state_t state, unsigned int code) {
  * @semaddr: address of the key of the semaphore where to block the process.
  */
 static inline void RETURN_SYSCALL_BLOCK(int *semAdd) {
-	update_p_time();
-	insertBlocked(semAdd, proc_curr);
-	proc_curr = NULL;
+	SYSCALL_BLOCK(semAdd);
 	RETURN_SYSCALL_VOID();
 	Scheduler();
 }
@@ -93,7 +100,9 @@ static inline void RETURN_SYSCALL_BLOCK(int *semAdd) {
 /* syscall dispatcher,
  * i.e. dispatches to syscall sub-functions.
  */
-#define SYSCALL(a0, a1, a2, a3)						\
+/* syscall dispatcher, taking a variable as a0
+*/
+#define _SYSCALL(a0, a1, a2, a3)					\
 	switch(a0){										\
 		case CREATEPROCESS:							\
 			SYSCALL_CREATEPROCESS((state_t *)a1, (support_t *) a2, (struct nsd_t *) a3);	\
@@ -126,6 +135,12 @@ static inline void RETURN_SYSCALL_BLOCK(int *semAdd) {
 			SYSCALL_GETCHILDREN((int *)a1, a2);		\
 		}	
 
+/* syscall dispatcher, taking a syscall identifier constant as a0 (e.g. DOIO)
+*/
+#define SYSCALL(a0, a1, a2, a3)		\
+	int _a0 = a0;					\
+	_SYSCALL(_a0, a1, a2, a3)
+
 
 /**
  * init proc's pcb fields (for create_process syscall).
@@ -147,7 +162,7 @@ static inline void __init_createProc(pcb_t *p, pcb_t *prnt, state_t *state, supp
 /* terminate all of process' children.
  * process is not NULL.
  */
-extern void __terminateTree();
+extern void __terminateTree(pcb_t *p);
 
 
 

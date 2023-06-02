@@ -2,6 +2,7 @@
 #define PANDOS23_CONST_H
 
 
+#include "pandos_arch.h"
 #include "pandos_types.h"
 
 
@@ -11,6 +12,7 @@
 
 /* Basic types
  */
+typedef unsigned int uint;
 typedef unsigned int * uint_PTR;
 
 /*	alias of static, for disambiguating its use to declare
@@ -52,31 +54,11 @@ static inline void SEM_ADJUST(int *semAdd) {
 /* parameters
 */
 /* TERMPROCESS (2) */
-#define SYSCALL_TERMINATE_CURR_PROC
+#define SYSCALL_TERMINATE_CURR_PROC 0
 
-
-/*
- * STATE_T
- */
-
-/* check if a state is in User Mode.
-*/
-#define IS_UM(state) (SAVED_EXCEPTIONS_STATE->status == BIT_USER)
-
-/* copy a state from src to dst.
-*/
-static inline void STATE_CP(state_t src, state_t *dst) {
-	dst->entry_hi	= src.entry_hi;
-	dst->cause		= src.cause;
-	dst->status		= src.status;
-	dst->pc_epc		= src.pc_epc;
-	dst->hi			= src.hi;
-	dst->lo			= src.lo;
-
-	for(int i=0; i < STATE_GPR_LEN; i++)
-		dst->gpr[i] = src.gpr[i];
-}
-
+/* DOIO (5) */
+#define N_ARGS_DEV	4
+#define N_ARGS_TERM	2
 
 
 #endif /* CONST_H */

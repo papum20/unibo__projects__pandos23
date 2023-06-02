@@ -20,5 +20,8 @@
 /* CPU time used by a process */
 #define CPU_TIME_USED(proc) (proc->p_time + TODCK)
 
+/**/
+#define PROC_TIME_UPDATE(proc) (proc->p_time += TODCK)
+
 
 #endif /* CLOCKS_H */

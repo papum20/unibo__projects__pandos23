@@ -2,14 +2,10 @@
 #define INITIAL_H
 
 
-
-#include "const.h"
-#include "memory.h"
-
 #include "pandos_arch.h"
 #include "pandos_bios.h"
+#include "pandos_const.h"
 #include "pandos_types.h"
-#include "pandos_types2.h"
 #include "types.h"
 
 #include "pcb.h"
@@ -18,6 +14,9 @@
 
 #include "exceptions.h"
 #include "scheduler.h"
+
+#include "const.h"
+#include "memory.h"
 
 
 

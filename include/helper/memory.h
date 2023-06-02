@@ -35,32 +35,6 @@ static inline void regIncrPC(state_t *statep) {
 	statep->pc_epc += WORDLEN;
 }
 
-/* STATE_T
-*/
-
-/* Status bits values
-*/
-#define BIT_KERNEL 0
-#define BIT_USER 1
-
-/* check if the current saved exception state is in User Mode.
-*/
-#define IS_UM ( (SAVED_EXCEPTION_STATE->status & STATUS_KUp) == BIT_USER )
-
-/* copy a state from src to dst.
-*/
-static inline void STATE_CP(state_t src, state_t *dst) {
-	dst->entry_hi	= src.entry_hi;
-	dst->cause		= src.cause;
-	dst->status		= src.status;
-	dst->pc_epc		= src.pc_epc;
-	dst->hi			= src.hi;
-	dst->lo			= src.lo;
-
-	for(int i=0; i < STATE_GPR_LEN; i++)
-		dst->gpr[i] = src.gpr[i];
-}
-
 
 /*
  * BIOS DATA PAGE

@@ -64,7 +64,7 @@
  * @semaddr: address of the key of the semaphore where to block the process.
  */
 static inline void SYSCALL_BLOCK(int *semAdd) {
-	update_p_time();
+	PROC_TIME_UPDATE(proc_curr);
 	insertBlocked(semAdd, proc_curr);
 	proc_curr = NULL;
 }

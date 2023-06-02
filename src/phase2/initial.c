@@ -68,7 +68,7 @@ int main() {
 	proc_alive_n		= 0;
 	proc_soft_blocked_n	= 0;
 	mkEmptyProcQ ( &readyQ );
-	proc_curr			= NULL;
+	/* proc_curr used and initialized later */
 	
 	/* Semaphores set to 0, as they will be used for synchronization. */
 	for(int i = 0; i < N_DEV_SEM; i++)
@@ -84,37 +84,23 @@ int main() {
 	/* 6. Instantiate a single process, place its pcb in the Ready Queue, and
 	increment Process Count. */
 	
-	insertProcQ(&readyQ, allocPcb());
+	proc_curr = allocPcb();			/* use proc_curr temporary */
+	/* init state_t */
+	proc_curr->p_s.status = _INIT_FIRST_PROC_STATE(0);	/* kernel-mode on, PLT and Interrupts enabled */
+	RAMTOP(proc_curr->p_s.reg_sp);						/* SP to RAMTOP (use last RAM fram for its stack) */
+	proc_curr->p_s.pc_epc = (memaddr)test;				/* PC to test */
+
+	insertProcQ(&readyQ, proc_curr);
 	proc_alive_n++;
 
-	/* NOTES:
-	1.	to do when the new pcb_t will be released (containing the p_supportStruct field):
-		Set the Support Structure pointer (p_supportStruct) to NULL.
-		In particular this process needs to have interrupts enabled
-		the processor Local Timer enabled
-		kernel-mode on
-		the SP set to RAMTOP (i.e. use the last RAM frame for its stack)
-		and its PC set to the address of test
-	*/
+	proc_curr = NULL;				/* initialize proc_curr */
 
 
-	/*
-	Inizializzazione: scheduler
-	- Allocare un processo (pcb_t) in kernel mode, 
-	con interrupt abilitati, stack pointer a RAMTOP e 
-	program counter che punta alla funzione test() 
-	(fornita da noi).
-	- Inserire questo processo nella Ready Queue.
-	- invocare lo scheduler.
-
-	*/
 
 	/* 7. Call the Scheduler. */
 
 	Scheduler();
 
-
-	/* L’esecuzione del test e’ corretta se questo arriva 
-	al termine senza andare in PANIC. */
 	test();
+	
 }

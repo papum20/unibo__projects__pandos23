@@ -81,12 +81,13 @@ extern int dev_sems[N_DEV_SEM];
 /**	get the index for the array of device semaphores,
 	relative to the device identified by its address.
 */
-static inline DEV_SEM_IDX(int *devAddr) {
+static inline uint DEV_SEM_IDX(int *devAddr) {
 	return _DEV_ADDR_OFFSET(devAddr) ?
 		_DEV_NUM(devAddr) : (_DEV_NUM(devAddr) + _DEV_NUM_REL(devAddr));
 }
 
-/**	get a device semaphore (int *) from the device's register address.
+/**	
+ * get a device semaphore (int *) from the device's register address.
 */
 #define DEV_SEM_FROM_ADDR(devAddr) (dev_sems + DEV_SEM_IDX(devAddr))
 

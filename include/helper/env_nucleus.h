@@ -43,17 +43,25 @@ extern pcb_t *proc_curr;
 
 /* number of internal devices semaphores, i.e. PLT and Interval Timer */
 #define N_INT_IL 2
+/* number of terminal devices */
+#define N_DEV_TERMINAL 2
+/* number of semaphores for each terminal */
+#define N_SEM_TERMINAL 2
 
 /*	Number of semaphores for devices.
 	It's one for each device on each interrupt line
 	(excluding 1 for concurrency, not needed, and terminals),
 	plus two for each terminal.
 */
-#define N_DEV_SEM (N_EXT_IL * N_DEV_PER_IL + N_DEV_PER_IL + N_INT_IL)
+#define N_DEV_SEM ((N_EXT_IL - 1) * N_DEV_PER_IL + 2 * N_SEM_TERMINAL + N_INT_IL)
 
 /*	One integer semaphore for each external (sub)device, plus one
 	for the Pseudo-clock, plus four for two, independend terminal
 	devices, each needing two semaphores for read and write. 
+
+	Device semaphores are stored in the array in the following order:
+	first come the first one of each type, in the same order as interrupt lines
+	(cputimer)
 */
 extern int dev_sems[N_DEV_SEM];
 
@@ -67,27 +75,26 @@ extern int dev_sems[N_DEV_SEM];
  * Device semaphpores
  */
 
-#define _DEV_NUM_REL_MASK ( (N_DEV_PER_IL - 1) << DEV_REG_SIZE )
+#define _DEV_NUM_OF_TYPE_MASK ( (N_DEV_PER_IL - 1) << DEV_REG_SIZE )
 
-/* type of device, corresponding to an Interrupt Line */
+/* number of external device, from 0 to N_EXT_IL * (N_DEV_PER_IL - 1) + N_DEV_TERMINAL */
 #define _DEV_NUM(devAddr) ((uint)devAddr / DEV_REG_SIZE)
 
-/* number of device, between those of its type */
-#define _DEV_NUM_REL(devAddr) ((uint)devAddr & _DEV_NUM_REL_MASK)
-
-/* offset of the device address from the start of the register */
+/*	offset of the device address from the start of the register
+	(only terminals use an offset to indicate either read/write)
+*/
 #define _DEV_ADDR_OFFSET(devAddr) ((uint)devAddr % DEV_REG_SIZE)
 
-/**	get the index for the array of device semaphores,
-	relative to the device identified by its address.
+/**	get the index in the array of device semaphores,
+	for the external device identified by its address.
 */
 static inline uint DEV_SEM_IDX(int *devAddr) {
 	return _DEV_ADDR_OFFSET(devAddr) ?
-		_DEV_NUM(devAddr) : (_DEV_NUM(devAddr) + _DEV_NUM_REL(devAddr));
+		_DEV_NUM(devAddr) : (_DEV_NUM(devAddr) + N_DEV_TERMINAL);
 }
 
 /**	
- * get a device semaphore (int *) from the device's register address.
+ * get an externam device semaphore (int *) from the device's register address.
 */
 #define DEV_SEM_FROM_ADDR(devAddr) (dev_sems + DEV_SEM_IDX(devAddr))
 

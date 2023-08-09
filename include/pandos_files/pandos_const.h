@@ -40,6 +40,8 @@
 #define PGFAULTEXCEPT 0
 #define GENERALEXCEPT 1
 
+#define ACK             1
+
 /* Macro to load the Interval Timer */
 #define LDIT(T)         ((*((cpu_t *) INTERVALTMR)) = (T) *(*((cpu_t *) TIMESCALEADDR)))
 

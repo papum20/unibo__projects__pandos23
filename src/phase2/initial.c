@@ -33,7 +33,7 @@ pcb_t *proc_curr;
 	for the Pseudo-clock, plus four for two, independend terminal
 	devices, each needing two semaphores for read and write. 
 */
-int dev_sems[N_DEV_SEM];
+int dev_sems[MULTIPLE_LINE_DEVICES][N_DEV_PER_IL];
 
 
 
@@ -71,8 +71,10 @@ int main() {
 	/* proc_curr used and initialized later */
 	
 	/* Semaphores set to 0, as they will be used for synchronization. */
-	for(int i = 0; i < N_DEV_SEM; i++)
-		dev_sems[i] = SEM_VALUE_SYNC;
+	for(int i = 0; i < MULTIPLE_LINE_DEVICES; i++)
+		for(int j = 0; j < N_DEV_PER_IL; j++){
+			dev_sems[i][j] = SEM_VALUE_SYNC;
+		}
 
 
 

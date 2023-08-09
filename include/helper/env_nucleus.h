@@ -48,13 +48,6 @@ extern pcb_t *proc_curr;
 /* number of semaphores for each terminal */
 #define N_SEM_TERMINAL 2
 
-/*	Number of semaphores for devices.
-	It's one for each device on each interrupt line
-	(excluding 1 for concurrency, not needed, and terminals),
-	plus two for each terminal.
-*/
-#define N_DEV_SEM ((N_EXT_IL - 1) * N_DEV_PER_IL + 2 * N_SEM_TERMINAL + N_INT_IL)
-
 /*	One integer semaphore for each external (sub)device, plus one
 	for the Pseudo-clock, plus four for two, independend terminal
 	devices, each needing two semaphores for read and write. 
@@ -63,7 +56,7 @@ extern pcb_t *proc_curr;
 	first come the first one of each type, in the same order as interrupt lines
 	(cputimer)
 */
-extern int dev_sems[N_DEV_SEM];
+extern int dev_sems[MULTIPLE_LINE_DEVICES][N_DEV_PER_IL];
 
 
 

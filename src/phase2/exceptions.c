@@ -19,7 +19,7 @@ void Exception_handler(){
 	unsigned int exeCode = CAUSE_GET_EXCCODE(SAVED_EXCEPTION_STATE->cause);
 	
 	if(exeCode == EXC_INT){
-		Interrupt_handler();
+		Interrupt_handler(SAVED_EXCEPTION_STATE->cause);
 	}
 	else if(IS_TLB_EXCEPTION(exeCode)){
 		TLB_handler();

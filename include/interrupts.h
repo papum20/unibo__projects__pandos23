@@ -3,8 +3,7 @@
 
 #include "helper/const.h"
 #include "exceptions.h"
-
-int dev_semaphores[MULTIPLE_LINE_DEVICES][N_DEV_PER_IL];
+#include "../../include/helper/interrupt_helper.h"
 
 /* The interrupt initializing function.
 */
@@ -25,7 +24,13 @@ extern void Check_pending_interrupt(int line, int device);
 
 extern void Device_interrupt(int line);
 
+extern void PLT_interrupt();
+
+extern void IT_interrupt();
+
 extern void Set_IO(int *sem_key, int status);
+
+extern void Terminal_interrupt();
 
 
 

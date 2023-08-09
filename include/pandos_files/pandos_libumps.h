@@ -61,6 +61,7 @@ extern void TLBWR(void);
 
 extern unsigned int LDST(STATE_PTR statep);
 
+extern unsigned int setTIMER(unsigned int timer);
 
 
 #endif /* PANDOS_LIBUMBS_H_INCLUDED */

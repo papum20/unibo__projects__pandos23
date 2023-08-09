@@ -55,6 +55,11 @@
 #define DEV_REG_START           0x10000054
 #define DEV_REG_ADDR(line, dev) (DEV_REG_START + ((line) - DEV_IL_START) * N_DEV_PER_IL * DEV_REG_SIZE + (dev) * DEV_REG_SIZE)
 
+//Interrupting device bitmap start address
+#define PENDING_BITMAP_START 0x1000003c
+
+//Macro che ritorna una word contenente il device che richiede l'interrupt nella linea LINENO
+#define INTR_CURRENT_BITMAP(LINE)	 (unsigned int *)(PENDING_BITMAP_START + (WORD_SIZE * (LINE - 3)))
 
 
 #endif /* PANDOS_ARCH_H_INCLUDED */

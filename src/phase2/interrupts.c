@@ -2,7 +2,8 @@
 
 
 
-void Interrupt_handler() {
+
+void Interrupt_handler(unsigned int cause) {
 	/*
 	Non-Timer Interrupts:
 	1. Calculate the address for this device’s device register. [Section ??-pops]
@@ -14,9 +15,23 @@ void Interrupt_handler() {
 	register. Alternatively, writing a new command in the interrupting
 	device’s device register will also acknowledge the interrupt.
 	*/
+	int il = interrupt_line(cause);
 
-
-
+	if (il == 1){
+		PLT_interrupt();
+	}
+	else if (il == 2){
+		IT_interrupt();
+	}
+	else if (il == 7){
+		Terminal_interrupt();
+	}
+	else if (il > 2 &&  il < 7){
+		Device_interrupt(il);
+	}
+	else {
+		PANIC();
+	}
 }
 
 void SYSCALL_DOIO_return() {
@@ -60,4 +75,29 @@ void Device_interrupt(int line){
 			dev->command = ACK_DEVICE;
 		}
 	}
+}
+
+void IT_interrupt(){
+
+}
+
+void PLT_interrupt(){
+	//ackownledge the PLT interrupt by loading the timer with a new value
+
+	setTIMER()
+
+	//copy the processor state at the time into current pcb
+
+	proc_curr->p_s = *((state_t*)BIOSDATAPAGE);
+
+	//place the process in readyqueue
+
+	insertProcQ(&readyQ, proc_curr);
+
+	//call the scheduler
+	Scheduler();
+}
+
+void Terminal_interrupt(){
+	
 }

@@ -53,6 +53,14 @@ static inline void SEM_ADJUST(int *semAdd) {
 
 /* parameters
 */
+
+/*
+	Interrupt constants
+*/
+
+#define MULTIPLE_LINE_DEVICES 6
+#define ACK_DEVICE 1
+
 /* TERMPROCESS (2) */
 #define SYSCALL_TERMINATE_CURR_PROC 0
 

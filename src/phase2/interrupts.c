@@ -15,6 +15,8 @@ void Interrupt_handler() {
 	device’s device register will also acknowledge the interrupt.
 	*/
 
+
+
 }
 
 void SYSCALL_DOIO_return() {
@@ -37,3 +39,25 @@ void SYSCALL_DOIO_return() {
 	*/
 }
 
+extern void Check_pending_interrupt(int line, int device){
+	return *INTR_CURRENT_BITMAP(line) & (1 << device);
+}
+
+void Device_interrupt(int line){
+	for(int i = 0; i < N_DEV_PER_IL; i++){
+		if (Check_pending_interrupt(line, i)){
+
+			//get the address of the device
+			dtpreg_t *dev = (dtpreg_t*)DEV_REG_ADDR(line, i);
+
+			//set the result on the process descriptor
+			Set_IO(&dev_semaphores[line][i], dev->status);
+
+			//release the process to be added to the ready queue
+			SYSCALL_VERHOGEN(&dev_semaphores[line][i]);
+
+			//acknowledge the interrupt
+			dev->command = ACK_DEVICE;
+		}
+	}
+}

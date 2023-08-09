@@ -1,50 +1,49 @@
+PER RELAZIONE:
+
+	cambiamenti phase1:
+		pcb : inizializzazioni campi non usati in phase1.
+
+	EXCEPTIONS:
+	syscall cast tipi
+	- Implementazione di syscall() con una macro che fa dmux tra le singole implementazioni delle syscall.
+	- 3 tipi return
+	- Implementazione dei pid= indirizzo del pcb (funzione che assicura una corrispondenza biunivoca).
+	- syscall doio: 
+		-	(uso le struct di umps)
 
 
-cambiamenti phase1:
-	pcb : inizializzazioni campi non usati in phase1
-
-		/*
-NOTES:
-1.	N_INTERRUPT_LINES or N_INTERRUPT_LINES*N_DEV_PER_IL ?
-2.	"two semaphores for each terminal device":
-	does it mean 2*2, or 2, of which ONE for each terminal?
-3.	IL_IPI: what is it? Does it count?
-*/
-
-LDIT takes ms?
+	SEMAFORI:
+		Abbiamo scelto di implementarli come semafori binari, che diventano anche negativi, così che valga l'invariante
+		`abs(s_key) = n_proc_blocked`.
 
 
-ns: non aggiunge ns se già presente uno del tipo?
+	dev_sems[] : semafori del nucleus per i device.
+		L'array contiene tutti e soli i semafori necessari, indicizzati seguendo l'ordine delle interrupt line,
+		con N_DEV_PER_IL semafori per ogni IL, ad eccezione di: terminali, con 4 semafori (read/write per 2 terminali),
+		e i due clock (cputimer e interval timer).
+		Per i terminali, vengono indicizzati, in ordine di terminal number, prima tutti i 'read', poi i 'write';
+		ai clock, invece, sono dedicati gli ultimi due slot.
+		In ogni caso, è tutto nascosto dall'implementazione (che è basata sui valori attuali per assegnare i semafori
+		in base all'indirizzo del registro, con una funzione biunivoca) e accessibile con le macro DEV_SEM_FROM_ADDR
+		per i device esterni, e DEV_SEM_CPUTIMER e DEV_SEM_TIMER per i clock.
 
 
-EXCEPTIONS:
-syscall cast tipi
-- syscall macro
-- 3 tipi return
-- impl. pid
-- syscall doio: 
-	-	uso le struct di umps
-	-	assumo che con i terminali comunque si passino 4word di args, ma quella non usata sia =0 (come dice il libro,
-		se si usano solo 2 arg con i terminal perché si fa r/w)
--	device identificato da suo addr (cmdAddr)
 
 
-SEMAFORI:
-diventano anche negativi,
-così abs(s_key) = n proc blocked
-//decidere comportamento semafori (binari)
-( the value of a semaphore is negative, it is an invariant that the abso-
-lute value of the semaphore equal the number of pcb’s blocked on that
-semaphore. Hence if a terminated process is blocked on a semaphore,
-the value of the semaphore must be adjusted; i.e. incremented.
-)
 
-NS:
-si deve cambiare la visita in ampiezza, perché interferisce con readyQ ed eventuali
-altre code.
-per ora in TERMINATE_PROC uso la ricorsione; se si vuole fare con interazione, basta creare
-una struct aggiuntiva
-struct iterator {
-	list_head list;
-	pcb_t *p;
-}
+
+DA CONTROLLARE:
+
+	ns: non aggiunge ns se già presente uno del tipo?
+
+
+	NS:
+	si deve cambiare la visita in ampiezza, perché interferisce con readyQ ed eventuali
+	altre code: non può usare i campi del pcb come lista ausiliaria, perché sono usati in altro modo
+	(nel test1 non si è notato perché non veniva verificato).
+	per ora in TERMINATE_PROC uso la ricorsione per i ns; se si vuole fare con interazione, bisognerebbe creare
+	una struct aggiuntiva
+	struct iterator {
+		list_head list;
+		pcb_t *p;
+	}

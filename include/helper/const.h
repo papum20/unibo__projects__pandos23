@@ -60,6 +60,8 @@ static inline void SEM_ADJUST(int *semAdd) {
 
 #define MULTIPLE_LINE_DEVICES 6
 #define ACK_DEVICE 1
+#define PLT_RESET 4294967293
+#define IT_RESET 100000
 
 /* TERMPROCESS (2) */
 #define SYSCALL_TERMINATE_CURR_PROC 0

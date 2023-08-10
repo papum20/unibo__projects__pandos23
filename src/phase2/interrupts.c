@@ -66,10 +66,10 @@ void Device_interrupt(int line){
 			dtpreg_t *dev = (dtpreg_t*)DEV_REG_ADDR(line, i);
 
 			//set the result on the process descriptor
-			Set_IO(&dev_semaphores[line][i], dev->status);
+			Set_IO(&dev_semaphores[SEM_INDEX_LD(line, i)], dev->status);
 
 			//release the process to be added to the ready queue
-			SYSCALL_VERHOGEN(&dev_semaphores[line][i]);
+			SYSCALL_VERHOGEN(&dev_semaphores[SEM_INDEX_LD(line, i)]);
 
 			//acknowledge the interrupt
 			dev->command = ACK_DEVICE;
@@ -78,13 +78,47 @@ void Device_interrupt(int line){
 }
 
 void IT_interrupt(){
+	/*
+	1. Acknowledge the interrupt by loading the Interval Timer with a new
+	value: 100 milliseconds. [Section ??-pops]
+	2. Unblock ALL pcbs blocked on the Pseudo-clock semaphore. Hence,
+	the semantics of this semaphore are a bit different than traditional
+	synchronization semaphores
+	3. Reset the Pseudo-clock semaphore to zero. This insures that all SYS7
+	calls block and that the Pseudo-clock semaphore does not grow positive.
+	4. Return control to the Current Process: Perform a LDST on the saved
+	exception state (located at the start of the BIOS Data Page [Section
+	3.4]).
+	*/
 
+	//Acknowledge the interrupt by loading the Interval Timer with 100 milliseconds
+	LDIT(IT_RESET);
+
+	//2. Unblock ALL pcbs blocked on the Pseudo-clock semaphore.
+
+	pcb_t* unlockedProcess = NULL;
+	while( (unlockedProcess = removeBlocked(&dev_sems[DEV_SEM_TIMER])) != NULL){
+		
+		insertProcQ(&readyQ, unlockedProcess);
+		//aggiornare il tempo?
+
+	}
+
+	//Reset the Pseudo-clock semaphore to zero.
+	dev_sems[DEV_SEM_TIMER] = 0;
+	
+	//Returnto the Current Process: Perform a LDST on the saved exception state
+	if (proc_curr != NULL)
+		LDST( (state_t*)BIOSDATAPAGE);
+	else
+		Scheduler();
 }
 
 void PLT_interrupt(){
+
 	//ackownledge the PLT interrupt by loading the timer with a new value
 
-	setTIMER()
+	setTIMER(PLT_RESET);
 
 	//copy the processor state at the time into current pcb
 

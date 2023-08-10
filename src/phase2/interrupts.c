@@ -24,7 +24,7 @@ void Interrupt_handler(unsigned int cause) {
 		IT_interrupt();
 	}
 	else if (il == 7){
-		Terminal_interrupt();
+		Terminal_interrupt(il);
 	}
 	else if (il > 2 &&  il < 7){
 		Device_interrupt(il);
@@ -132,6 +132,23 @@ void PLT_interrupt(){
 	Scheduler();
 }
 
-void Terminal_interrupt(){
-	
+void Terminal_interrupt(int line){
+	for(int i = 0; i < N_DEV_PER_IL; i++){
+		if (Check_pending_interrupt(line, i)){
+
+			termreg_t *reg = (termreg_t*)DEV_REG_ADDR(line, i);
+
+			if(reg->recv_status != TERM_READY){
+				Set_IO(&dev_sems[SEM_INDEX_LD(TERM_WR_LINE, i)], reg->recv_status);
+				SYSCALL_VERHOGEN(&dev_semaphores[SEM_INDEX_LD(TERM_WR_LINE, i)]);
+				reg->recv_command = ACK;
+			}
+
+			if(reg->transm_status != TERM_READY){
+				Set_IO(&dev_sems[SEM_INDEX_LD(TERM_RD_LINE, i)], reg->transm_status);
+				SYSCALL_VERHOGEN(&dev_semaphores[SEM_INDEX_LD(TERM_RD_LINE, i)]);
+				reg->transm_command = ACK;
+			}
+		}
+	}
 }

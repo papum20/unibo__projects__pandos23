@@ -30,7 +30,7 @@ extern void IT_interrupt();
 
 extern void Set_IO(int *sem_key, int status);
 
-extern void Terminal_interrupt();
+extern void Terminal_interrupt(int line);
 
 
 

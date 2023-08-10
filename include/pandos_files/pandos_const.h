@@ -154,6 +154,10 @@
 
 
 /* Utility constants */
+#define TERM_READY 1
+#define TERM_WR_LINE 7
+#define TERM_RD_LINE 8
+
 #define ON         1
 #define OFF        0
 #define OK         0

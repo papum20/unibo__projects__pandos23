@@ -5,9 +5,6 @@
 #include "exceptions.h"
 #include "../../include/helper/interrupt_helper.h"
 
-/* The interrupt initializing function.
-*/
-extern void Interrupt_init();
 
 
 /* The interrupt handling function.
@@ -16,7 +13,7 @@ extern void Interrupt_handler();
 
 /* Complete an IO request, returning the result.
 */
-extern void SYSCALL_DOIO_return();
+extern void SYSCALL_DOIO_return(int *sem_key, unsigned int status);
 
 /*  Controls whether there is a pending interrupt on a determinate line of a device
 */

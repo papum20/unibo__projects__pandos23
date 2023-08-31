@@ -22,10 +22,18 @@
  * All functions return the value in register after write
  */
 
-
 extern unsigned int setENTRYLO(unsigned int entry);
 
 extern unsigned int setENTRYHI(unsigned int entry);
+
+extern unsigned int setTIMER(unsigned int timer);
+
+
+/* these functions produce a program trap if executed in user mode
+ * without CPU0 bit _set_
+ */
+
+extern void TLBWR(void);
 
 
 /* This function allows a current process to change its operating mode,
@@ -41,13 +49,6 @@ extern unsigned int setENTRYHI(unsigned int entry);
 extern unsigned int LDCXT(unsigned int stackPtr, unsigned int status, unsigned int pc);
 
 
-/* these functions produce a program trap if executed in user mode
- * without CPU0 bit _set_
- */
-
-extern void TLBWR(void);
-
-
 /* This function may be used to restart an interrupted/blocked process,
  * reloading it from a physical address passed as argument.
  * It is available only in kernel mode, thru a BIOS routine
@@ -60,8 +61,6 @@ extern void TLBWR(void);
  */
 
 extern unsigned int LDST(STATE_PTR statep);
-
-extern unsigned int setTIMER(unsigned int timer);
 
 
 #endif /* PANDOS_LIBUMBS_H_INCLUDED */

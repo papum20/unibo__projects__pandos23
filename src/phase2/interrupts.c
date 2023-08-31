@@ -31,9 +31,9 @@ void SYSCALL_DOIO_return(int *sem_key, unsigned int status) {
 	//obtain the process from the relative semaphore
 	pcb_t *pr = headBlocked(sem_key);
 
-	//set it's v0 register
+	//set its v0 register
 	if (pr != NULL){
-		pr->p_s.regv0 = status;
+		pr->p_s.reg_v0 = status;
 	}
 
 	//remove it from the sem and add it to the readyQ

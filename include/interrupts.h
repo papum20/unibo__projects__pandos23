@@ -3,7 +3,7 @@
 
 #include "helper/const.h"
 #include "exceptions.h"
-#include "../../include/helper/interrupt_helper.h"
+#include "include/helper/interrupt_helper.h"
 
 
 
@@ -29,6 +29,11 @@ extern void Set_IO(int *sem_key, int status);
 
 extern void Terminal_interrupt(int line);
 
+
+/* the following are defined outside and must be imorted.
+*/
+
+extern void PANIC();
 
 
 #endif /* INTERRUPTS_H */

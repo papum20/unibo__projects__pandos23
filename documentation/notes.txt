@@ -1,0 +1,9 @@
+questions:
+osama->const.h?
+osama->env_nucleus?
+
+diff osama: 2d2a474d6cbb8d5dcd1b2b28d57d168690003e1b
+
+
+static inline int interrupt_line(unsigned int cause){
+equivalent to `log(cause && 0xFFF) >> 8`

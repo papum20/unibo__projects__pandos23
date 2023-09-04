@@ -173,7 +173,7 @@ void SYSCALL_DOIO (int *cmdAddr, int *cmdValues){
 	/* pass the parameters to the device */
 	dev_setArgs(cmdAddr, cmdValues);
 	/* get the corresponding semaphore */
-	int *sem = dev_sems + DEV_SEM_IDX(cmdAddr);
+	int *sem = dev_sems + _DEV_SEM_IDX(cmdAddr);
 	/* block the process */
 	SYSCALL_PASSEREN(sem);
 }

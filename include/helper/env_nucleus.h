@@ -49,11 +49,19 @@ extern pcb_t *proc_curr;
 #define N_SEM_TERMINAL 2
 
 /*	Number of semaphores for devices.
+<<<<<<< HEAD
 	It's one for each device on each interrupt line
 	(excluding 1 for concurrency, not needed, and terminals),
 	plus two for each terminal.
 */
 #define N_DEV_SEM ((N_EXT_IL - 1) * N_DEV_PER_IL + 2 * N_SEM_TERMINAL + N_INT_IL)
+=======
+	It's one for each internal device (timers) and each device on each
+	interrupt line (excluding 1 for concurrency, not needed, and terminals),
+	plus two for each terminal.
+*/
+#define N_DEV_SEM ((N_EXT_IL + 1) * N_DEV_PER_IL + N_INT_IL)
+>>>>>>> tmp
 
 /*	One integer semaphore for each external (sub)device, plus one
 	for the Pseudo-clock, plus four for two, independend terminal
@@ -99,8 +107,8 @@ static inline uint _DEV_SEM_IDX(devregtr devAddr_offset) {
  * @param devAddr device register address
  * @return a semAddr
 */
-#define DEV_SEM_FROM_ADDR(devAddr) (dev_sems + DEV_SEM_IDX(devAddr - DEV_REG_START))
-
+#define DEV_SEM_FROM_ADDR(devAddr) (dev_sems + _DEV_SEM_IDX(devAddr - DEV_REG_START))
+#define SEM_INDEX_LD(line, dev) ( (line - DEV_IL_START) * N_DEV_PER_IL + dev)
 /*	Internal devices semaphores (PLT and Interval Timer)
 */
 #define DEV_SEM_CPUTIMER (dev_sems + N_DEV_SEM - 2)

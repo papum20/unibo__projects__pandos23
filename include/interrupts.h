@@ -5,6 +5,8 @@
 #include "exceptions.h"
 #include "include/helper/interrupt_helper.h"
 
+#include "include/helper/env_nucleus.h"
+
 
 
 /* The interrupt handling function.

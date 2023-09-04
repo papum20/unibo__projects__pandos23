@@ -43,7 +43,7 @@ void SYSCALL_DOIO_return(int *sem_key, unsigned int status) {
 
 void Check_pending_interrupt(int line, int device){
 
-	return *INTR_CURRENT_BITMAP(line) & (1 << device);
+	return *CDEV_BITMAP_ADDR(line) & (1 << device);
 
 }
 
@@ -56,7 +56,7 @@ void Device_interrupt(int line){
 			dtpreg_t *dev = (dtpreg_t*)DEV_REG_ADDR(line, i);
 
 			//set the result on the process descriptor
-			SYSCALL_DOIO_return(&dev_semaphores[SEM_INDEX_LD(line, i)], dev->status);
+			SYSCALL_DOIO_return(DEV_SEM_FROM_LINEDEV(line ,i), dev->status);
 
 			//acknowledge the interrupt
 			dev->command = ACK_DEVICE;

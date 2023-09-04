@@ -59,6 +59,9 @@ static inline void regIncrPC(state_t *statep) {
 /* get the device interrupt line from its address */
 #define DEV_IL(addr) ( (addr - DEV_REG_START) / (DEV_REG_SIZE * N_DEV_PER_IL) + DEV_IL_START )
 
+/* offset of device register address from device registers space */
+#define DEV_REG_OFFSET(line, dev) (((line) - DEV_IL_START) * N_DEV_PER_IL * DEV_REG_SIZE + (dev) * DEV_REG_SIZE)
+
 /* copy the DOIO arguments (cmdValues) to the device register (cmdAddr)
 */
 static inline void dev_setArgs(int *cmdAddr, int *cmdValues) {

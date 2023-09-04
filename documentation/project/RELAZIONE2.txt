@@ -2,6 +2,8 @@ PER RELAZIONE:
 
 	cambiamenti phase1:
 		pcb : inizializzazioni campi non usati in phase1.
+		ns	: visita in ampiezza usa il campo del pcb per le liste, che viene usato anche per altri scopi (e.g. lista processi
+			attivi/blocked) e quindi interferisce. Ora usa la ricorsione.
 
 	EXCEPTIONS:
 	syscall cast tipi

@@ -30,7 +30,7 @@ extern void Set_IO(int *sem_key, int status);
 extern void Terminal_interrupt(int line);
 
 
-/* the following are defined outside and must be imorted.
+/* the following are defined outside and must be imported.
 */
 
 extern void PANIC();

@@ -7,21 +7,17 @@
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/include/helper",
                 "${workspaceFolder}/include/kernel",
-                "${workspaceFolder}/include/phase1_files"
-                //"/usr/include/",
-                //"/usr/include/linux"
-				//"/usr/src/linux-headers-5.10.0-19-common/include/"
-                //"/usr/src/linux-headers-5.10.0-19-common/**"
+                "${workspaceFolder}/include/pandos_files"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],
-            "compilerPath": "/usr/bin/gcc",
+            "compilerPath": "/usr/bin/mipsel-linux-gnu-gcc",
             "cStandard": "gnu99",
             "cppStandard": "c++17",
-            "intelliSenseMode": "${default}"
+            "intelliSenseMode": "linux-gcc-x86"
         }
     ],
     "enableConfigurationSquiggles": true,

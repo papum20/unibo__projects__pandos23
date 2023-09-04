@@ -1,6 +1,7 @@
 {
     "files.associations": {
 		"*.h": "c",
+		"*.md": "markdown",
 		"*.c": "c",
 		"typeinfo": "c",
 		"random": "c",
@@ -13,7 +14,33 @@
 		"ostream": "c",
 		"ranges": "c",
 		"tuple": "c",
-		"utility": "c"
+		"utility": "c",
+		"bitset": "c",
+		"optional": "c",
+		"fstream": "c",
+		"istream": "c",
+		"sstream": "c",
+		"stop_token": "c",
+		"mutex": "c",
+		"chrono": "c",
+		"ratio": "c",
+		"variant": "c",
+		"deque": "c",
+		"forward_list": "c",
+		"list": "c",
+		"string": "c",
+		"unordered_map": "c",
+		"unordered_set": "c",
+		"vector": "c",
+		"string_view": "c",
+		"hash_map": "c",
+		"hash_set": "c",
+		"slist": "c",
+		"initializer_list": "c",
+		"span": "c",
+		"regex": "c",
+		"system_error": "c",
+		"*.inc": "c"
 	},
 
 
@@ -57,6 +84,6 @@
 	"workbench.activityBar.visible": true,
 
 	//C Cpp
-  	"C_Cpp.default.compilerPath": "/usr/bin/gcc"
+  	"C_Cpp.default.compilerPath": "/usr/bin/mipsel-linux-gnu-gcc"
 
 }

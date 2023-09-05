@@ -41,7 +41,7 @@ void SYSCALL_DOIO_return(int *sem_key, unsigned int status) {
 
 }
 
-void Check_pending_interrupt(int line, int device){
+int Check_pending_interrupt(int line, int device){
 
 	return *CDEV_BITMAP_ADDR(line) & (1 << device);
 
@@ -123,12 +123,12 @@ void Terminal_interrupt(int line){
 
 			//give priority to the writing end of the terminal device
 			if(reg->recv_status != TERM_READY){
-				SYSCALL_DOIO_return(&dev_sems[SEM_INDEX_LD(TERM_WR_LINE, i)], reg->recv_status);
+				SYSCALL_DOIO_return(TERM_SEM(WRITE_TERMINAL, i), reg->recv_status);
 				reg->recv_command = ACK;
 			}
 			
 			if(reg->transm_status != TERM_READY){
-				SYSCALL_DOIO_return(&dev_sems[SEM_INDEX_LD(TERM_RD_LINE, i)], reg->transm_status);
+				SYSCALL_DOIO_return(TERM_SEM(READ_TERMINAL, i), reg->transm_status);
 				reg->transm_command = ACK;
 			}
 		}

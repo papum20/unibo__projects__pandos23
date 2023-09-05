@@ -117,6 +117,13 @@ static inline uint _EXT_DEV_SEM_IDX(devregtr devAddr_offset) {
 		_EXT_DEV_SEM_IDX(DEV_REG_OFFSET(line, dev))			/* case external device */	\
 	))
 
+/**
+ *	get the correct terminal semaphore, given there are two for each device
+ *	@param priority 0 (higher) if write operation, 1 if read
+ * 	@param dev device number
+ *  @return a semAddr
+*/
+#define TERM_SEM(priority, dev) (dev_sems + (N_EXT_IL + priority) * N_DEV_PER_IL)
 
 /**
  * Check if a semaphore key is associated to a device semaphore.

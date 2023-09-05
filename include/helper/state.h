@@ -52,6 +52,15 @@ static inline void STATE_CP(state_t src, state_t *dst) {
 #define BIT_DISABLED 0
 #define BIT_ENABLED 1
 
+/* Devices
+*/
+
+/* terminals */
+/* terminal status codes  */
+#define TERM_READY 1
+
+
+/* Utilities */
 
 /* check if the current saved exception state is in User Mode.
 */
@@ -79,6 +88,10 @@ static inline void STATE_CP(state_t src, state_t *dst) {
 */
 #define STATUS_SET_TE(status, mode) _STATUS_SET(status, mode, STATUS_TE_MASK, STATUS_TE_BIT)
 
+
+
+/* Cause code */
+#define CAUSE_IP_START 8	/* starting bit */
 
 
 

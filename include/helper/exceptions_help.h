@@ -6,10 +6,15 @@
 #include "pandos_types.h"
 
 #include "memory.h"
+#include "state.h"
 
 #include "ash.h"
 #include "ns.h"
 #include "pcb.h"
+#include "scheduler.h"
+
+#include "env_nucleus.h"
+#include "pcb_help.h"
 
 
 

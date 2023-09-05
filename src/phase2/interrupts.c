@@ -3,10 +3,10 @@
 
 
 
-void Interrupt_handler(unsigned int cause) {
+void Interrupt_handler() {
 
 	//function that calculates the interrupt line
-	int il = interrupt_line(cause);
+	int il = interrupt_line(SAVED_EXCEPTION_STATE->cause);
 
 
 	if (il == 1){
@@ -41,59 +41,15 @@ void SYSCALL_DOIO_return(int *sem_key, unsigned int status) {
 
 }
 
+
+
 int Check_pending_interrupt(int line, int device){
 
-	return *CDEV_BITMAP_ADDR(line) & (1 << device);
+	return (*(memaddr*)CDEV_BITMAP_ADDR(line)) & (1 << device);
 
 }
 
-void Device_interrupt(int line){
 
-	for(int i = 0; i < N_DEV_PER_IL; i++){
-		if (Check_pending_interrupt(line, i)){
-
-			//get the address of the device
-			dtpreg_t *dev = (dtpreg_t*)DEV_REG_ADDR(line, i);
-
-			//set the result on the process descriptor
-			SYSCALL_DOIO_return(DEV_SEM_FROM_LINEDEV(line ,i), dev->status);
-
-			//acknowledge the interrupt
-			dev->command = ACK_DEVICE;
-		}
-	}
-
-	//return control to the current process
-	if (proc_curr != NULL)
-		LDST( (state_t*)BIOSDATAPAGE);
-	else
-		Scheduler();
-
-}
-
-void IT_interrupt(){
-
-	//Acknowledge the interrupt by loading the Interval Timer with 100 milliseconds
-	LDIT(IT_RESET);
-
-	//2. Unblock ALL pcbs blocked on the Pseudo-clock semaphore.
-	pcb_t* unlockedProcess = NULL;
-	while( (unlockedProcess = removeBlocked(&dev_sems[DEV_SEM_TIMER])) != NULL){
-		
-		insertProcQ(&readyQ, unlockedProcess);
-		//aggiornare il tempo?
-
-	}
-
-	//Reset the Pseudo-clock semaphore to zero.
-	dev_sems[DEV_SEM_TIMER] = 0;
-	
-	//Returnto the Current Process: Perform a LDST on the saved exception state
-	if (proc_curr != NULL)
-		LDST( (state_t*)BIOSDATAPAGE);
-	else
-		Scheduler();
-}
 
 void PLT_interrupt(){
 
@@ -113,6 +69,31 @@ void PLT_interrupt(){
 
 }
 
+void IT_interrupt(){
+
+	//Acknowledge the interrupt by loading the Interval Timer with 100 milliseconds
+	LDIT(IT_RESET);
+
+	//2. Unblock ALL pcbs blocked on the Pseudo-clock semaphore.
+	pcb_t* unlockedProcess = NULL;
+	while( (unlockedProcess = removeBlocked(DEV_SEM_TIMER)) != NULL){
+		
+		insertProcQ(&readyQ, unlockedProcess);
+		//aggiornare il tempo?
+
+	}
+
+	//Reset the Pseudo-clock semaphore to zero.
+	*DEV_SEM_TIMER = 0;
+	
+	//Return to the Current Process: Perform a LDST on the saved exception state
+	if (proc_curr != NULL)
+		LDST( (state_t*)BIOSDATAPAGE);
+	else
+		Scheduler();
+}
+
+
 void Terminal_interrupt(int line){
 
 	for(int i = 0; i < N_DEV_PER_IL; i++){
@@ -123,17 +104,41 @@ void Terminal_interrupt(int line){
 
 			//give priority to the writing end of the terminal device
 			if(reg->recv_status != TERM_READY){
-				SYSCALL_DOIO_return(TERM_SEM(WRITE_TERMINAL, i), reg->recv_status);
+				SYSCALL_DOIO_return(EXT_DEV_SEM_FROM_REGADDR(reg->recv_status), reg->recv_status);
 				reg->recv_command = ACK;
 			}
 			
 			if(reg->transm_status != TERM_READY){
-				SYSCALL_DOIO_return(TERM_SEM(READ_TERMINAL, i), reg->transm_status);
+				SYSCALL_DOIO_return(EXT_DEV_SEM_FROM_REGADDR(reg->transm_status), reg->transm_status);
 				reg->transm_command = ACK;
 			}
 		}
 	}
 
+	if (proc_curr != NULL)
+		LDST( (state_t*)BIOSDATAPAGE);
+	else
+		Scheduler();
+
+}
+
+void Device_interrupt(int line){
+
+	for(int i = 0; i < N_DEV_PER_IL; i++){
+		if (Check_pending_interrupt(line, i)){
+
+			//get the address of the device register
+			dtpreg_t *reg = (dtpreg_t*)DEV_REG_ADDR(line, i);
+
+			//set the result on the process descriptor
+			SYSCALL_DOIO_return(EXT_DEV_SEM_FROM_REGADDR((devregtr)reg), reg->status);
+
+			//acknowledge the interrupt
+			reg->command = ACK_DEVICE;
+		}
+	}
+
+	//return control to the current process
 	if (proc_curr != NULL)
 		LDST( (state_t*)BIOSDATAPAGE);
 	else

@@ -29,7 +29,7 @@ PER RELAZIONE:
 		in base all'indirizzo del registro, con una funzione biunivoca) e accessibile con le macro DEV_SEM_FROM_ADDR
 		per i device esterni, e DEV_SEM_CPUTIMER e DEV_SEM_TIMER per i clock.
 
-
+	_EXT_DEV_SEM_IDX : è una funzione (inline) perché usa più volte lo stesso parametro (safety).
 
 
 

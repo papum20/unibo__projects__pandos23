@@ -1,8 +1,5 @@
 #include "exceptions_help.h"
 
-#include "env_nucleus.h"
-#include "pcb_help.h"
-
 
 
 void __terminateTree(pcb_t *p) {

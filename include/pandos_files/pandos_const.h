@@ -27,6 +27,10 @@
 #define INTERVALTMR   0x10000020
 #define TIMESCALEADDR 0x10000024
 
+/* device common COMMAND codes */
+#define RESET           0
+#define ACK             1
+
 /* Memory related constants */
 #define KSEG0        0x00000000
 #define KSEG1        0x20000000
@@ -39,8 +43,6 @@
 /* Exceptions related constants */
 #define PGFAULTEXCEPT 0
 #define GENERALEXCEPT 1
-
-#define ACK             1
 
 /* Macro to load the Interval Timer */
 #define LDIT(T)         ((*((cpu_t *) INTERVALTMR)) = (T) *(*((cpu_t *) TIMESCALEADDR)))
@@ -154,10 +156,6 @@
 
 
 /* Utility constants */
-#define TERM_READY 1
-#define TERM_WR_LINE 7
-#define TERM_RD_LINE 8
-
 #define ON         1
 #define OFF        0
 #define OK         0

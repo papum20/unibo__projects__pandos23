@@ -59,8 +59,9 @@ extern pcb_t *proc_curr;
 	Device semaphores are stored in the array in the following order:
 	first come the external devices, in the same order as their interrupt lines;
 	then, assuming terminals are the last devices, come other N_DEV_PER_IL semaphores
-	for each terminal, representing the write ends (while the first N_DEV_PER_IL represent
-	their respective read ends); lastly come cputimer and interval timer.
+	for each terminal, representing the write ends, which only use the bytes 3-4 of the register
+	(while the first N_DEV_PER_IL represent their respective read ends, using bytes 1-2);
+	lastly come cputimer and interval timer.
 */
 extern int dev_sems[N_DEV_SEM];
 
@@ -99,8 +100,10 @@ static inline uint _EXT_DEV_SEM_IDX(devregtr devAddr_offset) {
 }
 
 /**	
- * get an external device semaphore from the device's register address.
- * @param devAddr device register address
+ * Get an external device semaphore from the device's register address.
+ * For terminals, the command values are 2 bytes long, so `devAddr` can start 
+ * at its device register address + 2.
+ * @param devAddr device register address, of type `devrgtr`
  * @return a semAddr
 */
 #define EXT_DEV_SEM_FROM_REGADDR(devAddr) (dev_sems + _EXT_DEV_SEM_IDX(devAddr - DEV_REG_START))
@@ -116,14 +119,6 @@ static inline uint _EXT_DEV_SEM_IDX(devregtr devAddr_offset) {
 		N_DEV_SEM - (N_EXT_IL - 1 - dev) :					/* case internal device */	\
 		_EXT_DEV_SEM_IDX(DEV_REG_OFFSET(line, dev))			/* case external device */	\
 	))
-
-/**
- *	get the correct terminal semaphore, given there are two for each device
- *	@param priority 0 (higher) if write operation, 1 if read
- * 	@param dev device number
- *  @return a semAddr
-*/
-#define TERM_SEM(priority, dev) (dev_sems + (N_EXT_IL + priority) * N_DEV_PER_IL)
 
 /**
  * Check if a semaphore key is associated to a device semaphore.

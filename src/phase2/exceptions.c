@@ -19,7 +19,7 @@ void Exception_handler(){
 	unsigned int exeCode = CAUSE_GET_EXCCODE(SAVED_EXCEPTION_STATE->cause);
 	
 	if(exeCode == EXC_INT){
-		Interrupt_handler(SAVED_EXCEPTION_STATE->cause);
+		Interrupt_handler();
 	}
 	else if(IS_TLB_EXCEPTION(exeCode)){
 		TLB_handler();
@@ -173,7 +173,7 @@ void SYSCALL_DOIO (int *cmdAddr, int *cmdValues){
 	/* pass the parameters to the device */
 	dev_setArgs(cmdAddr, cmdValues);
 	/* get the corresponding semaphore */
-	int *sem = EXT_DEV_SEM_FROM_REGADDR(cmdAddr);
+	int *sem = EXT_DEV_SEM_FROM_REGADDR((devregtr)cmdAddr);
 	/* block the process */
 	SYSCALL_PASSEREN(sem);
 }

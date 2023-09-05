@@ -54,10 +54,20 @@ static inline void SEM_ADJUST(int *semAdd) {
 /* parameters
 */
 
+/* TERMPROCESS (2) */
+#define SYSCALL_TERMINATE_CURR_PROC 0
+
+/* DOIO (5) */
+#define N_ARGS_DEV	4
+#define N_ARGS_TERM	2
+
+
 /*
-	Interrupt constants
+	INTERRUPTS
 */
 
+#define TERM_WR_LINE 7
+#define TERM_RD_LINE 8
 #define MULTIPLE_LINE_DEVICES 6
 #define ACK_DEVICE 1
 #define PLT_RESET 4294967293
@@ -65,12 +75,6 @@ static inline void SEM_ADJUST(int *semAdd) {
 #define WRITE_TERMINAL 0
 #define READ_TERMINAL 1
 
-/* TERMPROCESS (2) */
-#define SYSCALL_TERMINATE_CURR_PROC 0
-
-/* DOIO (5) */
-#define N_ARGS_DEV	4
-#define N_ARGS_TERM	2
 
 
 

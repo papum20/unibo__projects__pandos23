@@ -3,9 +3,10 @@
 
 #include "helper/const.h"
 #include "exceptions.h"
-#include "include/helper/interrupt_helper.h"
+#include "helper/interrupt_helper.h"
+#include "helper/devices.h"
 
-#include "include/helper/env_nucleus.h"
+#include "helper/env_nucleus.h"
 
 
 
@@ -30,12 +31,6 @@ extern void IT_interrupt();
 extern void Set_IO(int *sem_key, int status);
 
 extern void Terminal_interrupt(int line);
-
-
-/* the following are defined outside and must be imported.
-*/
-
-extern void PANIC();
 
 
 #endif /* INTERRUPTS_H */

@@ -18,13 +18,45 @@
  */
 
 
+/* All these functions access CP0 registers.
+ * Access to CP0 registers is always possible in kernel mode, or in user
+ * mode with CPU 0 bit _set_ in STATUS register
+ */
+
+extern unsigned int getINDEX(void);
+
+extern unsigned int getRANDOM(void);
+
+extern unsigned int getENTRYLO(void);
+
+extern unsigned int getBADVADDR(void);
+
+extern unsigned int getENTRYHI(void);
+
+extern unsigned int getSTATUS(void);
+
+extern unsigned int getCAUSE(void);
+
+extern unsigned int getEPC(void);
+
+extern unsigned int getPRID(void);
+
+extern unsigned int getTIMER(void);
+
+
 /* Only some of CP0 register are R/W: handling requires care.
  * All functions return the value in register after write
  */
 
+extern unsigned int setINDEX(unsigned int index);
+
 extern unsigned int setENTRYLO(unsigned int entry);
 
 extern unsigned int setENTRYHI(unsigned int entry);
+
+extern unsigned int setSTATUS(unsigned int entry);
+
+extern unsigned int setCAUSE(unsigned int cause);
 
 extern unsigned int setTIMER(unsigned int timer);
 
@@ -34,6 +66,8 @@ extern unsigned int setTIMER(unsigned int timer);
  */
 
 extern void TLBWR(void);
+
+extern void WAIT(void);
 
 
 /* This function allows a current process to change its operating mode,
@@ -61,6 +95,19 @@ extern unsigned int LDCXT(unsigned int stackPtr, unsigned int status, unsigned i
  */
 
 extern unsigned int LDST(STATE_PTR statep);
+
+
+/* This function stops the system printing a warning message on terminal 0
+ */
+
+extern void PANIC(void);
+
+
+/* This function halts the system printing a regular shutdown message on
+ * terminal 0
+ */
+
+extern void HALT(void);
 
 
 #endif /* PANDOS_LIBUMBS_H_INCLUDED */

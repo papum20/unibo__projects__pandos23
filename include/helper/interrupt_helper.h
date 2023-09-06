@@ -1,8 +1,24 @@
 #ifndef INTERRUPT_HELPER_H
 #define INTERRUPT_HELPER_H
 
-#include "include/pandos_files/pandos_cp0.h"
-#include "include/helper/state.h"
+#include "pandos_files/pandos_cp0.h"
+#include "helper/state.h"
+
+
+
+/*
+	CONSTANTS
+*/
+
+#define TERM_WR_LINE 7
+#define TERM_RD_LINE 8
+#define MULTIPLE_LINE_DEVICES 6
+#define ACK_DEVICE 1
+#define PLT_RESET 4294967293
+#define IT_RESET 100000
+#define WRITE_TERMINAL 0
+#define READ_TERMINAL 1
+
 
 
 

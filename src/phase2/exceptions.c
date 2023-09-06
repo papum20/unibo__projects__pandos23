@@ -1,10 +1,3 @@
-/* notes:
-1. Furthermore, SYSCALLs that do not result in process termination (even-
-tually) return control to the process’s execution stream. This is done either
-immediately (e.g. SYS6) or after the process is blocked and eventually un-
-blocked (e.g. SYS5)
-*/
-
 #include "exceptions.h"
 
 #include "env_nucleus.h"

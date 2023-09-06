@@ -18,6 +18,7 @@
 #define INTERVAL_TIMER_INIT 100
 
 
+/* return the initialization value for the first process */
 #define _INIT_FIRST_PROC_STATE(state) (STATUS_SET_KU(	\
 	STATUS_SET_IE(										\
 		STATUS_SET_TE(state, BIT_ENABLED),				\

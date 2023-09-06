@@ -31,6 +31,8 @@ PER RELAZIONE:
 
 	_EXT_DEV_SEM_IDX : è una funzione (inline) perché usa più volte lo stesso parametro (safety).
 
+	MAKEFILE:
+		added include -I
 
 
 

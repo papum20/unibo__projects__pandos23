@@ -1,22 +1,29 @@
 #include "scheduler.h"
 
 void Scheduler(){
+
+	/* Scheduler is called in kernel mode */
     
-    if(emptyProcQ(&readyQ)){
+    if(proc_alive_n==0)
+		HALT();
 
-        if(proc_alive_n==0) HALT();
+    else if(proc_alive_n>0 && proc_soft_blocked_n>0 && emptyProcQ(&readyQ)){
 
-        else if(proc_alive_n>0 && proc_soft_blocked_n>0){
-
-        STATUS_SET_IE(STATUS_SET_TE(BIT_KERNEL, BIT_DISABLED), BIT_ENABLED);
+		setSTATUS(
+			STATUS_SET_IE(
+				STATUS_SET_TE(
+					getSTATUS(), BIT_DISABLED
+				),
+				BIT_ENABLED
+			)
+		);
         
         WAIT();
 
         }
 
-        else if(proc_alive_n>0 && proc_soft_blocked_n==0) PANIC();
-
-    }
+    else if(proc_alive_n>0 && proc_soft_blocked_n==0 && emptyProcQ(&readyQ)) 
+        PANIC();
 
     else{
 
@@ -24,6 +31,6 @@ void Scheduler(){
 
         setTIMER(_set_time);
 
-        LDST(proc_curr->p_s);
+        LDST(&proc_curr->p_s);
     }
 }

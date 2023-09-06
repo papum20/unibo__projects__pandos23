@@ -18,6 +18,6 @@ void Scheduler(){
 
         setTIMER(5);
 
-        LDST(proc_curr->p_s);
+        LDST(&proc_curr->p_s);
     }
 }

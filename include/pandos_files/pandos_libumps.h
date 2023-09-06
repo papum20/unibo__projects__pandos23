@@ -35,6 +35,8 @@ extern unsigned int setTIMER(unsigned int timer);
 
 extern void TLBWR(void);
 
+extern void WAIT(void);
+
 
 /* This function allows a current process to change its operating mode,
  * turning on/off interrupt masks, turning on user mode, and at the same time
@@ -61,6 +63,19 @@ extern unsigned int LDCXT(unsigned int stackPtr, unsigned int status, unsigned i
  */
 
 extern unsigned int LDST(STATE_PTR statep);
+
+
+/* This function stops the system printing a warning message on terminal 0
+ */
+
+extern void PANIC(void);
+
+
+/* This function halts the system printing a regular shutdown message on
+ * terminal 0
+ */
+
+extern void HALT(void);
 
 
 #endif /* PANDOS_LIBUMBS_H_INCLUDED */

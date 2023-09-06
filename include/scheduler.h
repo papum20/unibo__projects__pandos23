@@ -72,8 +72,8 @@ or PANIC (halt execution in the presence of deadlock)
 
 
 
-#include "include/helper/env_nucleus.h"
-#include "include/helper/state.h"
+#include "helper/env_nucleus.h"
+#include "helper/state.h"
 #include "pandos_files/pandos_libumps.h"
 #include "list.h"
 

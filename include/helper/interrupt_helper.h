@@ -1,8 +1,8 @@
 #ifndef INTERRUPT_HELPER_H
 #define INTERRUPT_HELPER_H
 
-#include "include/pandos_files/pandos_cp0.h"
-#include "include/helper/state.h"
+#include "pandos_files/pandos_cp0.h"
+#include "helper/state.h"
 
 
 

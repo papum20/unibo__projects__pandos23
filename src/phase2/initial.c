@@ -3,13 +3,6 @@
 #include "env_nucleus.h"
 
 
-/*
-Important Point: When setting up a new processor state one must
-set the previous bits (i.e. IEp & KUp) and not the current bits (i.e.
-IEc & KUc) in the Status register for the desired assignment to take
-effect after the initial LDST loads the processor state. [Section ??-
-pops]
-*/
 
 /* 1. Declare the Level 3 global variables. */
 

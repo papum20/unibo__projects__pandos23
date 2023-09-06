@@ -37,7 +37,9 @@ DEPS = $(IDIR)/*.h
 
 __OBJS1 = pcb ash ns
 _OBJS1 = $(patsubst %, $(SDIR)/$(SDIR1)/%, $(__OBJS1))
-__TESTS = p1test
+__OBJS2 = exceptions initial interrupts scheduler
+_OBJS2 = $(patsubst %, $(SDIR)/$(SDIR2)/%, $(__OBJS2))
+__TESTS = p2test.04
 _TESTS = $(patsubst %, $(TDIR)/%, $(__TESTS))
 ifneq ($(strip $(DELTEST)), $(strip T))
 	TESTS = $(patsubst %, $(ODIR)/%.o, $(_TESTS))
@@ -45,7 +47,7 @@ endif
 ifneq ($(strip $(T)),)
 	TESTS += $(patsubst %, $(ODIR)/%.o, $(T))
 endif
-OBJS = $(patsubst %, $(ODIR)/%.o, $(_OBJS1))
+OBJS = $(patsubst %, $(ODIR)/%.o, $(_OBJS1) $(_OBJS2))
 
 
 
@@ -61,7 +63,7 @@ DEFS = $(DEPS) $(INCDIR)/libumps.h Makefile
 # std=gnu99 supports: inline, typeof
 CFLAGS = -ffreestanding -std=gnu99 -Wall -c -mips1 -mabi=32 -mfp32 \
  	-mno-gpopt -G 0 -fno-pic -mno-abicalls -o
-CFLAGSINC = $(patsubst %, -iquote%, $(IDIRS)) -Iinclude/pandos_files/
+CFLAGSINC = $(patsubst %, -iquote%, $(IDIRS)) -Iinclude/ -Iinclude/pandos_files/ -I/usr/include/umps3/
 LDAOUTFLAGS = -G 0 -nostdlib -T $(SUPDIR)/umpsaout.ldscript
 LDCOREFLAGS = -G 0 -nostdlib -T $(SUPDIR)/umpscore.ldscript
 

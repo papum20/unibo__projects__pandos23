@@ -84,8 +84,8 @@ PASS UP VECTOR
 #include "interrupts.h"
 #include "scheduler.h"
 
-#include "clocks.h"
 #include "const.h"
+#include "devices.h"
 #include "state.h"
 
 

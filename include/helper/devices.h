@@ -10,6 +10,16 @@
 #define DEVICES_H
 
 
+#include "pandos_files/pandos_const.h"
+
+
+/* TOD clock
+*/
+
+/* current TOD clock value */
+#define TODCK ( (*((cpu_t *) TODLOADDR)) / (*((cpu_t *) TIMESCALEADDR)) )
+
+
 /* terminals
 */
 

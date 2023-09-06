@@ -6,6 +6,22 @@
 
 
 
+/*
+	CONSTANTS
+*/
+
+#define TERM_WR_LINE 7
+#define TERM_RD_LINE 8
+#define MULTIPLE_LINE_DEVICES 6
+#define ACK_DEVICE 1
+#define PLT_RESET 4294967293
+#define IT_RESET 100000
+#define WRITE_TERMINAL 0
+#define READ_TERMINAL 1
+
+
+
+
 static inline int interrupt_line(unsigned int cause) {
 
   // Apply a mask to keep only the least significant 8 bits

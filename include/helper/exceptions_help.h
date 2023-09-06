@@ -15,6 +15,7 @@
 
 #include "env_nucleus.h"
 #include "pcb_help.h"
+#include "scheduler_help.h"
 
 
 

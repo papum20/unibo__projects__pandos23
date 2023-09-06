@@ -74,7 +74,8 @@ or PANIC (halt execution in the presence of deadlock)
 
 #include "list.h"
 #include "scheduler_help.h"
-
+#include "include/helper/env_nucleus.h"
+#include "include/helper/state.h"
 
 
 extern void Scheduler();

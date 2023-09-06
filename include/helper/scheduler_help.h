@@ -6,9 +6,11 @@
 
 
 /*	Stores the starting TOD clock value for an interval;
-	used to calculate the time passed for an inteval.
+	used to calculate the time passed for an interval.
 */
 int _interval_start;
+
+int _set_time = 5;
 
 
 /* Amount of the current schduler time slice used by the current process.

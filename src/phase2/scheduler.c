@@ -2,21 +2,27 @@
 
 void Scheduler(){
     
-    if(proc_alive_n==0 && emptyProcQ(&readyQ)) HALT();
+    if(emptyProcQ(&readyQ)){
 
-    if(proc_alive_n>0 && proc_soft_blocked_n>0 && emptyProcQ(&readyQ)){
+        if(proc_alive_n==0) HALT();
+
+        else if(proc_alive_n>0 && proc_soft_blocked_n>0){
 
         STATUS_SET_IE(STATUS_SET_TE(BIT_KERNEL, BIT_DISABLED), BIT_ENABLED);
         
         WAIT();
+
+        }
+
+        else if(proc_alive_n>0 && proc_soft_blocked_n==0) PANIC();
+
     }
-    if(proc_alive_n>0 && proc_soft_blocked_n==0 && emptyProcQ(&readyQ)) PANIC();
 
     else{
 
         proc_curr = removeProcQ(&readyQ);
 
-        setTIMER(5);
+        setTIMER(_set_time);
 
         LDST(proc_curr->p_s);
     }

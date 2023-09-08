@@ -83,7 +83,7 @@ extern int dev_sems[N_DEV_SEM];
 /*	offset of the device address from the start of the register
 	(only terminals use an offset to indicate either read/write)
 */
-#define _EXT_DEV_ADDR_OFFSET(devAddr) ((uint)devAddr % DEV_REG_SIZE)
+#define _EXT_DEV_ADDR_OFFSET(devAddr_offset) ((uint)devAddr_offset % DEV_REG_SIZE)
 
 /*	Internal devices semaphores (PLT and Interval Timer)
 */

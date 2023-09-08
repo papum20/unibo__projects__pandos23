@@ -22,7 +22,7 @@ extern void Interrupt_handler();
 
 /* Complete an IO request, returning the result.
 */
-extern void SYSCALL_DOIO_return(int *sem_key, unsigned int status);
+extern void SYSCALL_DOIO_return(int *sem_key, unsigned int *status);
 
 /*  Controls whether there is a pending interrupt on a determinate line of a device
 */

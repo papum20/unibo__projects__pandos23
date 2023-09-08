@@ -25,7 +25,8 @@ void Interrupt_handler() {
 	}
 }
 
-void SYSCALL_DOIO_return(int *sem_key, unsigned int status) {
+/* taking advantage of `status` field being always the first one for all (sub)devices */
+void SYSCALL_DOIO_return(int *sem_key, unsigned int *reg) {
 
 	//obtain the process from the relative semaphore
 	pcb_t *pr = headBlocked(sem_key);
@@ -33,10 +34,13 @@ void SYSCALL_DOIO_return(int *sem_key, unsigned int status) {
 	if (pr != NULL){
 		proc_soft_blocked_n--;
 		/* return status code (in cmdValues, whose address is still in its a1) */
-		*(memaddr *)(pr->p_s.reg_a1) = status;
+		*(memaddr *)(pr->p_s.reg_a1) = *reg;
 		/* return code */
-		pr->p_s.reg_v0 = (TERM_STATUS(status) == TERM_SUCCESS) ?
+		pr->p_s.reg_v0 = (DEV_STATUS(*reg) == TERM_SUCCESS) ?
 			RETURN_DOIO_SUCCESS : RETURN_DOIO_FAILURE;
+		/* return values (copy device register in cmdValues, still in a2) */
+		for(int i = 0; i < ((DEV_IL((int)reg) == IL_TERMINAL) ? N_ARGS_TERM : N_ARGS_DEV); i++)
+			*((memaddr *)pr->p_s.reg_a2 + i) = *(reg + i);
 	}
 
 	//remove it from the sem and add it to the readyQ
@@ -106,14 +110,14 @@ void Terminal_interrupt(int line){
 			termreg_t *reg = (termreg_t*)DEV_REG_ADDR(line, i);
 
 			//give priority to the writing end of the terminal device
-			if(TERM_STATUS(reg->recv_status) != TERM_READY){
-				SYSCALL_DOIO_return(EXT_DEV_SEM_FROM_REGADDR((memaddr)(&reg->recv_command)), reg->recv_status);
-				TERM_CMD_SET(reg->recv_command, ACK);
+			if(DEV_STATUS(reg->recv_status) != DEV_READY){
+				SYSCALL_DOIO_return(EXT_DEV_SEM_FROM_REGADDR((memaddr)(&reg->recv_command)), &reg->recv_status);
+				DEV_CMD_SET(reg->recv_command, ACK);
 			}
 			
-			if(TERM_STATUS(reg->transm_status) != TERM_READY){
-				TERM_CMD_SET(reg->transm_command, ACK);
-				SYSCALL_DOIO_return(EXT_DEV_SEM_FROM_REGADDR((memaddr)(&reg->transm_command)), reg->transm_status);
+			if(DEV_STATUS(reg->transm_status) != DEV_READY){
+				SYSCALL_DOIO_return(EXT_DEV_SEM_FROM_REGADDR((memaddr)(&reg->transm_command)), &reg->transm_status);
+				DEV_CMD_SET(reg->transm_command, ACK);
 			}
 		}
 	}
@@ -134,7 +138,7 @@ void Device_interrupt(int line){
 			dtpreg_t *reg = (dtpreg_t*)DEV_REG_ADDR(line, i);
 
 			//set the result on the process descriptor
-			SYSCALL_DOIO_return(EXT_DEV_SEM_FROM_REGADDR((devregtr)reg), reg->status);
+			SYSCALL_DOIO_return(EXT_DEV_SEM_FROM_REGADDR((devregtr)reg), reg);
 
 			//acknowledge the interrupt
 			reg->command = ACK_DEVICE;

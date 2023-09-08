@@ -1,1 +1,2 @@
-pkernel panic()
+p1 v(sem_testsem)
+System halted 

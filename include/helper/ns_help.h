@@ -30,7 +30,7 @@ HIDDEN inline void __addNamespace(pcb_t *p, nsd_t *ns){
 	}
 	else{
 		for(int i = 0; i < NS_TYPE_MAX && !ok; i++){//altrimenti se è gia presente lo sostituisco e faccio free
-			if(p->namespaces[i]->n_type==ns->n_type){
+			if(p->namespaces[i] != NULL && p->namespaces[i]->n_type==ns->n_type){
 				freeNamespace(p->namespaces[i]);
 				p->namespaces[i]=ns;
 				ok=1;

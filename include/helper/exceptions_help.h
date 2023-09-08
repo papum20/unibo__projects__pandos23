@@ -83,10 +83,10 @@ static inline void SYSCALL_BLOCK(int *semAdd) {
  * Return the control, reloading the processor state.
  * int @val: return value
  */
-#define RETURN_SYSCALL(val) ({			\
-	__RETURN_SYSCALL();					\
-	V0(proc_curr->p_s) = val;			\
-	LDST(SAVED_EXCEPTION_STATE);		\
+#define RETURN_SYSCALL(val) ({				\
+	__RETURN_SYSCALL();						\
+	SAVED_EXCEPTION_STATE->reg_v0 = val;	\
+	LDST(SAVED_EXCEPTION_STATE);			\
 })
 
 /**
@@ -142,10 +142,10 @@ static inline void RETURN_SYSCALL_BLOCK(int *semAdd) {
 		case GETSUPPORTPTR:							\
 			SYSCALL_GET_SUPPORT_DATA();				\
 			break;									\
-		case GETCHILDREN:							\
+		case GETPROCESSID:							\
 			SYSCALL_GETPID(a1);						\
 			break;									\
-		case GETPROCESSID:							\
+		case GETCHILDREN:							\
 			SYSCALL_GETCHILDREN((int *)a1, a2);		\
 		}	
 
@@ -165,11 +165,13 @@ static inline void RETURN_SYSCALL_BLOCK(int *semAdd) {
  * @ns: new pid namespace. set to parent's pid ns if it's null.
 */
 static inline void __init_createProc(pcb_t *p, pcb_t *prnt, state_t *state, support_t *sup, nsd_t *ns) {
+	p->p_parent = prnt;
 	if(state != NULL) STATE_CP(*state, &p->p_s);
 	p->p_supportStruct = sup;
-	(ns != NULL)
-	? addNamespace(p, ns)
-	: addNamespace(p, getNamespace(p->p_parent, NS_PID));
+	if (ns != NULL)
+		addNamespace(p, ns);
+	else if(getNamespace(p->p_parent, NS_PID) != NULL)
+		addNamespace(p, getNamespace(p->p_parent, NS_PID));
 }
 
 

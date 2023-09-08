@@ -361,6 +361,9 @@ void p2() {
         print("Inconsistent process id for p2!\n");
         PANIC();
     }
+
+	/*ADD*/
+	print("p2 pid ok\n");
     
     /* initialize all semaphores in the s[] array */
     for (i = 0; i <= MAXSEM; i++) {

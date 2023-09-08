@@ -55,19 +55,25 @@ void freeNamespace(nsd_t *ns){
 }
 
 
-int addNamespace(pcb_t *p, nsd_t *ns){
-	
-	//assegno a tmp_List la testa della lista degli NSD attivi di tipo type
-	struct list_head *type_list=type_nsList(ns->n_type);
-	list_add(&ns->n_link, type_list); //aggiungo ns alla lista degli NSD attivi
+/* auxiliary, recursive */
+void _addNamespace_rec(pcb_t *p, nsd_t *ns) {
 
 	__addNamespace(p ,ns);
 
 	pcb_t *pos;
 	pcb_for_each_child(pos, p) {
 		if(getNamespace(pos, ns->n_type) == ns)
-			addNamespace(pos, ns);
+			_addNamespace_rec(pos, ns);
 	}
+}
+
+int addNamespace(pcb_t *p, nsd_t *ns){
+	
+	//assegno a tmp_List la testa della lista degli NSD attivi di tipo type
+	struct list_head *type_list=type_nsList(ns->n_type);
+	list_add(&ns->n_link, type_list); //aggiungo ns alla lista degli NSD attivi
+
+	_addNamespace_rec(p, ns);
 
 	// ritorna sempre true, non essendo definiti casi di errore al momento
 	return true;

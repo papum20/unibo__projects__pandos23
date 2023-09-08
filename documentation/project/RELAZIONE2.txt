@@ -34,6 +34,11 @@ PER RELAZIONE:
 	MAKEFILE:
 		added include -I
 
+	ash
+
+	problemi con doio term, se lento debug (ret status code)
+
+
 
 
 DA CONTROLLARE:

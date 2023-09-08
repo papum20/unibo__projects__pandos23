@@ -79,6 +79,7 @@ void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *
 	/* if there are no free pcbs, return -1 */
 	if(new_proc == NULL) {
 		RETURN_SYSCALL(ERR);
+		return;
 	}
 
 	/* init pcb fields */
@@ -89,7 +90,7 @@ void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *
 	insertProcQ(&readyQ, new_proc);
 	proc_alive_n++;
 
-	RETURN_SYSCALL(PID(new_proc));
+	RETURN_SYSCALL(new_proc->p_pid);
 }
 
 /* 2

@@ -27,7 +27,7 @@
 /* get a process's (pcb*) pid.
  * In order to have unique, non-zero pids, they're chosen as the pcb's address.
 */
-#define PID(pcb_p) (int)pcb_p
+#define PID(pcb_p) ((int)pcb_p)
 
 /* get a process' pcb addr from its pid.
 */

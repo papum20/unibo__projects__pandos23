@@ -60,12 +60,8 @@ int Check_pending_interrupt(int line, int device){
 
 void PLT_interrupt(){
 
-	//ackownledge the PLT interrupt by loading the timer with a new value
-
-	setTIMER(PLT_RESET);
-
 	//copy the processor state at the time into current pcb
-	STST(&proc_curr->p_s);
+	STATE_CP(*SAVED_EXCEPTION_STATE, &proc_curr->p_s);
 
 	//place the process in readyqueue
 

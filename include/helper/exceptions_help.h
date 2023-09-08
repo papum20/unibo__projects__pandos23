@@ -175,6 +175,12 @@ static inline void __init_createProc(pcb_t *p, pcb_t *prnt, state_t *state, supp
 }
 
 
+/*	unblock a `pcb_t *`, removing the first element blocked on 
+	the semaphore with key `int *semAdd` and inserting it in the `readyQ`.
+ */
+#define unblockPcb(semAdd) insertProcQ(&readyQ, removeBlocked(semaddr))
+
+
 /* terminate all of process' children.
  * process is not NULL.
  */

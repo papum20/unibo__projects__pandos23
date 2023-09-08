@@ -118,7 +118,7 @@ void SYSCALL_PASSEREN (int *semaddr) {
 		
 		if(*semaddr >= 1)
 			/* wake up a process blocked on a V */
-			removeBlocked(semaddr);
+			unblockPcb(semaddr);
 
 		RETURN_SYSCALL_VOID();
 	}
@@ -140,11 +140,9 @@ void SYSCALL_VERHOGEN (int *semaddr, bool interrupt) {
 		return;
 	}
 
-	if(*semaddr <= 0) {
+	if(*semaddr <= 0)
 		/* wake up a process blocked on a P */
-		pcb_t *awakened_proc = removeBlocked(semaddr);
-		insertProcQ(&readyQ, awakened_proc);
-	}
+		unblockPcb(semaddr);
 
 	if(!interrupt)
 		RETURN_SYSCALL_VOID();

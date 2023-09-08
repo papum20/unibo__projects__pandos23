@@ -7,8 +7,12 @@
 
 
 /*
-	CONSTANTS
-*/
+ * CONSTANTS
+ */
+
+#define RETURN_DOIO_SUCCESS	0
+#define RETURN_DOIO_FAILURE	-1
+
 
 #define TERM_WR_LINE 7
 #define TERM_RD_LINE 8
@@ -21,6 +25,9 @@
 
 
 
+/*
+ * FUNCTIONS
+ */
 
 static inline int interrupt_line(unsigned int cause) {
 

@@ -2,6 +2,7 @@
 #define EXCEPTIONS_HELP_H
 
 
+#include "pandos_const.h"
 #include "pandos_cp0.h"
 #include "pandos_types.h"
 
@@ -25,7 +26,7 @@
 
 /* get cause register setted to exec_code x.
 */
-#define __CAUSE_EXCCODE_SETTED(cause, code) (cause & !CAUSE_EXCCODE_MASK) | (code << CAUSE_EXCCODE_BIT)
+#define __CAUSE_EXCCODE_SETTED(cause, code) (cause & ~CAUSE_EXCCODE_MASK) | (code << CAUSE_EXCCODE_BIT_START)
 
 /* set cause register to exec_code code for the Saved Exception State.
 */
@@ -56,40 +57,47 @@
 
 
 /**
- * copy the new state to pcb p, with pc updated to the next line
- * in order to avoid loop.
- * pcb_t *@p: process whose state is updated.
+ * Common operations for returning from a syscall.
+ * Increment the PC.
  */
-#define __RETURN_SYSCALL(p) ({					\
+#define __RETURN_SYSCALL() ({					\
 	regIncrPC(SAVED_EXCEPTION_STATE);			\
-	STATE_CP(*SAVED_EXCEPTION_STATE, &p->p_s);	\
 })
 
 /**
- * block the current process on the semaphore.
+ * Block the current process on the semaphore, and perform some operations,
+ * like storing the processor state and updating processor time and auxiliary variables.
  * @semaddr: address of the key of the semaphore where to block the process.
  */
 static inline void SYSCALL_BLOCK(int *semAdd) {
+	STATE_CP(*SAVED_EXCEPTION_STATE, &proc_curr->p_s);
 	PROC_TIME_UPDATE(proc_curr);
 	insertBlocked(semAdd, proc_curr);
 	proc_curr = NULL;
+	proc_soft_blocked_n++;
 }
 
 /**
  * save the return state for current_proc (from a syscall),
  * with return value.
+ * Return the control, reloading the processor state.
  * int @val: return value
  */
 #define RETURN_SYSCALL(val) ({			\
-	__RETURN_SYSCALL(proc_curr);		\
-	V0(proc_curr) = val;				\
+	__RETURN_SYSCALL();					\
+	V0(proc_curr->p_s) = val;			\
+	LDST(SAVED_EXCEPTION_STATE);		\
 })
 
 /**
  * save the return state for current_proc (from a syscall),
  * without return value.
+ * Return the control, reloading the processor state.
  */
-#define RETURN_SYSCALL_VOID() __RETURN_SYSCALL(proc_curr)
+#define RETURN_SYSCALL_VOID() ({	\
+	__RETURN_SYSCALL();	\
+	LDST(SAVED_EXCEPTION_STATE);	\
+})
 
 /**
  * save the return state for current_proc (from a syscall),
@@ -97,8 +105,8 @@ static inline void SYSCALL_BLOCK(int *semAdd) {
  * @semaddr: address of the key of the semaphore where to block the process.
  */
 static inline void RETURN_SYSCALL_BLOCK(int *semAdd) {
+	__RETURN_SYSCALL();
 	SYSCALL_BLOCK(semAdd);
-	RETURN_SYSCALL_VOID();
 	Scheduler();
 }
 
@@ -117,12 +125,12 @@ static inline void RETURN_SYSCALL_BLOCK(int *semAdd) {
 			SYSCALL_TERMINATEPROCESS (a1);			\
 			break;									\
 		case PASSEREN:								\
-			SYSCALL_PASSEREN(&a1);					\
+			SYSCALL_PASSEREN((int *)a1);			\
 			break;									\
 		case VERHOGEN:								\
-			SYSCALL_VERHOGEN(&a1);					\
+			SYSCALL_VERHOGEN((int *)a1, FALSE);		\
 			break;									\
-		case IOWAIT:								\
+		case DOIO:									\
 			SYSCALL_DOIO((int *)a1,(int *)a2);		\
 			break;									\
 		case GETTIME:								\
@@ -134,10 +142,10 @@ static inline void RETURN_SYSCALL_BLOCK(int *semAdd) {
 		case GETSUPPORTPTR:							\
 			SYSCALL_GET_SUPPORT_DATA();				\
 			break;									\
-		case TERMINATE:								\
+		case GETCHILDREN:							\
 			SYSCALL_GETPID(a1);						\
 			break;									\
-		case GET_TOD:								\
+		case GETPROCESSID:							\
 			SYSCALL_GETCHILDREN((int *)a1, a2);		\
 		}	
 

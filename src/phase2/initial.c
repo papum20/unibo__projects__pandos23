@@ -94,6 +94,4 @@ int main() {
 
 	Scheduler();
 
-	test();
-	
 }

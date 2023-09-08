@@ -83,6 +83,28 @@ extern void WAIT(void);
 extern unsigned int LDCXT(unsigned int stackPtr, unsigned int status, unsigned int pc);
 
 
+/* This function may be called from kernel or from user mode with CPU 0
+ * STATUS bit _on_: otherwise, it will cause a trap
+ */
+
+/* This function stores processor state to memory. It intentionally leaves
+ * the PC field set to 0; putting a meaningful value there is programmer's
+ * task.
+ * Return value is PC value for the instruction immediately following
+ * the call.
+ * This too is NOT an atomic operation: the processor state is saved
+ * register by register to memory. So, this call is interruptible (in a
+ * clean way) or cause a trap (for example, an memory access error if
+ * pointer is not correctly set).
+ * If called from user state, it will trap ONLY if CPU 0 bit of STATUS CP0
+ * register is NOT set, and only when access to CP0 register (STATUS, ENTRYHI,
+ * CAUSE) is requested (if no other errors intervene).
+ * However, trying it does not harm system security a bit.
+ */
+
+extern unsigned int STST(STATE_PTR statep);
+
+
 /* This function may be used to restart an interrupted/blocked process,
  * reloading it from a physical address passed as argument.
  * It is available only in kernel mode, thru a BIOS routine

@@ -29,10 +29,10 @@ void Exception_handler(){
 
 
 void SYSCALL_handler(){
-	unsigned int	a0 = A0(proc_curr),
-					a1 = A1(proc_curr),
-					a2 = A2(proc_curr),
-					a3 = A3(proc_curr);
+	unsigned int	a0 = A0(SAVED_EXCEPTION_STATE),
+					a1 = A1(SAVED_EXCEPTION_STATE),
+					a2 = A2(SAVED_EXCEPTION_STATE),
+					a3 = A3(SAVED_EXCEPTION_STATE);
 	
 	if(IS_UM) {
 		CAUSE_SET_EXCCODE(EXC_RI);	
@@ -40,7 +40,7 @@ void SYSCALL_handler(){
 		return;
 	}
 	
-	if(a0 >= CREATEPROCESS && a0 <= GET_TOD) {
+	if(a0 >= CREATEPROCESS && a0 <= GETCHILDREN) {
 		_SYSCALL(a0, a1, a2, a3);
 	} else {
 		/* system call con a0 >= 11 */
@@ -62,18 +62,6 @@ void PassUpOrDie(int excpt_type) {
 		STATE_CP( *SAVED_EXCEPTION_STATE, &(curr_sup->sup_exceptState[excpt_type]) );
 		context_t cxt = curr_sup->sup_exceptContext[excpt_type];
 		LDCXT(cxt.stackPtr, cxt.status, cxt.pc);
-}
-
-
-
-void uTLB_RefillHandler() {
-
-    setENTRYHI(0x80000000);
-    setENTRYLO(0x00000000);
-    TLBWR();
-
-    LDST((state_t *)0x0FFFF000);
-	
 }
 
 
@@ -138,9 +126,10 @@ void SYSCALL_PASSEREN (int *semaddr) {
 
 }
 
-/* 4
+/** 4
+ * @param interrupt true if this V is called while handling an interrupt
 */
-void SYSCALL_VERHOGEN (int *semaddr) {
+void SYSCALL_VERHOGEN (int *semaddr, bool interrupt) {
 
 	(*semaddr)++;
 	
@@ -156,7 +145,8 @@ void SYSCALL_VERHOGEN (int *semaddr) {
 		insertProcQ(&readyQ, awakened_proc);
 	}
 
-	RETURN_SYSCALL_VOID();
+	if(!interrupt)
+		RETURN_SYSCALL_VOID();
 }
 
 /* 5
@@ -200,9 +190,9 @@ void SYSCALL_GETPID(int parent) {
 	int pid;
 	
 	if(parent != TRUE)
-		pid = PID(proc_curr);
+		pid = proc_curr->p_pid;
 	else if(getNamespace(proc_curr, NS_PID) == getNamespace(proc_curr->p_parent, NS_PID))
-		pid = PID(proc_curr->p_parent);
+		pid = proc_curr->p_parent->p_pid;
 	else
 		pid = 0;
 

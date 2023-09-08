@@ -39,9 +39,18 @@ static inline void STATE_CP(state_t src, state_t *dst) {
 
 /* Masks
 */
-#define STATUS_IEp_MASK (!STATUS_IEp)
-#define STATUS_KUp_MASK (!STATUS_KUp)
-#define STATUS_TE_MASK (!STATUS_TE)		/* PLT */
+#define STATUS_IEc_MASK (~STATUS_IEc)
+#define STATUS_IEp_MASK (~STATUS_IEp)
+#define STATUS_KUp_MASK (~STATUS_KUp)
+#define STATUS_TE_MASK	(~STATUS_TE)		/* PLT */
+#define STATUS_CU0_MASK	(~STATUS_CU0)
+#define STATUS_IEc_ALL_MASK (~(STATUS_IEc | STATUS_IM_MASK) )
+#define STATUS_IEp_ALL_MASK (~(STATUS_IEp | STATUS_IM_MASK) )
+
+/* status bits values
+*/
+#define BIT_DISABLED 0
+#define BIT_ENABLED 1
 
 /* Kernel/User mode
 */
@@ -49,15 +58,12 @@ static inline void STATE_CP(state_t src, state_t *dst) {
 #define BIT_KERNEL 0
 #define BIT_USER 1
 
-#define BIT_DISABLED 0
-#define BIT_ENABLED 1
-
 
 /* Utilities */
 
 /* check if the current saved exception state is in User Mode.
 */
-#define IS_UM ( (SAVED_EXCEPTION_STATE->status & STATUS_KUp) == BIT_USER )
+#define IS_UM ( ( (SAVED_EXCEPTION_STATE->status & STATUS_KUp) >> STATUS_KUp_BIT) == BIT_USER )
 
 
 /* Macros to set status bits.
@@ -65,24 +71,41 @@ static inline void STATE_CP(state_t src, state_t *dst) {
 
 /**
  * Return the given status with the `mode` bit (0/1)
- * applied to the specified `bit` with the given `mask`.
+ * applied to the bits starting at the specified `shift` with the given `mask`
+ * (where there are 0 in the fields to modify).
  * 
  * As specified in the documentation, cpu state must be set using previous fields
  * (e.g. IEp).
  */
-#define _STATUS_SET(status, mode, mask, bit) ( (status & mask) | (mode << bit) )
+#define _STATUS_SET(status, mode, mask, shift) ( (status & mask) | (mode << shift) )
 
 /* Return the given status with the `mode` bit (kernel/user) applied.
 */
-#define STATUS_SET_KU(status, mode) _STATUS_SET(status, mode, STATUS_KUp_MASK, STATUS_KUp_BIT)
+#define STATUS_SET_KUp(status, mode)	_STATUS_SET(status, mode, STATUS_KUp_MASK, STATUS_KUp_BIT)
 
-/* Return the given status with the `mode` bit (interrupts enabled/disabled) applied.
+/* Return the given status with the `mode` bit (interrupts enabled/disabled) applied (prev).
 */
-#define STATUS_SET_IE(status, mode) _STATUS_SET(status, mode, STATUS_IEp_MASK, STATUS_IEp_BIT)
+#define STATUS_SET_IEp(status, mode)	_STATUS_SET(status, mode, STATUS_IEp_MASK, STATUS_IEp_BIT)
+
+/* Return the given status with the `mode` bit (interrupts enabled/disabled) applied (current).
+*/
+#define STATUS_SET_IEc(status, mode)	_STATUS_SET(status, mode, STATUS_IEc_MASK, STATUS_IEc_BIT)
 
 /* Return the given status with the `mode` bit (PLT enabled/disabled) applied.
 */
-#define STATUS_SET_TE(status, mode) _STATUS_SET(status, mode, STATUS_TE_MASK, STATUS_TE_BIT)
+#define STATUS_SET_TE(status, mode)		_STATUS_SET(status, mode, STATUS_TE_MASK, STATUS_TE_BIT)
+
+/* Return the given status with the `mode` bit (PLT enabled/disabled) applied.
+*/
+#define STATUS_SET_CU0(status, mode)	_STATUS_SET(status, mode, STATUS_CU0_MASK, STATUS_CU0_BIT)
+
+/* Return the given status with all interrupt enabled, i.e. the bit `IEp` and all the masks on (current).
+*/
+#define STATUS_SET_IEc_ALL(status, mode)	_STATUS_SET(status, mode * (~STATUS_IEc_ALL_MASK), STATUS_IEc_ALL_MASK, 0)
+
+/* Return the given status with all interrupt enabled, i.e. the bit `IEp` and all the masks on (prev).
+*/
+#define STATUS_SET_IEp_ALL(status, mode)	_STATUS_SET(status, mode * (~STATUS_IEp_ALL_MASK), STATUS_IEp_ALL_MASK, 0)
 
 
 

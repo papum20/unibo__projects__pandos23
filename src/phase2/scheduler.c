@@ -1,5 +1,12 @@
 #include "scheduler.h"
 
+
+/*	Stores the starting TOD clock value for an interval;
+	used to calculate the time passed for an interval.
+*/
+int _interval_start;
+
+
 void Scheduler(){
 
 	/* Scheduler is called in kernel mode */
@@ -10,7 +17,7 @@ void Scheduler(){
     else if(proc_alive_n>0 && proc_soft_blocked_n>0 && emptyProcQ(&readyQ)){
 
 		setSTATUS(
-			STATUS_SET_IE(
+			STATUS_SET_IEc_ALL(
 				STATUS_SET_TE(
 					getSTATUS(), BIT_DISABLED
 				),
@@ -20,7 +27,7 @@ void Scheduler(){
         
         WAIT();
 
-        }
+    }
 
     else if(proc_alive_n>0 && proc_soft_blocked_n==0 && emptyProcQ(&readyQ)) 
         PANIC();
@@ -29,7 +36,7 @@ void Scheduler(){
 
         proc_curr = removeProcQ(&readyQ);
 
-        setTIMER(_set_time);
+        setTIMER(TIMESLICE_MILLISECS);
 
         LDST(&proc_curr->p_s);
     }

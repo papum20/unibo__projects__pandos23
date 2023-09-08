@@ -20,7 +20,6 @@ static DECLARE_HASHTABLE(semd_h, HASH_TABLE_SIZE);
 	the semaphore associated with the hash of the key
 	if not present, it returns a pointer pointing to NULL
 */
-
 HIDDEN inline semd_t* __hash_semaphore(int* key){
   semd_t *sem;
 
@@ -36,7 +35,6 @@ HIDDEN inline semd_t* __hash_semaphore(int* key){
 	of a semaphore and checks if it became empty.
 	If so, removes the semaphore from the ash
 */
-
 HIDDEN inline void __remove_proc_update_ash(pcb_t* p, semd_t* sem){
 	//expands to list_del_init(&p->p_list)
 	__removeProcEntry_only(&p->p_list);															

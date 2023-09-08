@@ -59,8 +59,8 @@ extern pcb_t *proc_curr;
 	Device semaphores are stored in the array in the following order:
 	first come the external devices, in the same order as their interrupt lines;
 	then, assuming terminals are the last devices, come other N_DEV_PER_IL semaphores
-	for each terminal, representing the write ends, which only use the bytes 3-4 of the register
-	(while the first N_DEV_PER_IL represent their respective read ends, using bytes 1-2);
+	for each terminal, representing the receive ends, which only use the bytes 3-4 of the register
+	(while the first N_DEV_PER_IL represent their respective transmit ends, using bytes 1-2);
 	lastly come cputimer and interval timer.
 */
 extern int dev_sems[N_DEV_SEM];
@@ -91,9 +91,9 @@ extern int dev_sems[N_DEV_SEM];
 #define DEV_SEM_TIMER		(dev_sems + N_DEV_SEM - N_EXT_IL + IL_TIMER)
 
 /**	get the index in the array of device semaphores,
-	for the external device identified by its address.
-	@param devAddr_offset offset of device register address from DEV_REG_START
-*/
+ *	for the external device identified by its address.
+ *	@param devAddr_offset offset of device register address from DEV_REG_START
+ */
 static inline uint _EXT_DEV_SEM_IDX(devregtr devAddr_offset) {
 	return _EXT_DEV_ADDR_OFFSET(devAddr_offset) ?
 		(_EXT_DEV_NUM(devAddr_offset) + N_DEV_PER_IL) : _EXT_DEV_NUM(devAddr_offset);
@@ -105,7 +105,7 @@ static inline uint _EXT_DEV_SEM_IDX(devregtr devAddr_offset) {
  * at its device register address + 2.
  * @param devAddr device register address, of type `devrgtr`
  * @return a semAddr
-*/
+ */
 #define EXT_DEV_SEM_FROM_REGADDR(devAddr) (dev_sems + _EXT_DEV_SEM_IDX(devAddr - DEV_REG_START))
 
 /**	
@@ -113,7 +113,7 @@ static inline uint _EXT_DEV_SEM_IDX(devregtr devAddr_offset) {
  * @param line interrupt line
  * @param dev device number
  * @return a semAddr
-*/
+ */
 #define DEV_SEM_FROM_LINEDEV(line, dev) (dev_sems +										\
 	( (line < N_EXT_IL) ?																\
 		N_DEV_SEM - (N_EXT_IL - 1 - dev) :					/* case internal device */	\
@@ -123,7 +123,7 @@ static inline uint _EXT_DEV_SEM_IDX(devregtr devAddr_offset) {
 /**
  * Check if a semaphore key is associated to a device semaphore.
  * @semadd: semaphore key (address)
-*/
+ */
 static inline bool is_DEV_SEM(int *semAdd) {
 	return (semAdd >= dev_sems) && (semAdd < dev_sems + N_DEV_SEM);
 }

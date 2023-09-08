@@ -5,12 +5,14 @@
 #include "devices.h"
 
 
+/* Scheduler timeslice in milliseconds */
+#define TIMESLICE_MILLISECS 5000
+
+
 /*	Stores the starting TOD clock value for an interval;
 	used to calculate the time passed for an interval.
 */
-int _interval_start;
-
-int _set_time = 5;
+extern int _interval_start;
 
 
 /* Amount of the current schduler time slice used by the current process.

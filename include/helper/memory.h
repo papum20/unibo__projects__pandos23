@@ -68,10 +68,17 @@ static inline void dev_setArgs(int *cmdAddr, int *cmdValues) {
 
 	/* get the right number of arguments, depending on the device type*/
 	int argc = (DEV_IL((memaddr)cmdAddr) == IL_TERMINAL) ? N_ARGS_TERM : N_ARGS_DEV;
-	/* copy register fields */
-	for( ; argc > 0; argc--)
-		*(cmdAddr + argc * WORDLEN) = *(cmdValues + argc * WORDLEN);
+	/* copy register fields (status before, because could interfere) */
+	for(int arg = 0; arg < argc; arg++)
+		*(cmdAddr + arg) = *(cmdValues + arg);
 }
+
+/**
+ * get the command address part of the terminal specified by its register address
+ * @param reg start of terminal register area
+ * @param recv true (1) if terminal is receiving
+ */
+#define DEV_TERM_cmdAddr(reg, recv) ((memaddr *)reg + N_ARGS_TERM * recv)
 
 
 

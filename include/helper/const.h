@@ -43,13 +43,13 @@ static inline void SEM_ADJUST(int *semAdd) {
  * SYSCALLS
  */
 
-/* the four arguments for SYSCALL()
+/* the four arguments for SYSCALL(), from a processor state address
 */
-#define A0(proc) proc->p_s.reg_a0
-#define A1(proc) proc->p_s.reg_a1
-#define A2(proc) proc->p_s.reg_a2
-#define A3(proc) proc->p_s.reg_a3
-#define V0(proc) proc->p_s.reg_v0
+#define A0(state) state->reg_a0
+#define A1(state) state->reg_a1
+#define A2(state) state->reg_a2
+#define A3(state) state->reg_a3
+#define V0(state) state.reg_v0
 
 /* parameters
 */

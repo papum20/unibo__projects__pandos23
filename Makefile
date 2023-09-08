@@ -29,32 +29,44 @@ IDIRS = include include/helper include/kernel include/pandos_files
 IDIR = include
 ODIR = obj
 SDIR = src
+SDIRS = $(wildcard $(SDIR)/*) # source sub-directories
 SDIR1 = phase1
 SDIR2 = phase2
 TDIR = tests
 
 DEPS = $(IDIR)/*.h
 
-__OBJS1 = pcb ash ns
-_OBJS1 = $(patsubst %, $(SDIR)/$(SDIR1)/%, $(__OBJS1))
-__OBJS2 = exceptions initial interrupts scheduler
-_OBJS2 = $(patsubst %, $(SDIR)/$(SDIR2)/%, $(__OBJS2))
-__TESTS = p2test.04
-_TESTS = $(patsubst %, $(TDIR)/%, $(__TESTS))
+# __OBJS1 = pcb ash ns
+# _OBJS1 = $(patsubst %, $(SDIR)/$(SDIR1)/%, $(__OBJS1))
+# __OBJS2 = exceptions initial interrupts scheduler
+# _OBJS2 = $(patsubst %, $(SDIR)/$(SDIR2)/%, $(__OBJS2))
+# __TESTS1 = p1test
+# _TESTS1 = $(patsubst %, $(TDIR)/%, $(__TESTS1))
+# ifneq ($(strip $(DELTEST)), $(strip T))
+# 	TESTS = $(patsubst %, $(ODIR)/%.o, $(_TESTS1))
+# endif
+# ifneq ($(strip $(T)),)
+# 	TESTS += $(patsubst %, $(ODIR)/%.o, $(T))
+# endif
+# OBJS = $(patsubst %, $(ODIR)/%.o, $(_OBJS1) $(_OBJS2))
+
+__TESTS1 = p2test.04
+_TESTS1 = $(patsubst %, $(TDIR)/%, $(__TESTS1))
 ifneq ($(strip $(DELTEST)), $(strip T))
-	TESTS = $(patsubst %, $(ODIR)/%.o, $(_TESTS))
+	TESTS = $(patsubst %, $(ODIR)/%.o, $(_TESTS1))
 endif
 ifneq ($(strip $(T)),)
 	TESTS += $(patsubst %, $(ODIR)/%.o, $(T))
 endif
-OBJS = $(patsubst %, $(ODIR)/%.o, $(_OBJS1) $(_OBJS2))
 
-
+# obj directory structure copies the structure of the main folder (.)
+_OBJS_NAMES = $(wildcard $(SDIR)/*/*.c)
+OBJS = $(patsubst %.c, $(ODIR)/$(notdir %).o, $(_OBJS_NAMES))
 
 
 ## COMMANDS
 
-DEFS = $(DEPS) $(INCDIR)/libumps.h Makefile
+DEFS = $(DEPS) Makefile
 
 # CFLAGS suggested by project pdf
 # CFLAGS = -ffreestanding -ansi -Wall -c -mips1 -mabi=32 -mfp32 \
@@ -84,7 +96,35 @@ UDEV = umps3-mkdev
 # main target
 
 .PHONY: all
-all: $(BDIR)/kernel.core.umps $(BDIR)/disk0.umps
+all: mk_obj_dirs phase2
+
+
+# main target for phase 1, using adequate test file. Compiles the nucleus structures and the test
+
+# .PHONY: all
+# all: $(BDIR)/kernel.core.umps $(BDIR)/disk0.umps
+# 
+# # use umps3-mkdev to create the disk0 device
+# $(BDIR)/disk0.umps:
+# 	$(UDEV) -d $(BDIR)/disk0.umps
+# 
+# # create the kernel.core.umps kernel executable file
+# $(BDIR)/kernel.core.umps: $(BDIR)/kernel
+# 	$(EF) -k $(BDIR)/kernel
+# 
+# $(BDIR)/kernel: $(OBJS) $(TESTS)
+# 	$(LD) $(LDCOREFLAGS) $(LIBDIR)/crtso.o $(OBJS) $(TESTS) \
+# 		$(LIBDIR)/libumps.o -o $(BDIR)/kernel
+# 
+# #objects
+# $(ODIR)/%.o: %.c $(DEFS) 
+# 	$(CC) $(CFLAGS) $@ $< $(CFLAGSINC)
+
+
+# compile the nucleus (phase 2)
+
+.PHONY: phase2
+phase2: $(BDIR)/kernel.core.umps $(BDIR)/disk0.umps
 
 # use umps3-mkdev to create the disk0 device
 $(BDIR)/disk0.umps:
@@ -101,6 +141,13 @@ $(BDIR)/kernel: $(OBJS) $(TESTS)
 #objects
 $(ODIR)/%.o: %.c $(DEFS) 
 	$(CC) $(CFLAGS) $@ $< $(CFLAGSINC)
+
+
+# create src directories structure in obj dir
+
+.PHONY: mk_obj_dirs
+mk_obj_dirs:
+	@mkdir $(ODIR)/$(SDIRS)
 
 
 # show help screen
@@ -125,5 +172,5 @@ help:
 # CLEAN
 .PHONY: clean
 clean:
-	rm $(ODIR)/$(SDIR)/$(SDIR1)/*.o $(ODIR)/$(SDIR)/$(SDIR2)/*.o \
+	rm $(wildcard $(ODIR)/$(SDIR)/*/*.o) \
 		$(ODIR)/$(TDIR)/*.o $(BDIR)/$(filter-out .placeholder, *)

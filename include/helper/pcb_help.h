@@ -21,6 +21,20 @@
 
 
 /*
+ * PIDS
+ */
+
+/* get a process's (pcb*) pid.
+ * In order to have unique, non-zero pids, they're chosen as the pcb's address.
+*/
+#define PID(pcb_p) (int)pcb_p
+
+/* get a process' pcb addr from its pid.
+*/
+#define pcb_from_PID(pid) (pcb_t *)pid
+
+
+/*
  * ALLOCATION
  */
 
@@ -60,6 +74,8 @@ HIDDEN inline void __initPcb_no_plist(pcb_t *p)
     /* Namespace list */
     for(nsd_t **p_nsd = p->namespaces + NS_TYPE_MAX - 1; p_nsd >= p->namespaces; p_nsd--)
 		*p_nsd = NULL;
+	/* pid */
+	p->p_pid = PID(p);
 }
 
 /*	helper function for allcPcb,
@@ -140,19 +156,6 @@ static inline pcb_t* firstChild_or_Null(pcb_t *p){
 #define pcb_for_each_child(pos, parent) \
 	list_for_each_entry(pos, &(parent->p_child), p_sib)
 
-
-/*
- * PIDS
- */
-
-/* get a process's (pcb*) pid.
- * In order to have unique, non-zero pids, they're chosen as the pcb's address.
-*/
-#define PID(pcb_p) (int)pcb_p
-
-/* get a process' pcb addr from its pid.
-*/
-#define pcb_from_PID(pid) (pcb_t *)pid
 
 
 #endif /* PCB_HELP_H */

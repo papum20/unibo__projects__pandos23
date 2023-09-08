@@ -8,7 +8,6 @@ void Interrupt_handler() {
 	//function that calculates the interrupt line
 	int il = interrupt_line(SAVED_EXCEPTION_STATE->cause);
 
-
 	if (il == 1){
 		PLT_interrupt();							//PLT interrupt handler
 	}
@@ -31,13 +30,17 @@ void SYSCALL_DOIO_return(int *sem_key, unsigned int status) {
 	//obtain the process from the relative semaphore
 	pcb_t *pr = headBlocked(sem_key);
 
-	//set its v0 register
 	if (pr != NULL){
-		pr->p_s.reg_v0 = status;
+		proc_soft_blocked_n--;
+		/* return status code (in cmdValues, whose address is still in its a1) */
+		*(memaddr *)(pr->p_s.reg_a1) = status;
+		/* return code */
+		pr->p_s.reg_v0 = (TERM_STATUS(status) == TERM_SUCCESS) ?
+			RETURN_DOIO_SUCCESS : RETURN_DOIO_FAILURE;
 	}
 
 	//remove it from the sem and add it to the readyQ
-	SYSCALL_VERHOGEN(sem_key);
+	SYSCALL_VERHOGEN(sem_key, TRUE);
 
 }
 
@@ -58,7 +61,7 @@ void PLT_interrupt(){
 	setTIMER(PLT_RESET);
 
 	//copy the processor state at the time into current pcb
-	proc_curr->p_s = *((state_t*)BIOSDATAPAGE);
+	STST(&proc_curr->p_s);
 
 	//place the process in readyqueue
 
@@ -103,14 +106,14 @@ void Terminal_interrupt(int line){
 			termreg_t *reg = (termreg_t*)DEV_REG_ADDR(line, i);
 
 			//give priority to the writing end of the terminal device
-			if(reg->recv_status != TERM_READY){
-				SYSCALL_DOIO_return(EXT_DEV_SEM_FROM_REGADDR(reg->recv_status), reg->recv_status);
-				reg->recv_command = ACK;
+			if(TERM_STATUS(reg->recv_status) != TERM_READY){
+				SYSCALL_DOIO_return(EXT_DEV_SEM_FROM_REGADDR((memaddr)(&reg->recv_command)), reg->recv_status);
+				TERM_CMD_SET(reg->recv_command, ACK);
 			}
 			
-			if(reg->transm_status != TERM_READY){
-				SYSCALL_DOIO_return(EXT_DEV_SEM_FROM_REGADDR(reg->transm_status), reg->transm_status);
-				reg->transm_command = ACK;
+			if(TERM_STATUS(reg->transm_status) != TERM_READY){
+				TERM_CMD_SET(reg->transm_command, ACK);
+				SYSCALL_DOIO_return(EXT_DEV_SEM_FROM_REGADDR((memaddr)(&reg->transm_command)), reg->transm_status);
 			}
 		}
 	}

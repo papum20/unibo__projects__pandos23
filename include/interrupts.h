@@ -5,6 +5,12 @@
 #include "exceptions.h"
 #include "helper/interrupt_helper.h"
 #include "helper/devices.h"
+#include "pandos_files/pandos_libumps.h"
+#include "pandos_files/pandos_const.h"
+#include "pandos_files/pandos_types.h"
+#include "pcb.h"
+#include "scheduler.h"
+#include "const.h"
 
 #include "helper/env_nucleus.h"
 

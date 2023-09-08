@@ -59,22 +59,12 @@
 #define TERMPROCESS   2
 #define PASSEREN      3
 #define VERHOGEN      4
-#define IOWAIT        5
+#define DOIO          5
 #define GETTIME       6
 #define CLOCKWAIT     7
 #define GETSUPPORTPTR 8
-#define TERMINATE     9
-#define GET_TOD       10
-#define WRITEPRINTER  11
-#define WRITETERMINAL 12
-#define READTERMINAL  13
-#define DISK_GET      14
-#define DISK_PUT      15
-#define FLASH_READ    16
-#define FLASH_WRITE   17
-#define DELAY         18
-#define PSEMVIRT      19
-#define VSEMVIRT      20
+#define GETPROCESSID  9
+#define GETCHILDREN   10
 
 
 /* Status register constants */

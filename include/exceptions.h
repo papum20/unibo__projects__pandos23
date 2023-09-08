@@ -115,7 +115,10 @@ extern void PassUpOrDie(int excpt_type);
 #define TLB_handler() PassUpOrDie(PGFAULTEXCEPT)
 
 
-/* TLB refill exceptions handler */
+/*	TLB refill exceptions handler. 
+	This function is not defined in this module,
+	this it must be imported from somewhere else (test file).
+*/
 extern void uTLB_RefillHandler();
 
 
@@ -143,7 +146,7 @@ extern void SYSCALL_PASSEREN (int *semaddr);
 
 /* perfirm a V on a semaphore.
 */
-extern void SYSCALL_VERHOGEN (int *semaddr);
+extern void SYSCALL_VERHOGEN (int *semaddr, int interrupt);
 
 /* Start an IO request.
 */

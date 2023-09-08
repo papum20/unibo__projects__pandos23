@@ -24,7 +24,7 @@ static DECLARE_HASHTABLE(semd_h, HASH_TABLE_SIZE);
 HIDDEN inline semd_t* __hash_semaphore(int* key){
   semd_t *sem;
 
-  hash_for_each_possible(semd_h, sem, s_link, *key){
+  hash_for_each_possible(semd_h, sem, s_link, (int)key){
     if (sem->s_key == key)
       return sem;
   }
@@ -57,7 +57,7 @@ HIDDEN inline semd_t* __init_free_sem(int* semAdd){
 	semd_t* sem = list_first_entry(&semdFree_h, semd_t, s_freelink);
 	sem->s_key = semAdd;          										//inizializzo la chiave
 	mkEmptyProcQ(&sem->s_procq);     									//inizializzo la lista dei processi bloccati su quel semaforo
-	hash_add(semd_h, &sem->s_link, *sem->s_key);     					//metto il semaforo nella hashtable
+	hash_add(semd_h, &sem->s_link, (int)sem->s_key);     					//metto il semaforo nella hashtable
 	list_del_init(&sem->s_freelink);      	 								//rimuovo il sem dalla lista di quelli liberi
 	return sem;
 }

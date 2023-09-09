@@ -7,6 +7,7 @@ p2 is OK
 p3 is started
 p3 - CLOCKWAIT OK
 p3 - CPU time correctly maintained
+p3 before terminate
 hp_p1 starts
 hp_p2 starts
 first incarnation of p4 starts
@@ -14,53 +15,59 @@ p5 starts
 p6 starts
 p7 starts
 p9 starts
-second incarnation of p4 starts
+before v1 for 1
 Bus Error (as expected): Access non-existent memory
 p10 starts
+before v2 for 1
+memory management trap
+before v3 for 1
+Correct Support Structure Address
+after v3 for 1
+Address Error (as expected): non-kuseg access w/KU=1
+second incarnation of p4 starts
+High level SYS call from kernel mode process
+before v1 for 2
+before v2 for 2
 p4 incarnation terminating
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existent memory
-Bus Error (as expected): Access non-existe
+p5 end loop
+p1 knows p5 ended
+p1 knows p4 ok
+0
+p8root starts
+child1 starts
+child2 starts
+leaf process (1) starts
+leaf process (2) starts
+leaf process (3) starts
+leaf process (4) starts
+1
+p8root starts
+child1 starts
+child2 starts
+leaf process (1) starts
+leaf process (2) starts
+leaf process (3) starts
+leaf process (4) starts
+2
+p8root starts
+child1 starts
+child2 starts
+leaf process (1) starts
+leaf process (2) starts
+leaf process (3) starts
+leaf process (4) starts
+3
+p8root starts
+child1 starts
+child2 starts
+leaf process (1) starts
+leaf process (2) starts
+leaf process (3) starts
+leaf process (4) starts
+p11 starts
+ns pid in parent namespace
+ns pid in parent namespace
+ns pid not in parent namespace
+ns pid not in parent namespace
+Inconsistent GETCHILDREN namespace management 2
+kernel panic()

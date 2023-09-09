@@ -22,6 +22,6 @@
         "asid": 64,
         "file": "/home/danie/programm/unibo/projects/pandos23/bin/kernel.stab.umps"
     },
-    "tlb-floor-address": "0xffffffff",
+    "tlb-floor-address": "0x20040000",
     "tlb-size": 16
 }

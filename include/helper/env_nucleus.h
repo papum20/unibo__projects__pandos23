@@ -87,8 +87,8 @@ extern int dev_sems[N_DEV_SEM];
 
 /*	Internal devices semaphores (PLT and Interval Timer)
 */
-#define DEV_SEM_CPUTIMER	(dev_sems + N_DEV_SEM - N_EXT_IL + IL_CPUTIMER)
-#define DEV_SEM_TIMER		(dev_sems + N_DEV_SEM - N_EXT_IL + IL_TIMER)
+#define DEV_SEM_CPUTIMER	(dev_sems + N_DEV_SEM - N_INT_IL + IL_CPUTIMER - 1 )
+#define DEV_SEM_TIMER		(dev_sems + N_DEV_SEM - N_INT_IL + IL_TIMER - 1 )
 
 /**	get the index in the array of device semaphores,
  *	for the external device identified by its address.

@@ -5,8 +5,8 @@
 #include "devices.h"
 
 
-/* Scheduler timeslice in milliseconds */
-#define TIMESLICE_MILLISECS 5000
+/* Scheduler timeslice in microseconds */
+#define TIMESLICE 5000
 
 
 /*	Stores the starting TOD clock value for an interval;

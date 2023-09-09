@@ -39,9 +39,8 @@ void Scheduler(){
         proc_curr = removeProcQ(&readyQ);
 
         /*set the PLT*/
-        setTIMER(TIMESLICE_MILLISECS);
-
-        STCK(_interval_start);
+        setTIMER(TIMESLICE);
+		_interval_start = 0;
 
         /*load the processor state*/
         LDST(&proc_curr->p_s);

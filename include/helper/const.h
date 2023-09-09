@@ -35,7 +35,8 @@ typedef unsigned int * uint_PTR;
  * @semadd: semaphores key (address)
  */
 static inline void SEM_ADJUST(int *semAdd) {
-	(*semAdd > 1) ? (*semAdd)-- : (*semAdd)++;
+	if(*semAdd > 1) (*semAdd)--;
+	else if(*semAdd < 0) (*semAdd)++;
 }
 
 

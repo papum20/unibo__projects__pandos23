@@ -38,6 +38,8 @@ void Scheduler(){
 
         setTIMER(TIMESLICE_MILLISECS);
 
+        STCK(_interval_start);
+
         LDST(&proc_curr->p_s);
     }
 }

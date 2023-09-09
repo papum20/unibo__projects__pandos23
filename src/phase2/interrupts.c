@@ -83,7 +83,7 @@ void IT_interrupt(){
 		
 		insertProcQ(&readyQ, unlockedProcess);
 		//aggiornare il tempo?
-
+		proc_soft_blocked_n--;
 	}
 
 	//Reset the Pseudo-clock semaphore to zero.

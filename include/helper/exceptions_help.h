@@ -165,6 +165,7 @@ static inline void RETURN_SYSCALL_BLOCK(int *semAdd) {
  * @ns: new pid namespace. set to parent's pid ns if it's null.
 */
 static inline void __init_createProc(pcb_t *p, pcb_t *prnt, state_t *state, support_t *sup, nsd_t *ns) {
+	insertChild(prnt, p);
 	p->p_parent = prnt;
 	if(state != NULL) STATE_CP(*state, &p->p_s);
 	p->p_supportStruct = sup;

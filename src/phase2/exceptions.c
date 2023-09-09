@@ -179,7 +179,7 @@ void SYSCALL_WAITCLOCK() {
 */
 void SYSCALL_GET_SUPPORT_DATA() {
 
-	RETURN_SYSCALL((memaddr)(&proc_curr->p_supportStruct));
+	RETURN_SYSCALL((memaddr)(proc_curr->p_supportStruct));
 }
 
 /* 9

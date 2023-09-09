@@ -36,7 +36,7 @@ void Scheduler(){
 
         proc_curr = removeProcQ(&readyQ);
 
-        setTIMER(TIMESLICE_MILLISECS);
+        setTIMER(TIMESLICE);
 
         LDST(&proc_curr->p_s);
     }

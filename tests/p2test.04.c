@@ -322,8 +322,18 @@ void test() {
 
     SYSCALL(PASSEREN, (int)&sem_blkp4, 0, 0); /* P(sem_blkp4)		*/
 
+    print("p1 knows p4 ok\n");
+
     /* now for a more rigorous check of process termination */
     for (p8inc = 0; p8inc < 4; p8inc++) {
+
+		/*ADD*/
+		char _c[3];
+		_c[0] = '0' + p8inc;
+		_c[1] = '\n';
+		_c[2] = '\0';
+		print(_c);
+
         /* Reset semaphores */ 
         sem_blkp8 = 0;
         sem_endp8 = 0;
@@ -454,6 +464,9 @@ void p3() {
 
     SYSCALL(VERHOGEN, (int)&sem_endp3, 0, 0); /* V(sem_endp3)        */
 
+	/*ADD*/
+	print("p3 before terminate\n");
+
     SYSCALL(TERMPROCESS, 0, 0, 0); /* terminate p3    */
 
     /* just did a SYS2, so should not get to this point */
@@ -464,6 +477,10 @@ void p3() {
 
 /* p4 -- termination test process */
 void p4() {
+
+	/*ADD*/
+	int p4inc_old = p4inc;
+	
     switch (p4inc) {
         case 1:
             print("first incarnation of p4 starts\n");
@@ -480,11 +497,24 @@ void p4() {
         PANIC();
     }
 
+	/*ADD*/
+	print((p4inc_old == 1) ? "before v1 for 1\n" : "before v1 for 2\n");
 
     SYSCALL(VERHOGEN, (int)&sem_synp4, 0, 0); /* V(sem_synp4)     */
+	
+	/*ADD*/
+	print((p4inc_old == 1) ? "before v2 for 1\n" : "before v2 for 2\n");
+	
     SYSCALL(PASSEREN, (int)&sem_blkp4, 0, 0); /* P(sem_blkp4)     */
+
+	/*ADD*/
+	print((p4inc_old == 1) ? "before v3 for 1\n" : "before v3 for 2\n");
+	
     SYSCALL(PASSEREN, (int)&sem_synp4, 0, 0); /* P(sem_synp4)     */
 
+	/*ADD*/
+	print((p4inc_old == 1) ? "after v3 for 1\n" : "after v1 for 2\n");
+	
     /* start another incarnation of p4 running, and wait for  */
     /* a V(sem_synp4). the new process will block at the P(sem_blkp4),*/
     /* and eventually, the parent p4 will terminate, killing  */
@@ -612,6 +642,8 @@ void p5b() {
         SYSCALL(CLOCKWAIT, 0, 0, 0);
         STCK(time2);
     }
+
+	print("p5 end loop\n");
 
     /* if p4 and offspring are really dead, this will increment sem_blkp4 */
 

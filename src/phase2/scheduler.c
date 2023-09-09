@@ -16,6 +16,7 @@ void Scheduler(){
 
     else if(proc_alive_n>0 && proc_soft_blocked_n>0 && emptyProcQ(&readyQ)){
 
+        /*disable the PLT and enable the interrupt*/
 		setSTATUS(
 			STATUS_SET_IEc_ALL(
 				STATUS_SET_TE(
@@ -34,12 +35,15 @@ void Scheduler(){
 
     else{
 
+        /*Remove the pcb from the head of the Ready Queue and store it in the current process*/
         proc_curr = removeProcQ(&readyQ);
 
+        /*set the PLT*/
         setTIMER(TIMESLICE_MILLISECS);
 
         STCK(_interval_start);
 
+        /*load the processor state*/
         LDST(&proc_curr->p_s);
     }
 }

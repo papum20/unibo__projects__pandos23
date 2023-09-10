@@ -99,6 +99,12 @@ IMPLEMENTAZIONE:
 
     modulo SCHEDULER:
 
+		Lo scheduler è stato sviluppato come richiesto utilizzando un algoritmo round robin preemptive con il time slice impostato a 5 millisecondi e utilizzando il PLT come system clock per generare interrupt.
+
+		Il PLT viene aggiornato a TIMESLICE (5 millisecondi) nello scheduler con la funzione setTIMER prima di caricare lo stato nel processore. Mentre abbiamo tenuto traccia del tempo di CPU accumulato nel modulo delle exception, salvando il valore del PLT, prima che venga bloccato, in pcb->p_time. Calcolare l'intervallo di tempo di CPU utilizzata è stato più semplice di quanto ci era sembrato all'inizio, infatti abbiamo creato una macro in scheduler_help che sottrae al valore del time slice il valore del PLT nel momento prima del blocco e che quindi restituisce il tempo trascorso dal processo nella CPU.
+
+		Inoltre abbiamo deciso di disabilitare il PLT prima di mettere il sistema in WAIT, per evitare che il primo interrupt dopo la WAIT sia un PLT interrupt.
+
 	Modifiche alla phase1:
 		In corso di sviluppo, sono anche state effettuate leggere modifiche ai moduli della prima fase, rese necessarie e/o convenienti anche
 		per i seguenti motivi:

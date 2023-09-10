@@ -116,7 +116,7 @@ static inline void RETURN_SYSCALL_BLOCK(int *semAdd) {
  */
 /* syscall dispatcher, taking a variable as a0
 */
-#define _SYSCALL(a0, a1, a2, a3)					\
+#define SYSCALL(a0, a1, a2, a3)					\
 	switch(a0){										\
 		case CREATEPROCESS:							\
 			SYSCALL_CREATEPROCESS((state_t *)a1, (support_t *) a2, (struct nsd_t *) a3);	\
@@ -148,12 +148,6 @@ static inline void RETURN_SYSCALL_BLOCK(int *semAdd) {
 		case GETCHILDREN:							\
 			SYSCALL_GETCHILDREN((int *)a1, a2);		\
 		}	
-
-/* syscall dispatcher, taking a syscall identifier constant as a0 (e.g. DOIO)
-*/
-#define SYSCALL(a0, a1, a2, a3)		\
-	int _a0 = a0;					\
-	_SYSCALL(_a0, a1, a2, a3)
 
 
 /**

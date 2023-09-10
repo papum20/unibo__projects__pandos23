@@ -40,7 +40,7 @@ void Scheduler(){
 
         /*set the PLT*/
         setTIMER(TIMESLICE);
-		_interval_start = 0;
+		STCK(_interval_start);
 
         /*load the processor state*/
         LDST(&proc_curr->p_s);

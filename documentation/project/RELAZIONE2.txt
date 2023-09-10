@@ -1,0 +1,117 @@
+RELAZIONE PROGETTO SISTEMI OPERATIVI PARTE 2
+PandOS 2022/2023	-	Università di Bologna
+
+
+
+PARTECIPANTI/AUTORI:
+
+	Daniele		D'Ugo		0001027741
+	Osama		Elatfi		0001042877
+	Tommaso		Michetti 	0000881326
+	Giuseppe	Spathis		0001043077
+
+
+
+DIVISIONE DEL LAVORO:
+
+	Daniele:
+		init/debug/makefile
+	Giuseppe:
+		Exceptions
+	Osama:
+		Interrupt 
+	Tommaso:
+		Scheduler
+
+
+STRUTTURA E CONVENZIONI GENERALI:
+  Nel corso dello sviluppo, per quanto possibile e in linea con le nostre conoscenze, "imparando facendo",
+	abbiamo cercato di mantenere il codice e i file ordinati, e di rimanere coerenti con delle scelte precise
+	riguardo ad alcuni aspetti, una volta stabilite.
+
+  La fase 2 si suddivideva in 4 moduli principali: init, scheduler, interrupts ed exceptions. Su questa falsa
+  riga, abbiamo sviluppato un modulo ciascuno, consci della interazione tra i vari moduli.
+
+
+  CONVENZIONI (abbiamo mantenuto le stesse della fase 1):
+		static/hidden - public/private:
+			Per risolvere l'ambiguità della keyword static, utilizzata per rendere oggetti persistenti in memoria,
+			sia per creare il concetto di membro "privato" di un modulo, locale e accessibile solo a chi lo
+			dichiara, abbiamo definito il suo alias HIDDEN, utilizzato con il significato di privato.
+
+			Dunque, mentre le funzioni dell'interfaccia pubblica (negli header principali) sono dichiarate extern
+			(e definite nei sorgenti), quelle private, utili all'implementazione, collocate nei sorgenti e in
+			include/helper/ , sono HIDDEN; infine, le variabili che devono rimanere costanti per il tempo di vita
+			del sistema operativo, sono dichiarate static.
+
+			Per leggibilità, le funzioni HIDDEN iniziano con un doppio underscore (__).
+
+		fifo:
+			Tutte le liste vengono gestite in modo fifo, in particolare con inserimento in coda e rimozione in testa,
+			per garantire la "fifoness" dove necessaria e per coerenza in generale.
+
+		valori booleani:
+			Per coerenza, utilizziamo sempre le costanti true/false definite in phase1_files/types.h.
+    
+  COMPILAZIONE (da editare - Daniele):
+
+
+
+  IMPLEMENTAZIONE:
+
+    scelte progettuali:
+
+      - Gestione del timer:
+
+      - Gestione del tempo dei processi:
+
+      - Gestione dei semafori:
+
+				I semafori sono memorizzati in un array nel seguente ordine: prima i device esterni (secondo 
+				l'ordine delle loro linee), naturalmente il doppio dei samafori per i terminali (read e write)
+				e infine i semafori per il PLT e Interval Timer.
+				Per ottenere il semaforo utilizziamo l'indirizzo del registro del device interessato. 
+
+
+
+    strutture e variabili globali:
+
+      Dani
+
+    modulo INIT:
+
+    modulo INTERRUPT:
+
+			L'handling degli interrupt comincia identificando la linea a maggior priorità che necessita 
+			di attenzione, estrapolando gli 8 bit dal registro cause e prendendo il bit di maggior priorità.
+
+			Abbiamo sviluppato un handler per gli interrupt dei terminali, per device generici e per 
+			i due timer hardware. Data la specifica gestione dei terminali, nella funzione che si occupa
+			di questi interrupt, abbiamo dato priorità prima al controllo della linea write (come richiesto). 
+			Dato che per ogni linea di interrupt ci sono 8 device, la funzione check_pending_interrupt controlla 
+			quali device necessitano di attenzione usando l'interrrupt bit map. Anche qui abbiamo dato priorità 
+			ai device con numero più basso. La gestione dei semafori è spiegata sopra, qui ci limitiamo a
+			usare le macro per ottenere il semaforo giusto in base al registro. Per il resto, abbiamo sfruttato 
+			le macro e le costanti fornite dai file per gestire correttamente gli interrupt: salvare i risultati 
+			di I/O nei registri, resettare i timer, restituire il controllo ai giusti processi o allo scheduler. 
+
+			La funzione SYSCALL_DOIO_return si occupa proprio di restituire i valori di una chiamata I/O, salvando
+			il valore di ritorno (successo o errore) e i risultati dell'operazione nei registri appropriati.
+
+    modulo EXCEPTION:
+
+    modulo SCHEDULER:
+
+
+DIFFICOLTA' INCONTRATE:
+
+  Una delle principali difficoltà incontrate nello sviluppo del progetto non riguardava la comprensione di ciò
+  che dovevano svolgere i nostri moduli (concetti chiari dalle lezioni teoriche), quanto capire come implementarli
+  sulla macchina a disposizione. Ad esempio, la comprensione dei diversi timer e delle loro funzionalità non sono 
+  risultate immediate. 
+
+  Anche comprendere l'avvicendamento delle varie componenti del sistema operativo non è stato facile. Capire come si 
+  susseguono i vari gestori, scheduler e altri componenti, oppure sviluppare handler sincronizzati tra vari moduli è 
+  stata una sfida, come la systemcall DO_IO, che si articola sia nel modulo delle exception che in quello degli interrupt.
+
+  (Debugging)

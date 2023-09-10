@@ -74,7 +74,7 @@ static inline void SYSCALL_BLOCK(int *semAdd) {
 	PROC_TIME_UPDATE(proc_curr);
 	insertBlocked(semAdd, proc_curr);
 	proc_curr = NULL;
-	proc_soft_blocked_n++;
+	if(is_DEV_SEM(semAdd)) proc_soft_blocked_n++;
 }
 
 /**
@@ -179,7 +179,7 @@ static inline void __init_createProc(pcb_t *p, pcb_t *prnt, state_t *state, supp
 /*	unblock a `pcb_t *`, removing the first element blocked on 
 	the semaphore with key `int *semAdd` and inserting it in the `readyQ`.
  */
-#define unblockPcb(semAdd) insertProcQ(&readyQ, removeBlocked(semaddr))
+#define unblockPcb(semAdd) insertProcQ(&readyQ, removeBlocked(semAdd))
 
 
 /* terminate all of process' children.

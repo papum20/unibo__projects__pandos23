@@ -157,5 +157,12 @@ static inline pcb_t* firstChild_or_Null(pcb_t *p){
 	list_for_each_entry(pos, &(parent->p_child), p_sib)
 
 
+/* free a `pcb_t *p` and remove it from its parent's tree
+*/
+#define killChild(p) \
+	freePcb(outChild(p));
+
+
+
 
 #endif /* PCB_HELP_H */

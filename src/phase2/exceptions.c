@@ -210,7 +210,7 @@ void SYSCALL_GETCHILDREN(int *children, int size){
 
 		if(getNamespace(child, NS_PID) == getNamespace(proc_curr, NS_PID)) {
 			if(n < size)
-				children[n++] = PID(child);
+				children[n] = child->p_pid;
 			n++;
 		}
 	}

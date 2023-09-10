@@ -31,7 +31,10 @@ void SYSCALL_DOIO_return(int *sem_key, unsigned int *reg) {
 	//obtain the process from the relative semaphore
 	pcb_t *pr = headBlocked(sem_key);
 
+
 	if (pr != NULL){
+		/*	if the process died in the mean time, `proc_soft_blocked_n` was already
+			decremented */
 		proc_soft_blocked_n--;
 		/* return status code (in cmdValues, whose address is still in its a1) */
 		*(memaddr *)(pr->p_s.reg_a1) = *reg;

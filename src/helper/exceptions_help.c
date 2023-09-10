@@ -32,7 +32,7 @@ void __terminateTree(pcb_t *p) {
 	pcb_for_each_child(pos, p)
 		__terminateTree(pos);
 	
-	freePcb(p); 
+	killChild(p); 
 	proc_alive_n--;
 
 }

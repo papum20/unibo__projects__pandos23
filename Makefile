@@ -154,7 +154,11 @@ mk_obj_dirs:
 
 .PHONY: help
 help: 
+	@echo "make [DELTEST=T] [T=TEST_BASENAME]"
 	@echo "make			: make mk_obj_dirs && make phase2"
+	@echo "DELTEST=T		: don't compile default test (tests/p2test.04.c)"
+	@echo "T=TEST_BASENAME		: compile TEST_BASENAME, i.e. test's relative path without extension"
+	@echo "			e.g.: make DELTEST=T T=tests/p2test.03"
 	@echo "make phase2		: compile the nucleus (phase1+phase2) and TESTS (=p2test.04.c)"
 	@echo "make mk_obj_dirs	: create output dirs tree (obj/*)"
 	@echo "make help		: show this help message"

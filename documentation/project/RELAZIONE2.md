@@ -70,6 +70,9 @@ IMPLEMENTAZIONE:
       	-	Gestione dei semafori:
 			I semafori sono memorizzati in un array nel seguente ordine: prima i device esterni (secondo l'ordine delle loro linee), naturalmente il doppio dei samafori per i terminali (prima gli 8 semafori di receipt, seguiti da 8 di transmission) e infine i semafori per il PLT e Interval Timer.
 			Per ottenere il semaforo utilizziamo l'indirizzo del registro del device interessato; per il caso particolare dei terminali (con registri di 2 word), si usa l'inizio del "sub-registro" di 2 word come parametro: questo permette di distinguere univocamente tra vari device e tra read/write su terminale usando solo tale parametro.
+		
+		-   Gestione del pid:
+			Riguardo alla scelta del pid associato a ogni processo, esso doveva essere un valore univoco e non zero quindi abbiamo optato per l'indirizzo di memoria del pcb 
 
 
     Strutture e variabili globali:
@@ -113,13 +116,44 @@ all'eccezione sollevata agisce di conseguenza:
 ### Gestore delle System Call
 
 il gestore delle system call per prima cosa vede cosa é salvato nei registri a0, a1, a2, a3 in cui sono salvati rispettivamente in a0 il tipo di system call da 1 a 10 e negli altri registri sono salvati i parametri correlati alla system call da invocare; inoltre se in a0 é presente un valore superiore a 10 allora viene gestita come se fosse una eccezione TLB o Program Trap e se si é in User Mode allora viene simulata una eccezione Program Trap settando Cause.ExcCode a Reserved Instruction e invoncando l'handler delle Trap. \
-Infine l'handler delle system call invoca la specifica system call con i giusti parametri ottenuti in precedenza.
+Infine l'handler delle system call usa la macro SYSCALL che funge da dispatcher per invocare la specifica system call con i giusti parametri ottenuti in precedenza.
 
 ##### System Call 1: Create Process
 - Questa System Call viene invocata per creare un nuovo processo; infatti viene allocato un nuovo pcb, se la lista dei pcb liberi é vuota allora ritorna -1, il nuovo processo diventa figlio del processo corrente e infine viene inserito nella lista dei processi nello stato ready
 
 ##### System Call 2: Terminate Process
 - Questa System Call termina un processo relativo al pid passato come parametro alla funzione e anche tutti i discendenti del processo andando in maniera ricorsiva, se il pid é zero allora termina il processo corrente
+
+##### System Call 3: Passeren
+- Questa System Call performa una P su un semaforo binario
+
+##### System Call 4: Verhogen 
+- Questa System Call performa una V su un semaforo binario
+
+##### System Call 5: Do IO 
+- Questa System Call 
+
+##### System Call 5: Get CPU Time 
+- Questa System Call ritorna il tempo dell'uso del processore da parte del processo corrente, per calcolare questo tempo abbiamo usato il timer PLT, per informazioni piú dettagliate vedere in "scelte progettuali" la voce "Gestione del tempo accumulato dei processi"  
+
+
+##### System Call 6: Get CPU Time 
+- Questa System Call ritorna il tempo dell'uso del processore da parte del processo corrente, per calcolare questo tempo abbiamo usato il timer PLT, per informazioni piú dettagliate vedere in "scelte progettuali" la voce "Gestione del tempo accumulato dei processi"  
+
+
+##### System Call 7: Wait for Clock
+- Questa System Call blocca il processo corrente nel semaforo relativo all'Interval Timer
+
+##### System Call 8: Get Support Data
+- Questa System Call ritorna il puntatore alla struttura di supporto del processo corrente
+
+##### System Call 9: Get Process Id
+- Questa System Call ritorna 0 se il booleano passato come parametro é TRUE ma il padre del processo corrente e quest'ultimo non sono nello stesso namespace, il pid del padre del processo corrente se i due processi sono nello stesso namespace oppure il pid del processo corrente se il booleano passato come parametro é FALSE. \
+Per la gestione del PID vedere "scelte progettuali" alla voce "gestione del pid" 
+
+##### System Call 10: Get Children
+- Questa system call itera sulla lista dei figli del processo corrente per aggiungere all'array children, passato come parametro, il pid di ogni figlio che appartiene allo stesso namespace del processo corrente e infine ritorna il numero di figli aggiunti all'array o che potevano essere aggiunti 
+
 
 #### Ritorno da una system call
 Per le system call non bloccanti o che non fanno terminare processi, una volta finite le istruzioni relative alla specifica system call bisogna incrementare il PC di 4 del saved exception state cioé del processo al momento dell'esecuzione della system call, poi si salva nel registro v0 del processo citato il valore di ritorno della system call e infine fare il load di questo processo attraverso la funzione LDST. \

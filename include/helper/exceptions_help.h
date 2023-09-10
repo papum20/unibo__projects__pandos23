@@ -149,12 +149,6 @@ static inline void RETURN_SYSCALL_BLOCK(int *semAdd) {
 			SYSCALL_GETCHILDREN((int *)a1, a2);		\
 		}	
 
-/* syscall dispatcher, taking a syscall identifier constant as a0 (e.g. DOIO)
-*/
-#define SYSCALL(a0, a1, a2, a3)		\
-	int _a0 = a0;					\
-	_SYSCALL(_a0, a1, a2, a3)
-
 
 /**
  * init proc's pcb fields (for create_process syscall).

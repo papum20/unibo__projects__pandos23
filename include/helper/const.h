@@ -59,6 +59,7 @@ static inline void SEM_ADJUST(int *semAdd) {
 #define SYSCALL_TERMINATE_CURR_PROC 0
 
 /* DOIO (5) */
+/* number of args per type of device */
 #define N_ARGS_DEV	4
 #define N_ARGS_TERM	2
 

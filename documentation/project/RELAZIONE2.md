@@ -97,9 +97,7 @@ IMPLEMENTAZIONE:
 
 ### modulo EXCEPTION:
 
-Quando viene sollevata un'eccezione l'handler delle eccezioni per prima cosa vede che tipo di eccezione e' 
-stata sollevata guardando, grazie a una macro, nel registro Cause e in particolare nel campo ExcCode e in base
-all'eccezione sollevata agisce di conseguenza:
+Quando viene sollevata un'eccezione l'handler delle eccezioni per prima cosa vede che tipo di eccezione e' stata sollevata guardando, grazie a una macro, nel registro Cause e in particolare nel campo ExcCode, e in base all'eccezione sollevata agisce di conseguenza:
 
 - Interrupt: 
 	- viene chiamato l'handler degli interrupt.
@@ -112,14 +110,14 @@ all'eccezione sollevata agisce di conseguenza:
 
 ### Gestore delle System Call
 
-il gestore delle system call per prima cosa vede cosa é salvato nei registri a0, a1, a2, a3 in cui sono salvati rispettivamente in a0 il tipo di system call da 1 a 10 e negli altri registri sono salvati i parametri correlati alla system call da invocare; inoltre se in a0 é presente un valore superiore a 10 allora viene gestita come se fosse una eccezione TLB o Program Trap e se si é in User Mode allora viene simulata una eccezione Program Trap settando Cause.ExcCode a Reserved Instruction e invoncando l'handler delle Trap. \
+Il gestore delle system call per prima cosa vede cosa é salvato nei registri a0, a1, a2, a3, contenenti rispettivamente il tipo di system call, da 1 a 10, e i 3 parametri correlati alla system call da invocare; inoltre se in a0 é presente un valore superiore a 10 allora viene gestita come se fosse una eccezione TLB o Program Trap, mentre se si é in User Mode allora viene simulata una eccezione Program Trap settando Cause.ExcCode a Reserved Instruction e invoncando l'handler delle Trap.  
 Infine l'handler delle system call invoca la specifica system call con i giusti parametri ottenuti in precedenza.
 
 ##### System Call 1: Create Process
 - Questa System Call viene invocata per creare un nuovo processo; infatti viene allocato un nuovo pcb, se la lista dei pcb liberi é vuota allora ritorna -1, il nuovo processo diventa figlio del processo corrente e infine viene inserito nella lista dei processi nello stato ready
 
 ##### System Call 2: Terminate Process
-- Questa System Call termina un processo relativo al pid passato come parametro alla funzione e anche tutti i discendenti del processo andando in maniera ricorsiva, se il pid é zero allora termina il processo corrente
+- Questa System Call termina un processo relativo al pid passato come parametro e anche tutti i discendenti del processo maniera ricorsiva ed eseguendo le rimozioni in post-ordine; se il pid é zero termina il processo corrente.
 
 #### Ritorno da una system call
 Per le system call non bloccanti o che non fanno terminare processi, una volta finite le istruzioni relative alla specifica system call bisogna incrementare il PC di 4 del saved exception state cioé del processo al momento dell'esecuzione della system call, poi si salva nel registro v0 del processo citato il valore di ritorno della system call e infine fare il load di questo processo attraverso la funzione LDST. \

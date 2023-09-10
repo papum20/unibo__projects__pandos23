@@ -3,7 +3,7 @@ PandOS 2022/2023	-	Università di Bologna
 
 
 
-PARTECIPANTI/AUTORI:
+## PARTECIPANTI/AUTORI:
 
 	Daniele		D'Ugo		0001027741
 	Osama		Elatfi		0001042877
@@ -12,7 +12,7 @@ PARTECIPANTI/AUTORI:
 
 
 
-DIVISIONE DEL LAVORO:
+## DIVISIONE DEL LAVORO:
 
 	Daniele:
 		init,testing&debugging,makefile,helper
@@ -24,13 +24,13 @@ DIVISIONE DEL LAVORO:
 		Scheduler
 
 
-STRUTTURA E CONVENZIONI GENERALI:
+## STRUTTURA E CONVENZIONI GENERALI:
 	Nel corso dello sviluppo, per quanto possibile e in linea con le nostre conoscenze, "imparando facendo", abbiamo cercato di mantenere il codice e i file ordinati, e di rimanere coerenti con delle scelte precise riguardo ad alcuni aspetti, una volta stabilite.
 
 	La fase 2 si suddivide in 4 moduli principali: init, scheduler, interrupts ed exceptions. Su questa falsa riga, abbiamo sviluppato un modulo ciascuno, consci della interazione tra i vari moduli.
 
 
-CONVENZIONI (abbiamo mantenuto le stesse della fase 1, questo capitolo è copiato dalla RELAZIONE1):
+## CONVENZIONI (abbiamo mantenuto le stesse della fase 1, questo capitolo è copiato dalla RELAZIONE1):
 	static/hidden - public/private:
 		Per risolvere l'ambiguità della keyword static, utilizzata per rendere oggetti persistenti in memoria,
 		sia per creare il concetto di membro "privato" di un modulo, locale e accessibile solo a chi lo
@@ -49,7 +49,7 @@ CONVENZIONI (abbiamo mantenuto le stesse della fase 1, questo capitolo è copiat
 	valori booleani:
 		Per coerenza, utilizziamo sempre le costanti true/false definite in phase1_files/types.h.
 
-COMPILAZIONE:
+## COMPILAZIONE:
 	E' stato mantenuto il makefile della phase1, con leggere modifiche - nulla di rilevante.
 	Il makefile si aspetta di trovare, come test file, 'tests/p2test.04.c'; in alternativa, si possono usare i suoi parametri (make help).
 	Comandi:
@@ -58,120 +58,99 @@ COMPILAZIONE:
 	-	`make clean` : clean
 
 
-IMPLEMENTAZIONE:
+## IMPLEMENTAZIONE:
 
-    scelte progettuali:
+### scelte progettuali:
 
-	    -	Gestione del timer:
+	-	Gestione del tempo accumulato dei processi:
+		Come indicato dalla documentazione, c'era da fare una scelta di implementazione a riguardo, in particolare se accreditare o meno il tempo di exception handling al processo corrente/che l'aveva causata. La nostra scelta, dunque, essendo risultata anche la più naturale e semplice in corso di sviluppo, è stata quella di lasciar scorrere il PLT durante la gestione delle eccezioni; di conseguenza abbiamo applicato la prima opzione.
 
-		-	Gestione del tempo accumulato dei processi:
-			come indicato dalla documentazione, c'era da fare una scelta di implementazione a riguardo, in particolare se accreditare o meno il tempo di exception handling al processo corrente/che l'aveva causata. La nostra scelta, dunque, essendo risultata anche la più naturale e semplice in corso di sviluppo, è stata quella di lasciar scorrere il PLT durante la gestione delle eccezioni; di conseguenza abbiamo applicato la prima opzione.
-
-      	-	Gestione dei semafori:
-			I semafori sono memorizzati in un array nel seguente ordine: prima i device esterni (secondo l'ordine delle loro linee), naturalmente il doppio dei samafori per i terminali (prima gli 8 semafori di receipt, seguiti da 8 di transmission) e infine i semafori per il PLT e Interval Timer.
-			Per ottenere il semaforo utilizziamo l'indirizzo del registro del device interessato; per il caso particolare dei terminali (con registri di 2 word), si usa l'inizio del "sub-registro" di 2 word come parametro: questo permette di distinguere univocamente tra vari device e tra read/write su terminale usando solo tale parametro.
-		
-		-   Gestione del pid:
-			Riguardo alla scelta del pid associato a ogni processo, esso doveva essere un valore univoco e non zero quindi abbiamo optato per l'indirizzo di memoria del pcb 
+	-	Gestione dei semafori:
+		I semafori sono memorizzati in un array nel seguente ordine: prima i device esterni (secondo l'ordine delle loro linee), naturalmente il doppio dei samafori per i terminali (prima gli 8 semafori di receipt, seguiti da 8 di transmission) e infine i semafori per il PLT e Interval Timer.
+		Per ottenere il semaforo utilizziamo l'indirizzo del registro del device interessato; per il caso particolare dei terminali (con registri di 2 word), si usa l'inizio del "sub-registro" di 2 word come parametro: questo permette di distinguere univocamente tra vari device e tra read/write su terminale usando solo tale parametro.
+	
+	-   Gestione del pid:
+		Riguardo alla scelta del pid associato a ogni processo, esso doveva essere un valore univoco e diverso da zero, quindi abbiamo optato per l'indirizzo di memoria del pcb.
 
 
-    Strutture e variabili globali:
+### Strutture e variabili globali:
 
-		Le variabili globali del nucleus sono raccolte in `include/helper/env_nucleus.h` come dichiarazioni `extern`.
-		In questo modo, possono essere inizializzate utilizzate tutte nei vari moduli includendo tale file.
-		Le vere instanze si trovano invece in `initial.c`, che le inizializza e le mantiene private (non visibili dall'interfaccia, '.h'),
-		essendo in un file '.c'.
+	Le variabili globali del nucleus sono raccolte in `include/helper/env_nucleus.h` come dichiarazioni `extern`.
+	In questo modo, possono essere inizializzate utilizzate tutte nei vari moduli includendo tale file.
+	Le vere instanze si trovano invece in `initial.c`, che le inizializza e le mantiene private (non visibili dall'interfaccia, '.h'),
+	essendo in un file '.c'.
 
-		Per questa fase, è anche stato creato un largo numero di costanti, macro e 'utility', per semplificare l'interazione con la macchina aggiungendo
-		un livello d'astrazione e per rendere il codice più leggibile, dando nomi precisi ed esplicativi a indirizzi di memoria, operazioni a basso livello con i bit
-		e semplici comandi che, dovendoli implementare sulla macchina di umps3, sono in realtà composti di più istruzioni: per esempio, esistono delle macro/funzioni
-		('RETURN_*', in 'exceptions_help.h') per raccogliere le operazioni compiute a ogni 'return` da una system call, dove bisogna interagire con i registri e le aree
-		di memoria giusti.
+	Per questa fase, è anche stato creato un largo numero di costanti, macro e 'utility', per semplificare l'interazione con la macchina aggiungendo
+	un livello d'astrazione e per rendere il codice più leggibile, dando nomi precisi ed esplicativi a indirizzi di memoria, operazioni a basso livello con i bit
+	e semplici comandi che, dovendoli implementare sulla macchina di umps3, sono in realtà composti di più istruzioni: per esempio, esistono delle macro/funzioni
+	('RETURN_*', in 'exceptions_help.h') per raccogliere le operazioni compiute a ogni 'return` da una system call, dove bisogna interagire con i registri e le aree
+	di memoria giusti.
 
-     modulo INTERRUPT:
+### modulo INITIAL:
+	Semplici inizializzazioni, come indicato nella documentazione e nei commenti del codice, rispettando le linee guida di questa relazione.
 
-		L'handling degli interrupt comincia identificando la linea a maggior priorità che necessita 
-		di attenzione, estrapolando gli 8 bit dal registro cause e prendendo il bit di maggior priorità.
+### modulo INTERRUPT:
 
-		Abbiamo sviluppato un handler per gli interrupt dei terminali, per device generici e per i due timer hardware. Data la specifica gestione dei terminali, nella funzione che si occupa di questi interrupt, abbiamo dato priorità prima al controllo della linea write (come richiesto). Dato che per ogni linea di interrupt ci sono 8 device, la funzione check_pending_interrupt controlla quali device necessitano di attenzione usando l'interrrupt bit map. Anche qui abbiamo dato priorità ai device con numero più basso. La gestione dei semafori è spiegata sopra, qui ci limitiamo a usare le macro per ottenere il semaforo giusto in base al registro. Per il resto, abbiamo sfruttato le macro e le costanti fornite dai file per gestire correttamente gli interrupt: salvare i risultati di I/O nei registri, resettare i timer, restituire il controllo ai giusti processi o allo scheduler. 
+	L'handling degli interrupt comincia identificando la linea a maggior priorità che necessita di attenzione, estrapolando gli 8 bit dal registro cause e prendendo il bit di maggior priorità.
 
-		La funzione SYSCALL_DOIO_return si occupa proprio di restituire i valori di una chiamata I/O, salvando il valore di ritorno (successo o errore) e i risultati dell'operazione nei registri appropriati.
+	Abbiamo sviluppato un handler per gli interrupt dei terminali, per device generici e per i due timer hardware. Data la specifica gestione dei terminali, nella funzione che si occupa di questi interrupt, abbiamo dato priorità prima al controllo della linea write (come richiesto). Dato che per ogni linea di interrupt ci sono 8 device, la funzione check_pending_interrupt controlla quali device necessitano di attenzione usando l'interrrupt bit map. Anche qui abbiamo dato priorità ai device con numero più basso. La gestione dei semafori è spiegata sopra, qui ci limitiamo a usare le macro per ottenere il semaforo giusto in base al registro. Per il resto, abbiamo sfruttato le macro e le costanti fornite dai file per gestire correttamente gli interrupt: salvare i risultati di I/O nei registri, resettare i timer, restituire il controllo ai giusti processi o allo scheduler. 
+
+	La funzione SYSCALL_DOIO_return si occupa proprio di restituire i valori di una chiamata I/O, salvando il valore di ritorno (successo o errore) e i risultati dell'operazione nei registri appropriati.
 
 
 ### modulo EXCEPTION:
+	Quando viene sollevata un'eccezione l'handler delle eccezioni per prima cosa vede che tipo di eccezione e' stata sollevata guardando, grazie a una macro, nel registro Cause e in particolare nel campo ExcCode, e in base all'eccezione sollevata agisce di conseguenza:
 
-Quando viene sollevata un'eccezione l'handler delle eccezioni per prima cosa vede che tipo di eccezione e' stata sollevata guardando, grazie a una macro, nel registro Cause e in particolare nel campo ExcCode, e in base all'eccezione sollevata agisce di conseguenza:
-
-- Interrupt: 
-	- viene chiamato l'handler degli interrupt.
-- eccezioni TLB:
-	- viene chiamata una Pass Up or Die passando come parametro il tipo di eccezione sollevata
-- Program Trap: 
-	- viene chiamata una Pass Up or Die passando come parametro il tipo di eccezione sollevata
-- System Call:
-	- viene chiamato il gestore delle system call
+	- Interrupt: 
+		- viene chiamato l'handler degli interrupt.
+	- eccezioni TLB:
+		- viene chiamata una Pass Up or Die passando come parametro il tipo di eccezione sollevata
+	- Program Trap: 
+		- viene chiamata una Pass Up or Die passando come parametro il tipo di eccezione sollevata
+	- System Call:
+		- viene chiamato il gestore delle system call
 
 ### Gestore delle System Call
 
-Il gestore delle system call cosa vede cosa é salvato nei registri a0, a1, a2, a3, contenenti rispettivamente il tipo di system call, da 1 a 10, e i 3 parametri correlati alla system call da invocare; se in a0 é presente un valore superiore a 10 viene gestita come se fosse una eccezione TLB o Program Trap, mentre se si é in User Mode viene simulata una eccezione Program Trap settando Cause.ExcCode a Reserved Instruction e invoncando l'handler delle Trap.  
-Infine l'handler delle system call usa la macro _SYSCALL, che funge da dispatcher per invocare la specifica funzione call con i giusti parametri ottenuti in precedenza.
+	Il gestore delle eccezioni cambia comportamento in base al valore del registro a0: se in a0 é presente un valore superiore a 10 viene gestita come se fosse una eccezione TLB o Program Trap, altrimenti viene chiamato il gestore delle system call.  
+	Nel secondo caso, prima di tutto si leggono i parametri in a1, a2, a3; poi se si é in User Mode viene sollevata una eccezione Program Trap settando Cause.ExcCode a Reserved Instruction e invoncando l'handler delle Trap, altrimenti si usa la macro SYSCALL, che funge da dispatcher per invocare la specifica funzione con i giusti parametri ottenuti in precedenza (infatti ogni system call è implementata come una diversa funzione).
 
-##### System Call 1: Create Process
-- Questa System Call viene invocata per creare un nuovo processo; infatti viene allocato un nuovo pcb, se la lista dei pcb liberi é vuota allora ritorna -1, il nuovo processo diventa figlio del processo corrente e infine viene inserito nella lista dei processi nello stato ready
+	Tutte le funzioni di gestione delle eccezioni lavorano con i valori dello stato del processore salvati nel SAVED_EXCEPTION_STATE (corrispondente allo stato al momento in cui è stata sollevata).
 
-##### System Call 2: Terminate Process
-- Questa System Call termina un processo relativo al pid passato come parametro e anche tutti i discendenti del processo maniera ricorsiva ed eseguendo le rimozioni in post-ordine; se il pid é zero termina il processo corrente.
-
-##### System Call 3: Passeren
-- Questa System Call performa una P su un semaforo binario
-
-##### System Call 4: Verhogen 
-- Questa System Call performa una V su un semaforo binario
-
-##### System Call 5: Do IO 
-- Questa System Call 
-
-##### System Call 5: Get CPU Time 
-- Questa System Call ritorna il tempo dell'uso del processore da parte del processo corrente, per calcolare questo tempo abbiamo usato il timer PLT, per informazioni piú dettagliate vedere in "scelte progettuali" la voce "Gestione del tempo accumulato dei processi"  
-
-
-##### System Call 6: Get CPU Time 
-- Questa System Call ritorna il tempo dell'uso del processore da parte del processo corrente, per calcolare questo tempo abbiamo usato il timer PLT, per informazioni piú dettagliate vedere in "scelte progettuali" la voce "Gestione del tempo accumulato dei processi"  
-
-
-##### System Call 7: Wait for Clock
-- Questa System Call blocca il processo corrente nel semaforo relativo all'Interval Timer
-
-##### System Call 8: Get Support Data
-- Questa System Call ritorna il puntatore alla struttura di supporto del processo corrente
-
-##### System Call 9: Get Process Id
-- Questa System Call ritorna 0 se il booleano passato come parametro é TRUE ma il padre del processo corrente e quest'ultimo non sono nello stesso namespace, il pid del padre del processo corrente se i due processi sono nello stesso namespace oppure il pid del processo corrente se il booleano passato come parametro é FALSE. \
-Per la gestione del PID vedere "scelte progettuali" alla voce "gestione del pid" 
-
-##### System Call 10: Get Children
-- Questa system call itera sulla lista dei figli del processo corrente per aggiungere all'array children, passato come parametro, il pid di ogni figlio che appartiene allo stesso namespace del processo corrente e infine ritorna il numero di figli aggiunti all'array o che potevano essere aggiunti 
-
+#### Elenco delle System Call:
+	-	1: Create Process: Crea un nuovo processo; infatti, gli alloca un nuovo pcb, lo fa diventare figlio del processo corrente e lo inserisce nella lista dei processi nello stato ready; ritorna -1 se la lista dei pcb liberi è vuota.
+	-	2: Terminate Process: Termina un processo relativo al pid passato come parametro e anche tutti i discendenti del processo maniera ricorsiva ed eseguendo le rimozioni in post-ordine; se il pid é zero termina il processo corrente.
+	-	3: Passeren: Performa una P su un semaforo binario.
+	-	4: Verhogen: Performa una V su un semaforo binario.
+	-	5: DOIO: i/o.
+	-	6: Get CPU Time: Ritorna il tempo dell'uso del processore da parte del processo corrente. Per calcolare questo tempo abbiamo usato il timer PLT (per informazioni piú dettagliate vedere in "scelte progettuali" la voce "Gestione del tempo accumulato dei processi", e "modulo SCHEDULER").  
+	-	7: Wait for Clock: Blocca il processo corrente sul semaforo dell'Interval Timer.
+	-	8: Get Support Data: Ritorna il puntatore alla struttura di supporto del processo corrente.
+	-	9: Get Process Id: Ritorna il pid del processo corrente, o quello del padre se il parametro è TRUE e il processo corrente è nello stesso namespace PID del padre, altrimenti 0. (per la gestione del PID vedere "scelte progettuali" alla voce "gestione del pid" )
+	-	10: Get Children: Itera sulla lista dei figli del processo corrente per aggiungere all'array children, passato come parametro, il pid di ogni figlio che appartiene allo stesso namespace del processo corrente; infine ritorna il numero di figli aggiunti all'array o che potevano essere aggiunti.
 
 #### Ritorno da una system call
-Per le system call non bloccanti o che non fanno terminare processi, una volta finite le istruzioni relative alla specifica system call bisogna incrementare il PC di 4 del saved exception state cioé del processo al momento dell'esecuzione della system call, poi si salva nel registro v0 del processo citato il valore di ritorno della system call e infine fare il load di questo processo attraverso la funzione LDST. \
-Invece per le system call bloccanti bisogna sempre aggiornare il pc e poi aggiungere il processo da bloccare alla coda dei processi bloccati di un semaforo 
- 
- 
-					
+	Per le system call non bloccanti o che non fanno terminare processi, bisogna salvare nel registro v0 il valore di ritorno della system call e fare il load di questo processo, caricando il SAVED_EXCEPTION_STATE (infatti, non essendo bloccante, il processo non cambia) attraverso la funzione LDST.
+	Invece per le system call bloccanti bisogna salvare nel suo pcb il SAVED_EXCEPTION_STATE e aggiungerlo alla coda dei processi bloccati del giusto semaforo.
+	In entrambi i casi bisogna incrementare il suo PC di una word, per evitare un loop di chiamate di syscall quando ritorna alla sua normale esecuzione.
+	
+### modulo SCHEDULER:
+	Lo scheduler, alla sua chiamata, può compiere 4 possibili operazioni:
+	-	HALT: ferma il sistema se non ci sono più processi da eseguire.
+	-	WAIT: se ci sono processi bloccati su un semaforo e nessuno ready.
+	-	PANIC: se ci sono processi, ma nessuno è né ready, né bloccato (errore).
+	-	LDST: se ci sono processi ready, carica il primo (fifo).
 
+	Prima di una wait, abbiamo scelto di disabilitare il PLT, per evitare di essere interrotti da un suo interrupt mentre se ne aspetta uno di un device (che sblocchi un proeceso).
+	Prima di un LDST, invece, viene ricaricato il PLT con una costante. Quando un processo sta per essere bloccato, il suo campo `p_time` viene aggiornato aggiungendo il tempo del processore da esso utilizzato, nel corrente quanto di tempo. Avendo scelto la gestione più semplice per il processor timer (come scritto nelle scelte progettuali->PLT), per ottenere tale addendo basta calcolare la differenza tra il tempo di inizializzazione e il tempo rimanente (cioè `inizio-fine`, dato che il PLT conta alla rovescia).
 
-  
+### Modifiche alla phase1:
+	In corso di sviluppo, sono anche state effettuate leggere modifiche ai moduli della prima fase, rese necessarie e/o convenienti anche
+	per i seguenti motivi:
+	-	lo struct `pcb_t` è stato ampliato con nuovi campi, e in più alcuni già presenti che non erano utilizzati prima, nella fase 2 si; di conseguenza abbiamo dovuto pensare alla loro inizializzazione e gestione;
+	-	ricollegandoci al punto precedente, le reali funzioni di alcuni campi di `pcb_t` e altre strutture non erano chiari prima come ora, dove gestiamo noi stessi l'interno nucleus; pertanto ci siamo ritrovati a dover correggere alcuni dettagli (che magari non erano venuti fuori dal primo test) - per esempio, `addNamespace` è passato da un'implementazione iterativa a una ricorsiva.
 
-    modulo SCHEDULER:
-
-	Modifiche alla phase1:
-		In corso di sviluppo, sono anche state effettuate leggere modifiche ai moduli della prima fase, rese necessarie e/o convenienti anche
-		per i seguenti motivi:
-		-	lo struct `pcb_t` è stato ampliato con nuovi campi, e in più alcuni già presenti che non erano utilizzati prima, nella fase 2 si; di conseguenza abbiamo dovuto pensare alla loro inizializzazione e gestione;
-		-	ricollegandoci al punto precedente, le reali funzioni di alcuni campi di `pcb_t` e altre strutture non erano chiari prima come ora, dove gestiamo noi stessi l'interno nucleus; pertanto ci siamo ritrovati a dover correggere alcuni dettagli (che magari non erano venuti fuori dal primo test) - per esempio, `addNamespace` è passato da un'implementazione iterativa a una ricorsiva.
-
-DIFFICOLTA' INCONTRATE:
+## DIFFICOLTA' INCONTRATE:
 
 	Una delle principali difficoltà incontrate nello sviluppo del progetto non riguardava la comprensione di ciò che dovevano svolgere i nostri moduli (concetti chiari dalle lezioni teoriche), quanto capire come implementarli sulla macchina a disposizione. Ad esempio, la comprensione dei diversi timer e delle loro funzionalità non sono risultate immediate. 
 

@@ -18,6 +18,6 @@ obj/src/phase2/*
 !obj/src/phase1/.placeholder
 !obj/src/phase2/.placeholder
 # umps config (config files use own paths, which differ from each pc)
-umps-config/*
+umps/*
 misc/umps-config/*
 !misc/umps-config/.placeholder

@@ -1,11 +1,6 @@
 #include "scheduler.h"
 
 
-/*	Stores the starting TOD clock value for an interval;
-	used to calculate the time passed for an interval.
-*/
-int _interval_start;
-
 
 void Scheduler(){
 
@@ -40,7 +35,6 @@ void Scheduler(){
 
         /*set the PLT*/
         setTIMER(TIMESLICE);
-		_interval_start = TIMESLICE;
 
         /*load the processor state*/
         LDST(&proc_curr->p_s);

@@ -41,7 +41,7 @@ void SYSCALL_handler(){
 	}
 	
 	if(a0 >= CREATEPROCESS && a0 <= GETCHILDREN) {
-		_SYSCALL(a0, a1, a2, a3);
+		SYSCALL(a0, a1, a2, a3);
 	} else {
 		/* system call con a0 >= 11 */
 		PassUpOrDie(GENERALEXCEPT);

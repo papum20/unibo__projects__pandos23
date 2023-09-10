@@ -135,14 +135,13 @@ PandOS 2022/2023	-	Università di Bologna
 	In entrambi i casi bisogna incrementare il suo PC di una word, per evitare un loop di chiamate di syscall quando ritorna alla sua normale esecuzione.
 	
 ### modulo SCHEDULER:
-	Lo scheduler, alla sua chiamata, può compiere 4 possibili operazioni:
-	-	HALT: ferma il sistema se non ci sono più processi da eseguire.
-	-	WAIT: se ci sono processi bloccati su un semaforo e nessuno ready.
-	-	PANIC: se ci sono processi, ma nessuno è né ready, né bloccato (errore).
-	-	LDST: se ci sono processi ready, carica il primo (fifo).
+	Lo scheduler è stato sviluppato come richiesto utilizzando un algoritmo round robin preemptive, con il time slice impostato a 5 millisecondi e utilizzando il PLT come system clock per generare interrupt.
 
-	Prima di una wait, abbiamo scelto di disabilitare il PLT, per evitare di essere interrotti da un suo interrupt mentre se ne aspetta uno di un device (che sblocchi un proeceso).
-	Prima di un LDST, invece, viene ricaricato il PLT con una costante. Quando un processo sta per essere bloccato, il suo campo `p_time` viene aggiornato aggiungendo il tempo del processore da esso utilizzato, nel corrente quanto di tempo. Avendo scelto la gestione più semplice per il processor timer (come scritto nelle scelte progettuali->PLT), per ottenere tale addendo basta calcolare la differenza tra il tempo di inizializzazione e il tempo rimanente (cioè `inizio-fine`, dato che il PLT conta alla rovescia).
+	Il PLT viene aggiornato a TIMESLICE (5 millisecondi) nello scheduler con la funzione setTIMER prima di caricare lo stato nel processore.
+	Del tempo di CPU accumulato teniamo traccia nel modulo delle exception, salvando il valore del PLT, prima che venga bloccato, in pcb->p_time. Calcolare l'intervallo di tempo di CPU utilizzata è stato più semplice di quanto ci era sembrato all'inizio: infatti abbiamo creato la macro TIMESLICE_USED (in scheduler_help) che sottrae al valore del time slice il valore del PLT nel momento prima del blocco e che quindi restituisce il tempo trascorso dal processo nella CPU nel corrente quanto di tempo. 
+	In scheduler_h sono presenti anche altre due macro CPU_TIME_USED e PROC_TIME_UPDATE: la prima ritorna il valore di p_time del pcb passato in input più il tempo di utilizzo della CPU durante il quanto di tempo corrente, mentre la seconda esegue le stesse operazioni solamente che al posto di ritornare un valore lo salva/aggiorna direttamente nel campo p_time. Queste due macro sono utilizzate rispettivamente nel modulo exception (SYS 6) e modulo interrupt (nell'handler del interrupt PLT).
+
+	Nel caso in cui non ci siano processi ready, prima di mettere il sistema in WAIT abbiamo deciso di disabilitare il PLT, per evitare che il primo interrupt dopo la WAIT sia un PLT interrupt.
 
 ### Modifiche alla phase1:
 	In corso di sviluppo, sono anche state effettuate leggere modifiche ai moduli della prima fase, rese necessarie e/o convenienti anche
@@ -151,7 +150,6 @@ PandOS 2022/2023	-	Università di Bologna
 	-	ricollegandoci al punto precedente, le reali funzioni di alcuni campi di `pcb_t` e altre strutture non erano chiari prima come ora, dove gestiamo noi stessi l'interno nucleus; pertanto ci siamo ritrovati a dover correggere alcuni dettagli (che magari non erano venuti fuori dal primo test) - per esempio, `addNamespace` è passato da un'implementazione iterativa a una ricorsiva.
 
 ## DIFFICOLTA' INCONTRATE:
-
 	Una delle principali difficoltà incontrate nello sviluppo del progetto non riguardava la comprensione di ciò che dovevano svolgere i nostri moduli (concetti chiari dalle lezioni teoriche), quanto capire come implementarli sulla macchina a disposizione. Ad esempio, la comprensione dei diversi timer e delle loro funzionalità non sono risultate immediate. 
 
 	Anche comprendere l'avvicendamento delle varie componenti del sistema operativo non è stato facile. Capire come si susseguono i vari gestori, scheduler e altri componenti, oppure sviluppare handler sincronizzati tra vari moduli è stata una sfida, come la systemcall DO_IO, che si articola sia nel modulo delle exception che in quello degli interrupt.

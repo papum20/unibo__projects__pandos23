@@ -116,7 +116,7 @@ static inline void RETURN_SYSCALL_BLOCK(int *semAdd) {
  */
 /* syscall dispatcher, taking a variable as a0
 */
-#define _SYSCALL(a0, a1, a2, a3)					\
+#define SYSCALL(a0, a1, a2, a3)					\
 	switch(a0){										\
 		case CREATEPROCESS:							\
 			SYSCALL_CREATEPROCESS((state_t *)a1, (support_t *) a2, (struct nsd_t *) a3);	\

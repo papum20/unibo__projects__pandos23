@@ -1,11 +1,6 @@
 #include "scheduler.h"
 
 
-/*	Stores the starting TOD clock value for an interval;
-	used to calculate the time passed for an interval.
-*/
-int _interval_start;
-
 
 void Scheduler(){
 

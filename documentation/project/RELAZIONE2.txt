@@ -67,9 +67,10 @@ STRUTTURA E CONVENZIONI GENERALI:
 
       - Gestione dei semafori:
 
-        seguita invariante dal libro (P e V). Invariante utilizzata nel codice per fare assunzioni.
-
-        addr
+				I semafori sono memorizzati in un array nel seguente ordine: prima i device esterni (secondo 
+				l'ordine delle loro linee), naturalmente il doppio dei samafori per i terminali (read e write)
+				e infine i semafori per il PLT e Interval Timer.
+				Per ottenere il semaforo utilizziamo l'indirizzo del registro del device interessato. 
 
 
 
@@ -80,6 +81,22 @@ STRUTTURA E CONVENZIONI GENERALI:
     modulo INIT:
 
     modulo INTERRUPT:
+
+			L'handling degli interrupt comincia identificando la linea a maggior priorità che necessita 
+			di attenzione, estrapolando gli 8 bit dal registro cause e prendendo il bit di maggior priorità.
+
+			Abbiamo sviluppato un handler per gli interrupt dei terminali, per device generici e per 
+			i due timer hardware. Data la specifica gestione dei terminali, nella funzione che si occupa
+			di questi interrupt, abbiamo dato priorità prima al controllo della linea write (come richiesto). 
+			Dato che per ogni linea di interrupt ci sono 8 device, la funzione check_pending_interrupt controlla 
+			quali device necessitano di attenzione usando l'interrrupt bit map. Anche qui abbiamo dato priorità 
+			ai device con numero più basso. La gestione dei semafori è spiegata sopra, qui ci limitiamo a
+			usare le macro per ottenere il semaforo giusto in base al registro. Per il resto, abbiamo sfruttato 
+			le macro e le costanti fornite dai file per gestire correttamente gli interrupt: salvare i risultati 
+			di I/O nei registri, resettare i timer, restituire il controllo ai giusti processi o allo scheduler. 
+
+			La funzione SYSCALL_DOIO_return si occupa proprio di restituire i valori di una chiamata I/O, salvando
+			il valore di ritorno (successo o errore) e i risultati dell'operazione nei registri appropriati.
 
     modulo EXCEPTION:
 

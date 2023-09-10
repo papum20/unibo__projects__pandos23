@@ -111,9 +111,7 @@ PandOS 2022/2023	-	Università di Bologna
 		- viene chiamato il gestore delle system call
 
 ### Gestore delle System Call
-
-	Il gestore delle eccezioni cambia comportamento in base al valore del registro a0: se in a0 é presente un valore superiore a 10 viene gestita come se fosse una eccezione TLB o Program Trap, altrimenti viene chiamato il gestore delle system call.  
-	Nel secondo caso, prima di tutto si leggono i parametri in a1, a2, a3; poi se si é in User Mode viene sollevata una eccezione Program Trap settando Cause.ExcCode a Reserved Instruction e invoncando l'handler delle Trap, altrimenti si usa la macro SYSCALL, che funge da dispatcher per invocare la specifica funzione con i giusti parametri ottenuti in precedenza (infatti ogni system call è implementata come una diversa funzione).
+	Nel gestore delle system call prima di tutto si leggono i parametri in a1, a2, a3; poi se in a0 é presente un valore superiore a 10 allora viene gestita come se fosse una eccezione TLB o Program Trap, mentre se si é in User Mode viene sollevata una eccezione Program Trap settando Cause.ExcCode a Reserved Instruction e invoncando l'handler delle Trap, altrimenti si usa la macro SYSCALL, che funge da dispatcher per invocare la specifica funzione con i giusti parametri ottenuti in precedenza (infatti ogni system call è implementata come una diversa funzione).
 
 	Tutte le funzioni di gestione delle eccezioni lavorano con i valori dello stato del processore salvati nel SAVED_EXCEPTION_STATE (corrispondente allo stato al momento in cui è stata sollevata).
 
@@ -144,8 +142,7 @@ PandOS 2022/2023	-	Università di Bologna
 	Nel caso in cui non ci siano processi ready, prima di mettere il sistema in WAIT abbiamo deciso di disabilitare il PLT, per evitare che il primo interrupt dopo la WAIT sia un PLT interrupt.
 
 ### Modifiche alla phase1:
-	In corso di sviluppo, sono anche state effettuate leggere modifiche ai moduli della prima fase, rese necessarie e/o convenienti anche
-	per i seguenti motivi:
+	In corso di sviluppo, sono anche state effettuate leggere modifiche ai moduli della prima fase, rese necessarie e/o convenienti anche per i seguenti motivi:
 	-	lo struct `pcb_t` è stato ampliato con nuovi campi, e in più alcuni già presenti che non erano utilizzati prima, nella fase 2 si; di conseguenza abbiamo dovuto pensare alla loro inizializzazione e gestione;
 	-	ricollegandoci al punto precedente, le reali funzioni di alcuni campi di `pcb_t` e altre strutture non erano chiari prima come ora, dove gestiamo noi stessi l'interno nucleus; pertanto ci siamo ritrovati a dover correggere alcuni dettagli (che magari non erano venuti fuori dal primo test) - per esempio, `addNamespace` è passato da un'implementazione iterativa a una ricorsiva.
 
@@ -154,7 +151,5 @@ PandOS 2022/2023	-	Università di Bologna
 
 	Anche comprendere l'avvicendamento delle varie componenti del sistema operativo non è stato facile. Capire come si susseguono i vari gestori, scheduler e altri componenti, oppure sviluppare handler sincronizzati tra vari moduli è stata una sfida, come la systemcall DO_IO, che si articola sia nel modulo delle exception che in quello degli interrupt.
 
-	Infine, come c'era da aspettarsi, il "debugging finché non funziona tutto il test" ha richiesto un certo impegno, dovendo lavorare, con il linguaggio c,
-	a un livello abbastanza basso, analizzando lo stato di memoria e registri durante l'esecuzione, di istruzione in istruzione o chiamata in chiamata.
-	Va comunque sottolineato che, con una macchina semplificata come umps3 e una GUI che lascia svariati strumenti di debugging, la "sfida" è risultata
-	della giusta difficoltà e ha permesso di apprezzare il valore didattico e pratico del progetto.
+	Infine, come c'era da aspettarsi, il "debugging finché non funziona tutto il test" ha richiesto un certo impegno, dovendo lavorare, con il linguaggio c, a un livello abbastanza basso, analizzando lo stato di memoria e registri durante l'esecuzione, di istruzione in istruzione o chiamata in chiamata.
+	Va comunque sottolineato che, con una macchina semplificata come umps3 e una GUI che lascia svariati strumenti di debugging, la "sfida" è risultata della giusta difficoltà e ha permesso di apprezzare il valore didattico e pratico del progetto.

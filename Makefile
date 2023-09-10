@@ -147,7 +147,7 @@ $(ODIR)/%.o: %.c $(DEFS)
 
 .PHONY: mk_obj_dirs
 mk_obj_dirs:
-	@mkdir -p $(ODIR)/$(SDIRS)
+	@mkdir -p $(patsubst %, $(ODIR)/%, $(SDIRS) $(TDIR)) $(BDIR)
 
 
 # show help screen

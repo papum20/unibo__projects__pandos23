@@ -147,19 +147,16 @@ $(ODIR)/%.o: %.c $(DEFS)
 
 .PHONY: mk_obj_dirs
 mk_obj_dirs:
-	@mkdir $(ODIR)/$(SDIRS)
+	@mkdir -p $(ODIR)/$(SDIRS)
 
 
 # show help screen
 
 .PHONY: help
 help: 
-	@echo "make [DELTEST={T}] [T=paths]"
-	@echo "make			: compile default tests"
-	@echo "DELTEST=T		: don't compile default tests"
-	@echo "DELTEST={anythig else}	: doesn't do anything"
-	@echo "T=paths-to-tests	: also compiles specified tests,"
-	@echo "			  to write with path, without extension"
+	@echo "make			: make mk_obj_dirs && make phase2"
+	@echo "make phase2		: compile the nucleus (phase1+phase2) and TESTS (=p2test.04.c)"
+	@echo "make mk_obj_dirs	: create output dirs tree (obj/*)"
 	@echo "make help		: show this help message"
 	@echo "make clean		: clean"
 

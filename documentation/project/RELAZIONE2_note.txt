@@ -1,22 +1,8 @@
-PER RELAZIONE:
-
-	cambiamenti phase1:
-		pcb : inizializzazioni campi non usati in phase1.
-		ns	: visita in ampiezza usa il campo del pcb per le liste, che viene usato anche per altri scopi (e.g. lista processi
-			attivi/blocked) e quindi interferisce. Ora usa la ricorsione.
 
 	EXCEPTIONS:
 	syscall cast tipi
 	- Implementazione di syscall() con una macro che fa dmux tra le singole implementazioni delle syscall.
-	- 3 tipi return
 	- Implementazione dei pid= indirizzo del pcb (funzione che assicura una corrispondenza biunivoca).
-	- syscall doio: 
-		-	(uso le struct di umps)
-
-
-	SEMAFORI:
-		Abbiamo scelto di implementarli come semafori binari, che diventano anche negativi, così che valga l'invariante
-		`abs(s_key) = n_proc_blocked`.
 
 
 	dev_sems[] : semafori del nucleus per i device.
@@ -30,29 +16,3 @@ PER RELAZIONE:
 		per i device esterni, e DEV_SEM_CPUTIMER e DEV_SEM_TIMER per i clock.
 
 	_EXT_DEV_SEM_IDX : è una funzione (inline) perché usa più volte lo stesso parametro (safety).
-
-	MAKEFILE:
-		added include -I
-
-	ash
-
-	problemi con doio term, se lento debug (ret status code)
-
-
-
-
-DA CONTROLLARE:
-
-	ns: non aggiunge ns se già presente uno del tipo?
-
-
-	NS:
-	si deve cambiare la visita in ampiezza, perché interferisce con readyQ ed eventuali
-	altre code: non può usare i campi del pcb come lista ausiliaria, perché sono usati in altro modo
-	(nel test1 non si è notato perché non veniva verificato).
-	per ora in TERMINATE_PROC uso la ricorsione per i ns; se si vuole fare con interazione, bisognerebbe creare
-	una struct aggiuntiva
-	struct iterator {
-		list_head list;
-		pcb_t *p;
-	}

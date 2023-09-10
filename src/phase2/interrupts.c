@@ -66,6 +66,8 @@ void PLT_interrupt(){
 	//copy the processor state at the time into current pcb
 	STATE_CP(*SAVED_EXCEPTION_STATE, &proc_curr->p_s);
 
+	PROC_TIME_UPDATE(proc_curr);
+
 	//place the process in readyqueue
 
 	insertProcQ(&readyQ, proc_curr);

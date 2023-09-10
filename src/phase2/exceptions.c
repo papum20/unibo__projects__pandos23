@@ -97,10 +97,13 @@ void SYSCALL_CREATEPROCESS(state_t *statep, support_t * supportp, struct nsd_t *
 */
 void SYSCALL_TERMINATEPROCESS (int pid) {
 	
-	if(pid == 0)
-		__terminateTree(proc_curr);
-	else
-		__terminateTree(pcb_from_PID(pid));
+	pcb_t *p = (pid == 0) ? proc_curr : pcb_from_PID(pid);
+	
+	/* first remove children and descendats, then the parent itself,
+	because of how the recursive function works. */
+	tmp__terminateDescendants(p);
+	killChild(p);
+	proc_alive_n--;
 
 	if(proc_curr == NULL)
 		/* current process was terminated */

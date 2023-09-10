@@ -159,10 +159,10 @@ static inline pcb_t* firstChild_or_Null(pcb_t *p){
 
 /* free a `pcb_t *p` and remove it from its parent's tree
 */
-#define killChild(p) \
-	freePcb(outChild(p));
-
-
+static inline void killChild(pcb_t *p) {
+	outChild(p);
+	freePcb(p);
+}
 
 
 #endif /* PCB_HELP_H */

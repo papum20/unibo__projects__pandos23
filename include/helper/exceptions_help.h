@@ -182,10 +182,9 @@ static inline void __init_createProc(pcb_t *p, pcb_t *prnt, state_t *state, supp
 #define unblockPcb(semAdd) insertProcQ(&readyQ, removeBlocked(semAdd))
 
 
-/* terminate all of process' children.
- * process is not NULL.
- */
-extern void __terminateTree(pcb_t *p);
+/* terminate all of process' children, with `p` != NULL.
+*/
+extern void tmp__terminateDescendants(pcb_t *p);
 
 
 

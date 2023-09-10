@@ -2,7 +2,7 @@
 
 
 
-void __terminateTree(pcb_t *p) {
+void tmp__terminateDescendants(pcb_t *p) {
 
 	if(p == proc_curr)
 		/* p is the current process */
@@ -30,9 +30,12 @@ void __terminateTree(pcb_t *p) {
 	/* terminate children */
 	pcb_t *pos;
 	pcb_for_each_child(pos, p)
-		__terminateTree(pos);
+		tmp__terminateDescendants(pos);
 	
-	killChild(p); 
-	proc_alive_n--;
-
+	/*	the parent has to delete its children: doing it in the for loop
+		would create problems with the list of siblings. */
+	while(!emptyChild(p)) {
+		freePcb(removeChild(p));
+		proc_alive_n--;
+	}
 }
